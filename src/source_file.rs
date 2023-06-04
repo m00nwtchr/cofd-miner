@@ -1,4 +1,8 @@
-use std::{collections::BTreeMap, ops::RangeBounds, path::PathBuf};
+use std::{
+	collections::{BTreeMap, HashMap},
+	ops::RangeBounds,
+	path::PathBuf,
+};
 
 use anyhow::{anyhow, Result};
 use lopdf::{content::Content, encodings::Encoding, Document, Object, ObjectId};
@@ -7,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	def::{PageSpanDef, SourceFileDef},
-	page_kind::PageKind,
+	page_kind::{Item, PageKind},
 	PageIndex,
 };
 
@@ -94,7 +98,7 @@ fn extract_text<R: RangeBounds<u32> + Sync + Send>(
 		.filter(|(num, _)| pages.contains(num))
 		.map(|(page_num, page_id)| {
 			let fonts = document.get_page_fonts(*page_id);
-			let encodings: BTreeMap<_, _> = fonts
+			let encodings: HashMap<_, _> = fonts
 				.into_par_iter()
 				.filter_map(|(name, font)| {
 					font.get_font_encoding(document).ok().map(|enc| (name, enc))
@@ -108,6 +112,7 @@ fn extract_text<R: RangeBounds<u32> + Sync + Send>(
 			let mut text = String::new();
 			let mut vec = Vec::new();
 			let mut flag = false;
+
 			for operation in &content.operations {
 				match operation.operator.as_ref() {
 					"Tf" => {
@@ -127,17 +132,17 @@ fn extract_text<R: RangeBounds<u32> + Sync + Send>(
 					"ET" => {
 						if !text.ends_with('\n') {
 							text.push('\n');
-							let str = text.trim();
+							let txt = text.trim();
 
-							if str.eq("-") {
+							if txt.eq("-") {
 								flag = true;
 							} else {
-								if flag || str.starts_with('-') {
-									*vec.last_mut().unwrap() += str;
+								if flag || txt.starts_with('-') {
+									*vec.last_mut().unwrap() += txt;
 									flag = false;
 								} else {
-									if !str.is_empty() {
-										vec.push(str.to_owned());
+									if !text.is_empty() {
+										vec.push(txt.to_owned());
 									}
 								}
 							}
@@ -223,7 +228,7 @@ pub struct PageSpan {
 }
 
 impl PageSpan {
-	pub fn parse(&self) -> Vec<String> {
+	pub fn parse(&self) -> Vec<Item> {
 		self.kind.parse(&self.extract)
 	}
 }
@@ -235,7 +240,10 @@ pub struct PdfExtract {
 }
 
 impl PdfExtract {
-	pub fn parse(&self) -> Vec<Vec<String>> {
-		self.spans.par_iter().map(|span| span.parse()).collect()
+	pub fn parse(&self) -> Vec<Item> {
+		self.spans
+			.par_iter()
+			.flat_map(|span| span.parse())
+			.collect()
 	}
 }

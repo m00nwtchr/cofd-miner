@@ -11,20 +11,64 @@ mod hash;
 mod page_kind;
 mod source_file;
 
+mod schema;
+
 use def::{PageSpanDef, SourceFileDef};
 use page_kind::*;
 use source_file::{PdfExtract, SourceFile};
 
 type PageIndex = u32;
 
+// fn write_def() -> anyhow::Result<()> {
+// 	let source_file_def = SourceFileDef {
+// 		hash: 0x127A8AA22916FDCD,
+// 		timestamp: 1462320000, // May 4, 2016
+// 		spans: vec![PageSpanDef {
+// 			range: 100..109,
+// 			kind: PageKind::Merit,
+// 		}],
+// 	};
+
+// 	serde_json::ser::to_writer_pretty(File::create("Def.json")?, &source_file_def)?;
+// 	Ok(())
+// }
+
+fn load_defs() -> Result<Vec<SourceFileDef>> {
+	Ok(fs::read_dir("meta")?
+		.into_iter()
+		.filter_map(|entry| entry.ok().map(|e| e.path()))
+		.filter(|path| {
+			path.extension()
+				.and_then(|ext| Some(ext.eq("json")))
+				.unwrap_or(false)
+		})
+		.map(|path| -> Result<SourceFileDef> {
+			Ok(serde_json::de::from_reader(File::open(path)?)?)
+		})
+		.filter_map(|r| r.ok())
+		.collect())
+}
+
 fn main() -> anyhow::Result<()> {
-	let source_file_defs = vec![SourceFileDef {
-		hash: 0x127A8AA22916FDCD,
-		spans: vec![PageSpanDef {
-			range: 100..109,
-			kind: PageKind::Merit,
-		}],
-	}];
+	let source_file_defs = vec![
+		SourceFileDef {
+			hash: 0x127A8AA22916FDCD,
+			timestamp: 1462320000, // May 4, 2016
+			spans: vec![PageSpanDef {
+				range: 100..109,
+				kind: PageKind::Merit,
+			}],
+		},
+		SourceFileDef {
+			hash: 0x9CC1F4CC8AA30AC2,
+			timestamp: 1449878400, // May 4, 2016
+			spans: vec![PageSpanDef {
+				range: 45..67,
+				kind: PageKind::Merit,
+			}],
+		},
+	];
+	// let source_file_defs = load_defs()?;
 
 	let sources: Vec<_> = fs::read_dir("pdf")?
 		.filter_map(|f| f.ok())
@@ -40,7 +84,7 @@ fn main() -> anyhow::Result<()> {
 				.par_iter()
 				.find_any(|def| def.hash.eq(&hash));
 			if o.is_none() {
-				println!("Unknown file: {}, Hash: {hash}", path.display());
+				println!("Unknown file: {}, Hash: {hash:X}", path.display());
 			}
 			o.map(|def| (path, def))
 		})
@@ -48,40 +92,33 @@ fn main() -> anyhow::Result<()> {
 
 	sources
 		.into_par_iter()
-		.map(
-			|(path, source_def)| -> Result<(PathBuf, PdfExtract, bool)> {
-				let json_path = path.with_extension("json");
+		.map(|(path, source_def)| -> Result<(PathBuf, PdfExtract)> {
+			let json_path = path.with_extension("json");
 
-				let flag;
-				let pdf_extract = if json_path.exists() {
-					flag = false;
-					serde_json::de::from_reader(File::open(&json_path)?)?
-				} else {
-					flag = true;
-					let mut source = SourceFile::from(path);
-					source.load_pdf()?;
-					source.extract(source_def)?
-				};
+			let pdf_extract = if json_path.exists() {
+				serde_json::de::from_reader(File::open(&json_path)?)?
+			} else {
+				let mut source = SourceFile::from(path);
+				source.load_pdf()?;
 
-				Ok((json_path, pdf_extract, flag))
-			},
-		)
+				let pdf_extract = source.extract(source_def)?;
+				serde_json::ser::to_writer_pretty(File::create(&json_path)?, &pdf_extract)?;
+				pdf_extract
+			};
+
+			Ok((json_path, pdf_extract))
+		})
 		.filter_map(|f| f.ok())
-		.map(
-			|(json_path, pdf_extract, should_save)| -> Result<PdfExtract> {
-				if should_save {
-					serde_json::ser::to_writer_pretty(File::create(json_path)?, &pdf_extract)?;
-				}
-
-				Ok(pdf_extract)
-			},
-		)
-		.filter_map(|f| f.ok())
-		.for_each(|p| {
+		.for_each(|(json_path, p)| {
 			//
 			// println!("{p:?}");
 			let vecs = p.parse();
-			println!("{vecs:?}");
+			// println!("{vecs:?}");
+			serde_json::ser::to_writer(
+				File::create(json_path.with_extension("stage2.json")).unwrap(),
+				&vecs,
+			)
+			.unwrap();
 		});
 
 	Ok(())
