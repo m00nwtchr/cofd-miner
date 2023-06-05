@@ -32,6 +32,8 @@ lazy_static! {
 		\s?
 		(?P<sub>:)?
 	").unwrap();
+
+	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Effect|Drawback)s?:$").unwrap();
 	//
 }
 
@@ -43,13 +45,43 @@ fn is_empty<T>(vec: &Vec<T>) -> bool {
 	vec.is_empty()
 }
 
+fn is_empty_map<K, V>(map: &HashMap<K, V>) -> bool {
+	map.is_empty()
+}
+
+#[derive(Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ItemProp {
+	Prerequisites,
+	Effects,
+	Drawbacks,
+
+	Cost,
+	Tags,
+
+	HeuristicPropExtraction,
+}
+
+impl ItemProp {
+	fn by_name(str: &str) -> Option<Self> {
+		match str.to_lowercase().as_str() {
+			"effect" | "effects" => Some(Self::Effects),
+			"prerequisite" | "prerequisites" => Some(Self::Prerequisites),
+			"drawback" | "drawbacks" => Some(Self::Drawbacks),
+
+			_ => None,
+		}
+	}
+}
+
 #[derive(Default, Serialize)]
 pub struct Item {
 	name: String,
 	#[serde(default, skip_serializing_if = "is_empty")]
 	children: Vec<Item>,
 	desc: Vec<String>,
-	// props: HashMap<String, String>,
+	#[serde(default, skip_serializing_if = "is_empty_map")]
+	props: HashMap<ItemProp, Vec<String>>,
 }
 
 impl PageKind {
@@ -67,25 +99,87 @@ impl PageKind {
 				let matches: Vec<_> = MERIT_HEADER_REGEX.captures_iter(&str).collect();
 				for captures in matches.into_iter().rev() {
 					let name = captures.name("name").unwrap().as_str().trim();
-					let cost = normalize(captures.name("cost").unwrap().as_str());
+					let cost = captures.name("cost");
 					let sub = captures.name("sub").is_some();
 
-					let ltags = captures.name("ltags").map(|m| m.as_str()).unwrap_or("");
-					let rtags = captures.name("rtags").map(|m| m.as_str()).unwrap_or("");
+					let ltags = captures.name("ltags").map(|m| m.as_str());
+					let rtags = captures.name("rtags").map(|m| m.as_str());
 
-					let desc: Vec<String> = str[captures.get(0).unwrap().end()..str_pos]
+					let body: Vec<String> = str[captures.get(0).unwrap().end()..str_pos]
 						.split('\n')
 						.filter_map(|str| filter_normalize(str))
 						.collect();
 					str_pos = captures.get(0).unwrap().start();
 
-					// let desc = ;
+					let mut props = HashMap::new();
+					let mut v: Vec<String> = Vec::new();
+
+					for el in body.iter().rev() {
+						if let Some(prop) = PROP_REGEX.captures(el) {
+							let prop = ItemProp::by_name(prop.get(1).unwrap().as_str()).unwrap();
+
+							if prop != ItemProp::Prerequisites || !props.is_empty() {
+								v.reverse();
+								props.insert(prop, v);
+								v = Vec::new();
+							} else if prop == ItemProp::Prerequisites && props.is_empty() {
+								v.reverse();
+								let mut a = Vec::new();
+								let mut b = Vec::new();
+
+								let mut flag = true;
+
+								for item in v {
+									/*if item.contains(" ") && !item.contains(",") {
+										flag = false;
+									} else */
+									if item.split_whitespace().count() > 3 {
+										flag = false;
+									} else if item.chars().all(|f| f.eq(&'•')) {
+									}
+
+									if !flag && item.contains("Combat: ") {
+										a.push(item);
+									} else {
+										if flag {
+											a.push(item);
+										} else {
+											b.push(item);
+										}
+									}
+								}
+
+								props.insert(prop, a);
+								props.insert(
+									ItemProp::HeuristicPropExtraction,
+									vec!["true".to_owned()],
+								);
+
+								v = b;
+								v.reverse()
+							}
+						} else {
+							v.push(el.clone());
+						}
+					}
+					v.reverse();
+					let desc = v;
+
+					if let Some(t) = ltags.or(rtags) {
+						let v: Vec<String> = t.split(", ").map(String::from).collect();
+						props.insert(ItemProp::Tags, v);
+					}
+
+					if let Some(cost) = cost {
+						props.insert(ItemProp::Cost, vec![normalize(cost.as_str())]);
+					}
 
 					if !sub {
 						out.push(Item {
 							name: name.to_owned(),
 							desc,
 							children,
+							props,
 						});
 						children = Vec::new();
 					} else {
@@ -93,6 +187,7 @@ impl PageKind {
 							name: name.to_owned(),
 							children: vec![],
 							desc,
+							props,
 						});
 					}
 				}
