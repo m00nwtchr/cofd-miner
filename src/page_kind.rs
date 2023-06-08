@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PageKind {
-	Merit,
+	Merit(Option<String>),
 }
 
 lazy_static! {
@@ -87,7 +87,7 @@ pub struct Item {
 impl PageKind {
 	pub fn parse(&self, vec: &[String]) -> Vec<Item> {
 		match self {
-			PageKind::Merit => {
+			PageKind::Merit(additional_prereqs) => {
 				let mut out = Vec::new();
 				let str = vec.join("\n");
 
@@ -172,6 +172,13 @@ impl PageKind {
 
 					if let Some(cost) = cost {
 						props.insert(ItemProp::Cost, vec![normalize(cost.as_str())]);
+					}
+
+					if let Some(prereqs) = additional_prereqs {
+						props
+							.entry(ItemProp::Prerequisites)
+							.or_default()
+							.insert(0, prereqs.clone());
 					}
 
 					if !sub {

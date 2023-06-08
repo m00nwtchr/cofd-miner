@@ -9,11 +9,12 @@ use rayon::prelude::*;
 mod def;
 mod hash;
 mod page_kind;
+mod parser;
 mod source_file;
 
 mod schema;
 
-use def::{PageSpanDef, SourceFileDef};
+use def::{PageSpanDef, SourceFileDef, TokenRange};
 use page_kind::*;
 use source_file::{PdfExtract, SourceFile};
 
@@ -54,17 +55,35 @@ fn main() -> anyhow::Result<()> {
 		SourceFileDef {
 			hash: 0x127A8AA22916FDCD,
 			timestamp: 1462320000, // May 4, 2016
-			spans: vec![PageSpanDef {
-				range: 100..109,
-				kind: PageKind::Merit,
-			}],
+			spans: vec![
+				PageSpanDef {
+					range: 100..106,
+					kind: PageKind::Merit(Some("Awakened".to_string())),
+					token_range: Some(TokenRange::EndAt(796)),
+				},
+				PageSpanDef {
+					range: 105..109,
+					kind: PageKind::Merit(None),
+					token_range: Some(TokenRange::StartAt(60)),
+				},
+			],
 		},
 		SourceFileDef {
 			hash: 0x9CC1F4CC8AA30AC2,
 			timestamp: 1449878400, // May 4, 2016
 			spans: vec![PageSpanDef {
 				range: 45..67,
-				kind: PageKind::Merit,
+				kind: PageKind::Merit(None),
+				token_range: None,
+			}],
+		},
+		SourceFileDef {
+			hash: 0xD7036DF1B5C78357,
+			timestamp: 0,
+			spans: vec![PageSpanDef {
+				range: 110..125,
+				kind: PageKind::Merit(None),
+				token_range: None,
 			}],
 		},
 	];

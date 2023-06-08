@@ -174,7 +174,16 @@ impl SourceFile {
 
 	pub fn extract_span(&self, def: &PageSpanDef) -> anyhow::Result<PageSpan> {
 		let extract = extract_text(&self, &def.range)?;
-		let extract = extract.into_iter().flat_map(|(_, v)| v).collect();
+		let extract: Vec<String> = extract.into_iter().flat_map(|(num, v)| v).collect();
+
+		let extract = if let Some(offset) = &def.token_range {
+			match offset {
+				crate::def::TokenRange::StartAt(i) => extract[*i..].to_vec(),
+				crate::def::TokenRange::EndAt(i) => extract[..*i].to_vec(),
+			}
+		} else {
+			extract
+		};
 
 		let pages = PageSpan {
 			extract,
