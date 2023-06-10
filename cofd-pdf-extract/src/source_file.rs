@@ -37,16 +37,16 @@ pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result
 
 			let extract = vec.join("\n");
 
-			{
-				let str = "\nbased on Supernal or Abyssal effects, you can instead take \nthe Strained Condition.";
-				let pos = extract.find(str);
+			// {
+			// 	let str = "\nWhere the Bodies Are Buried ";
+			// 	let pos = extract.find(str);
 
-				if pos.is_some() {
-					println!("{section:?} {:?} {:?}", pos, pos.map(|p| p + str.len()));
-				}
-			}
+			// 	if pos.is_some() {
+			// 		println!("{section:?} {:?} {:?}", pos, pos.map(|p| p + str.len()));
+			// 	}
+			// }
 
-			let extract = if let Some(range) = &section.range {
+			let mut extract = if let Some(range) = &section.range {
 				match range {
 					crate::meta::Span::Range(range) => extract[range.clone()].to_owned(),
 					crate::meta::Span::From(range) => extract
@@ -56,6 +56,14 @@ pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result
 			} else {
 				extract
 			};
+
+			for op in &section.ops {
+				match op {
+					crate::meta::Op::Insert { pos, char } => {
+						extract.insert(*pos, *char);
+					}
+				}
+			}
 
 			Section {
 				extract,

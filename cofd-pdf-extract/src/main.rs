@@ -19,20 +19,6 @@ mod source_file;
 use meta::SourceMeta;
 use source_file::{extract_text, PdfExtract};
 
-// fn write_def() -> anyhow::Result<()> {
-// 	let source_file_def = SourceFileDef {
-// 		hash: 0x127A8AA22916FDCD,
-// 		timestamp: 1462320000, // May 4, 2016
-// 		spans: vec![PageSpanDef {
-// 			range: 100..109,
-// 			kind: PageKind::Merit,
-// 		}],
-// 	};
-
-// 	serde_json::ser::to_writer_pretty(File::create("Def.json")?, &source_file_def)?;
-// 	Ok(())
-// }
-
 #[derive(Default, Serialize, Deserialize)]
 struct Cache {
 	hash: HashMap<PathBuf, u64>,

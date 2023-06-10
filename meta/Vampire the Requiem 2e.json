@@ -13,7 +13,19 @@
 			},
 			"kind": {
 				"Merit": "Kindred"
-			}
+			},
+			"ops": [
+				{
+					"type": "Insert",
+					"pos": 33016,
+					"char": "("
+				},
+				{
+					"type": "Insert",
+					"pos": 33023,
+					"char": ")"
+				}
+			]
 		},
 		{
 			"pages": {
