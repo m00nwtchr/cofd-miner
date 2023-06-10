@@ -1,10 +1,9 @@
-use std::{collections::HashMap, fs::File, io::Write, ops::DerefMut};
+use std::collections::HashMap;
 
+use cofd_schema::prelude::DotRange;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-
-use crate::schema::DotRange;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PageKind {

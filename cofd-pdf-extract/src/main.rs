@@ -1,6 +1,5 @@
 use std::{
 	fs::{self, File},
-	io::Write,
 	path::{Path, PathBuf},
 };
 
@@ -13,9 +12,7 @@ mod page_kind;
 // mod parser;
 mod source_file;
 
-mod schema;
-
-use def::{PageSpanDef, SourceFileDef, TokenRange};
+use def::{PageSpanDef, SourceFileDef};
 use page_kind::*;
 use source_file::{extract, PdfExtract};
 use walkdir::{DirEntry, WalkDir};
@@ -121,10 +118,8 @@ fn main() -> anyhow::Result<()> {
 			],
 		},
 	];
-	// let source_file_defs = load_defs()?;
 
 	let out_path = Path::new("./out");
-
 	let paths: Vec<PathBuf> = WalkDir::new("pdf")
 		.into_iter()
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
@@ -169,7 +164,7 @@ fn main() -> anyhow::Result<()> {
 			// println!("{p:?}");
 			let vecs = p.parse();
 			// println!("{vecs:?}");
-			serde_json::ser::to_writer(
+			serde_json::ser::to_writer_pretty(
 				File::create(json_path.with_extension("stage2.json")).unwrap(),
 				&vecs,
 			)

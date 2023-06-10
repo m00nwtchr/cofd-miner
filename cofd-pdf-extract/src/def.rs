@@ -5,12 +5,6 @@ use serde::{Deserialize, Serialize};
 use crate::page_kind::PageKind;
 
 #[derive(Serialize, Deserialize)]
-pub enum TokenRange {
-	StartAt(usize),
-	EndAt(usize),
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct PageSpanDef {
 	pub range: Range<usize>,
 	pub kind: PageKind,

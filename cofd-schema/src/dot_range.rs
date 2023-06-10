@@ -1,8 +1,6 @@
-use std::ops::{Range, RangeFrom, RangeInclusive};
+use std::ops::{RangeFrom, RangeInclusive};
 
 use serde::{Deserialize, Serialize};
-
-mod prerequisites;
 
 #[derive(Serialize, Deserialize)]
 pub struct MyRangeFrom {
@@ -22,11 +20,6 @@ pub enum DotRange {
 	Range(RangeInclusive<u8>),
 	RangeFrom(MyRangeFrom),
 }
-
-// enum Token {
-// 	Num(i8),
-// 	To,
-// }
 
 fn dot_to_num(str: &str) -> Option<u8> {
 	if str.chars().all(|f| f.eq(&'•')) {
@@ -54,5 +47,3 @@ impl From<&[&str]> for DotRange {
 		}
 	}
 }
-
-impl DotRange {}
