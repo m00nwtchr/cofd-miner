@@ -1,6 +1,7 @@
 use std::{
 	fs::{self, File},
-	path::PathBuf,
+	io::Write,
+	path::{Path, PathBuf},
 };
 
 use anyhow::Result;
@@ -9,16 +10,15 @@ use rayon::prelude::*;
 mod def;
 mod hash;
 mod page_kind;
-mod parser;
+// mod parser;
 mod source_file;
 
 mod schema;
 
 use def::{PageSpanDef, SourceFileDef, TokenRange};
 use page_kind::*;
-use source_file::{PdfExtract, SourceFile};
-
-type PageIndex = u32;
+use source_file::{extract, PdfExtract};
+use walkdir::{DirEntry, WalkDir};
 
 // fn write_def() -> anyhow::Result<()> {
 // 	let source_file_def = SourceFileDef {
@@ -50,6 +50,26 @@ fn load_defs() -> Result<Vec<SourceFileDef>> {
 		.collect())
 }
 
+fn is_hidden(entry: &DirEntry) -> bool {
+	entry
+		.file_name()
+		.to_str()
+		.map(|s| s.starts_with("."))
+		.unwrap_or(false)
+}
+
+fn is_pdf(entry: &DirEntry) -> bool {
+	if entry.file_type().is_file() {
+		entry
+			.file_name()
+			.to_str()
+			.map(|s| s.ends_with(".pdf"))
+			.unwrap_or(false)
+	} else {
+		true
+	}
+}
+
 fn main() -> anyhow::Result<()> {
 	let source_file_defs = vec![
 		SourceFileDef {
@@ -57,46 +77,63 @@ fn main() -> anyhow::Result<()> {
 			timestamp: 1462320000, // May 4, 2016
 			spans: vec![
 				PageSpanDef {
-					range: 100..106,
+					range: 405544..432406,
 					kind: PageKind::Merit(Some("Awakened".to_string())),
-					token_range: Some(TokenRange::EndAt(796)),
 				},
 				PageSpanDef {
-					range: 105..109,
+					range: 432407..450302,
 					kind: PageKind::Merit(None),
-					token_range: Some(TokenRange::StartAt(60)),
+				},
+				PageSpanDef {
+					range: 1324269..1327325,
+					kind: PageKind::Merit(Some("Sleeper".to_owned())),
+				},
+				PageSpanDef {
+					range: 1340991..1347013,
+					kind: PageKind::Merit(None),
 				},
 			],
 		},
 		SourceFileDef {
-			hash: 0x9CC1F4CC8AA30AC2,
-			timestamp: 1449878400, // May 4, 2016
+			hash: 0x9CC1F4CC8AA30AC2, // CofD
+			timestamp: 1449878400,    // May 4, 2016
 			spans: vec![PageSpanDef {
-				range: 45..67,
+				range: 138923..240656,
 				kind: PageKind::Merit(None),
-				token_range: None,
 			}],
 		},
 		SourceFileDef {
-			hash: 0xD7036DF1B5C78357,
-			timestamp: 0,
-			spans: vec![PageSpanDef {
-				range: 110..125,
-				kind: PageKind::Merit(None),
-				token_range: None,
-			}],
+			hash: 0xD7036DF1B5C78357, // VtR 2e
+			timestamp: 1387411200,
+			spans: vec![
+				PageSpanDef {
+					range: 425794..470434,
+					kind: PageKind::Merit(Some("Kindred".to_owned())),
+				},
+				PageSpanDef {
+					range: 470765..502137,
+					kind: PageKind::Merit(None),
+				},
+				PageSpanDef {
+					range: 1279243..1289074,
+					kind: PageKind::Merit(None),
+				},
+			],
 		},
 	];
 	// let source_file_defs = load_defs()?;
 
-	let sources: Vec<_> = fs::read_dir("pdf")?
-		.filter_map(|f| f.ok())
-		.map(|f| f.path())
-		.filter(|path| {
-			path.extension()
-				.and_then(|ext| Some(ext.eq("pdf")))
-				.unwrap_or(false)
-		})
+	let out_path = Path::new("./out");
+
+	let paths: Vec<PathBuf> = WalkDir::new("pdf")
+		.into_iter()
+		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
+		.filter_map(|e| e.ok())
+		.map(|f| f.path().to_owned())
+		.collect();
+
+	let sources: Vec<_> = paths
+		.into_par_iter()
 		.filter_map(|path| hash::hash(&path).ok().map(|hash| (path, hash)))
 		.filter_map(|(path, hash)| {
 			let o = source_file_defs
@@ -112,15 +149,15 @@ fn main() -> anyhow::Result<()> {
 	sources
 		.into_par_iter()
 		.map(|(path, source_def)| -> Result<(PathBuf, PdfExtract)> {
-			let json_path = path.with_extension("json");
+			let json_path = out_path
+				.join(path.file_name().unwrap())
+				.with_extension("json");
 
 			let pdf_extract = if json_path.exists() {
 				serde_json::de::from_reader(File::open(&json_path)?)?
 			} else {
-				let mut source = SourceFile::from(path);
-				source.load_pdf()?;
+				let pdf_extract = extract(&path, source_def)?;
 
-				let pdf_extract = source.extract(source_def)?;
 				serde_json::ser::to_writer_pretty(File::create(&json_path)?, &pdf_extract)?;
 				pdf_extract
 			};
@@ -129,7 +166,6 @@ fn main() -> anyhow::Result<()> {
 		})
 		.filter_map(|f| f.ok())
 		.for_each(|(json_path, p)| {
-			//
 			// println!("{p:?}");
 			let vecs = p.parse();
 			// println!("{vecs:?}");

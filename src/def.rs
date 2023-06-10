@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{page_kind::PageKind, PageIndex};
+use crate::page_kind::PageKind;
 
 #[derive(Serialize, Deserialize)]
 pub enum TokenRange {
@@ -12,9 +12,8 @@ pub enum TokenRange {
 
 #[derive(Serialize, Deserialize)]
 pub struct PageSpanDef {
-	pub range: Range<PageIndex>,
+	pub range: Range<usize>,
 	pub kind: PageKind,
-	pub token_range: Option<TokenRange>,
 }
 
 #[derive(Serialize, Deserialize)]

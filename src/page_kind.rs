@@ -1,8 +1,10 @@
-use std::{collections::HashMap, fs::File, io::Write};
+use std::{collections::HashMap, fs::File, io::Write, ops::DerefMut};
 
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+
+use crate::schema::DotRange;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum PageKind {
@@ -11,13 +13,12 @@ pub enum PageKind {
 
 lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(r"(?xm)
-		#[.\s]?
-		(?P<name>[^\s.][^\n.]+)                 # Name
+		^
+		(?P<name>[^\s.][^\n.]+)               # Name
 		\s?
-		\(\s?
-			(?: (?P<ltags> .+ ), )?             # Tags
-			\s?
-			(?P<cost>                           # Cost
+		\(
+			(?: (?P<ltags> [^•]+ ),\s)?       # Tags
+			(?P<cost>                         # Cost
 				(?:          
 					•{1,5}
 					[,\s\+]*
@@ -26,14 +27,13 @@ lazy_static! {
 					\s*
 				)+
 			)
-			\s?
-			(?: [,;] \s? (?P<rtags> [^\n]+ ) )? # Tags
-		\s?\)
-		\s?
-		(?P<sub>:)?
+			(?: [,;] \s (?P<rtags> [^•]+ ) )? # Tags
+		\)
+		( (?P<sub>:) \s (?P<subbegin> .* ) )?
+		$
 	").unwrap();
 
-	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Effect|Drawback)s?:$").unwrap();
+	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Cost|Dice Pool|Action|Duration|Effect|Drawback)s?:\s?(.*)$").unwrap();
 	//
 }
 
@@ -49,24 +49,31 @@ fn is_empty_map<K, V>(map: &HashMap<K, V>) -> bool {
 	map.is_empty()
 }
 
-#[derive(Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemProp {
-	Prerequisites,
-	Effects,
-	Drawbacks,
-
-	Cost,
+	Description,
+	DotRating,
 	Tags,
 
-	HeuristicPropExtraction,
+	Prerequisites,
+	Cost,
+	DicePool,
+	Action,
+	Duration,
+	Effects,
+	Drawbacks,
 }
 
 impl ItemProp {
 	fn by_name(str: &str) -> Option<Self> {
 		match str.to_lowercase().as_str() {
-			"effect" | "effects" => Some(Self::Effects),
 			"prerequisite" | "prerequisites" => Some(Self::Prerequisites),
+			"cost" => Some(Self::Cost),
+			"dice pool" => Some(Self::DicePool),
+			"action" => Some(Self::Action),
+			"duration" => Some(Self::Duration),
+			"effect" | "effects" => Some(Self::Effects),
 			"drawback" | "drawbacks" => Some(Self::Drawbacks),
 
 			_ => None,
@@ -74,114 +81,133 @@ impl ItemProp {
 	}
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PropValue {
+	Vec(Vec<String>),
+	Bool(bool),
+	DotRange(DotRange),
+}
+
+impl PropValue {
+	pub fn insert(&mut self, index: usize, element: String) {
+		if let PropValue::Vec(vec) = self {
+			vec.insert(index, element)
+		}
+	}
+}
+
+#[derive(Default, Serialize)]
+pub struct SubItem {
+	name: String,
+	desc: Vec<String>,
+	#[serde(default, skip_serializing_if = "is_empty_map")]
+	props: HashMap<ItemProp, PropValue>,
+}
+
 #[derive(Default, Serialize)]
 pub struct Item {
 	name: String,
 	#[serde(default, skip_serializing_if = "is_empty")]
-	children: Vec<Item>,
+	children: Vec<SubItem>,
 	desc: Vec<String>,
 	#[serde(default, skip_serializing_if = "is_empty_map")]
-	props: HashMap<ItemProp, Vec<String>>,
+	props: HashMap<ItemProp, PropValue>,
 }
 
 impl PageKind {
-	pub fn parse(&self, vec: &[String]) -> Vec<Item> {
+	pub fn parse(&self, span: &str) -> Vec<Item> {
 		match self {
 			PageKind::Merit(additional_prereqs) => {
 				let mut out = Vec::new();
-				let str = vec.join("\n");
-
-				// File::create("st2.txt").unwrap().write_all(str.as_bytes());
 
 				let mut children = Vec::new();
-				let mut str_pos = str.len();
+				let mut str_pos = span.len();
 
-				let matches: Vec<_> = MERIT_HEADER_REGEX.captures_iter(&str).collect();
+				let matches: Vec<_> = MERIT_HEADER_REGEX.captures_iter(&span).collect();
 				for captures in matches.into_iter().rev() {
 					let name = captures.name("name").unwrap().as_str().trim();
 					let cost = captures.name("cost");
+
 					let sub = captures.name("sub").is_some();
+					let sub_begin = captures.name("subbegin");
 
 					let ltags = captures.name("ltags").map(|m| m.as_str());
 					let rtags = captures.name("rtags").map(|m| m.as_str());
 
-					let body: Vec<String> = str[captures.get(0).unwrap().end()..str_pos]
-						.split('\n')
-						.filter_map(|str| filter_normalize(str))
-						.collect();
-					str_pos = captures.get(0).unwrap().start();
-
 					let mut props = HashMap::new();
-					let mut v: Vec<String> = Vec::new();
+					let desc = {
+						let body: Vec<String> = span[captures.get(0).unwrap().end()..str_pos]
+							.split('\n')
+							.filter_map(|str| filter_normalize(str))
+							.collect();
+						str_pos = captures.get(0).unwrap().start();
 
-					for el in body.iter().rev() {
-						if let Some(prop) = PROP_REGEX.captures(el) {
-							let prop = ItemProp::by_name(prop.get(1).unwrap().as_str()).unwrap();
+						let mut v: Vec<String> = Vec::new();
+						for el in body.iter().rev() {
+							if let Some(prop) = PROP_REGEX.captures(el) {
+								let prop_key =
+									ItemProp::by_name(prop.get(1).unwrap().as_str()).unwrap();
 
-							if prop != ItemProp::Prerequisites || !props.is_empty() {
-								v.reverse();
-								props.insert(prop, v);
-								v = Vec::new();
-							} else if prop == ItemProp::Prerequisites && props.is_empty() {
-								v.reverse();
-								let mut a = Vec::new();
-								let mut b = Vec::new();
+								let prop_val = prop.get(2).unwrap().as_str().to_owned();
 
-								let mut flag = true;
+								if prop_key == ItemProp::Prerequisites {
+									props.insert(
+										ItemProp::Prerequisites,
+										PropValue::Vec(
+											prop_val.split(", ").map(str::to_owned).collect(),
+										),
+									);
 
-								for item in v {
-									/*if item.contains(" ") && !item.contains(",") {
-										flag = false;
-									} else */
-									if item.split_whitespace().count() > 3 {
-										flag = false;
-									} else if item.chars().all(|f| f.eq(&'•')) {
+									if !v.is_empty() {
+										v.reverse();
+										props.insert(ItemProp::Description, PropValue::Vec(v));
+										v = Vec::new();
 									}
-
-									if !flag && item.contains("Combat: ") {
-										a.push(item);
-									} else {
-										if flag {
-											a.push(item);
-										} else {
-											b.push(item);
-										}
-									}
+								} else {
+									v.push(prop_val);
+									v.reverse();
+									props.insert(prop_key, PropValue::Vec(v));
+									v = Vec::new();
 								}
-
-								props.insert(prop, a);
-								props.insert(
-									ItemProp::HeuristicPropExtraction,
-									vec!["true".to_owned()],
-								);
-
-								v = b;
-								v.reverse()
+							} else {
+								v.push(el.clone());
 							}
-						} else {
-							v.push(el.clone());
 						}
-					}
-					v.reverse();
-					let desc = v;
+						v.reverse();
+						// let desc = v;
+						v
+					};
 
-					if let Some(t) = ltags.or(rtags) {
-						let v: Vec<String> = t.split(", ").map(String::from).collect();
-						props.insert(ItemProp::Tags, v);
+					if let Some(tags) = ltags.or(rtags) {
+						props.insert(
+							ItemProp::Tags,
+							PropValue::Vec(tags.split(", ").map(String::from).collect()),
+						);
 					}
 
 					if let Some(cost) = cost {
-						props.insert(ItemProp::Cost, vec![normalize(cost.as_str())]);
+						let strs: Vec<&str> = cost
+							.as_str()
+							.split(|c: char| c.is_whitespace() || c.eq(&','))
+							.filter(|str| !str.is_empty() && !str.eq(&"or"))
+							.collect();
+
+						props.insert(
+							ItemProp::DotRating,
+							PropValue::DotRange(DotRange::from(strs.as_slice())),
+						);
 					}
 
 					if let Some(prereqs) = additional_prereqs {
 						props
 							.entry(ItemProp::Prerequisites)
-							.or_default()
+							.or_insert(PropValue::Vec(Vec::new()))
 							.insert(0, prereqs.clone());
 					}
 
 					if !sub {
+						children.reverse();
 						out.push(Item {
 							name: name.to_owned(),
 							desc,
@@ -190,9 +216,10 @@ impl PageKind {
 						});
 						children = Vec::new();
 					} else {
-						children.push(Item {
+						let mut desc = desc;
+						desc.insert(0, normalize(sub_begin.unwrap().as_str()));
+						children.push(SubItem {
 							name: name.to_owned(),
-							children: vec![],
 							desc,
 							props,
 						});
