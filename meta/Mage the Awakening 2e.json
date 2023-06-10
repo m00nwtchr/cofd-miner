@@ -1,0 +1,53 @@
+{
+	"hash": 1331529068920110541,
+	"timestamp": 1462320000,
+	"sections": [
+		{
+			"pages": {
+				"start": 99,
+				"end": 104
+			},
+			"range": {
+				"start": 0,
+				"end": 30938
+			},
+			"kind": {
+				"Merit": "Awakened"
+			}
+		},
+		{
+			"pages": {
+				"start": 104,
+				"end": 107
+			},
+			"range": {
+				"start": 2644
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 302,
+				"end": 303
+			},
+			"range": {
+				"start": 0,
+				"end": 5959
+			},
+			"kind": {
+				"Merit": "Sleeper"
+			}
+		},
+		{
+			"pages": {
+				"start": 305,
+				"end": 306
+			},
+			"kind": {
+				"Merit": null
+			}
+		}
+	]
+}

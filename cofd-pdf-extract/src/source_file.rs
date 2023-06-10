@@ -1,64 +1,81 @@
-use std::{
-	fs::File,
-	io::Write,
-	path::{Path, PathBuf},
-};
+use std::{collections::HashMap, fs::File, io::Write, ops::RangeFrom, path::Path};
 
 use anyhow::Result;
-use pyo3::prelude::*;
+use mupdf::Document;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	def::SourceFileDef,
+	meta::{MyRangeFrom, SourceMeta},
 	page_kind::{Item, PageKind},
 };
 
-fn extract_text(path: &impl AsRef<Path>) -> Result<String> {
-	let path = path.as_ref();
-	let code = include_str!("py/extract_text.py");
+pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result<PdfExtract> {
+	let document = Document::open(path.as_ref().to_str().unwrap())?;
 
-	let str = Python::with_gil(|py| -> PyResult<String> {
-		let extract = PyModule::from_code(py, code, "extract_text.py", "extract")?;
-		let extract = extract.getattr("extract_text")?.call1((path,))?.extract()?;
+	let map: HashMap<usize, String> = document
+		.pages()?
+		.enumerate()
+		.filter_map(|(i, p)| p.ok().map(|p| (i, p)))
+		.filter_map(|(i, page)| page.to_text().ok().map(|p| (i, p)))
+		.collect();
 
-		Ok(extract)
-	})?;
-
-	Ok(str)
-}
-
-pub fn extract(path: &impl AsRef<Path>, source_file_def: &SourceFileDef) -> Result<PdfExtract> {
-	let text = extract_text(path)?;
-	let path = path.as_ref();
-
-	let str = "though you had it at whatever level she possesses.";
-	let i = text.find(str);
-	println!("{:?} {:?}", i, i.map(|i| i + str.len()));
-
-	// let _ = File::create(&path.with_extension("txt"))?.write_all(text.as_bytes());
-
-	let spans = source_file_def
-		.spans
+	let sections: Vec<_> = source_meta
+		.sections
 		.par_iter()
-		.map(|span| PageSpan {
-			extract: text[span.range.clone()].to_owned(),
-			kind: span.kind.clone(),
+		.map(|section| {
+			let vec: Vec<String> = (section.pages.clone())
+				.into_par_iter()
+				.filter_map(|i| map.get(&i))
+				.flat_map(|page| {
+					page.split("\n")
+						.filter(|line| !line.is_empty())
+						.collect::<Vec<_>>()
+				})
+				.map(str::to_owned)
+				.collect();
+
+			let extract = vec.join("\n");
+
+			{
+				let str = "\nbased on Supernal or Abyssal effects, you can instead take \nthe Strained Condition.";
+				let pos = extract.find(str);
+
+				if pos.is_some() {
+					println!("{section:?} {:?} {:?}", pos, pos.map(|p| p + str.len()));
+				}
+			}
+
+			let extract = if let Some(range) = &section.range {
+				match range {
+					crate::meta::Span::Range(range) => extract[range.clone()].to_owned(),
+					crate::meta::Span::From(range) => extract
+						[<MyRangeFrom as Into<RangeFrom<usize>>>::into(range.clone())]
+					.to_owned(),
+				}
+			} else {
+				extract
+			};
+
+			Section {
+				extract,
+				kind: section.kind.clone(),
+			}
 		})
 		.collect();
 
-	Ok(PdfExtract { spans })
+	Ok(PdfExtract { sections })
 }
 
 // Stage 2
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PageSpan {
+pub struct Section {
 	kind: PageKind,
 	extract: String,
 }
 
-impl PageSpan {
+impl Section {
 	pub fn parse(&self) -> Vec<Item> {
 		self.kind.parse(&self.extract)
 	}
@@ -66,13 +83,13 @@ impl PageSpan {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PdfExtract {
-	spans: Vec<PageSpan>,
+	sections: Vec<Section>,
 	// errors: Vec<Error>,
 }
 
 impl PdfExtract {
 	pub fn parse(&self) -> Vec<Item> {
-		self.spans
+		self.sections
 			.par_iter()
 			.flat_map(|span| span.parse())
 			.collect()

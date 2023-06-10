@@ -1,0 +1,80 @@
+{
+	"hash": 15493348027988935511,
+	"timestamp": 1387411200,
+	"sections": [
+		{
+			"pages": {
+				"start": 109,
+				"end": 115
+			},
+			"range": {
+				"start": 0,
+				"end": 33771
+			},
+			"kind": {
+				"Merit": "Kindred"
+			}
+		},
+		{
+			"pages": {
+				"start": 116,
+				"end": 116
+			},
+			"range": {
+				"start": 0,
+				"end": 4282
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 116,
+				"end": 117
+			},
+			"range": {
+				"start": 5488,
+				"end": 9231
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 117,
+				"end": 118
+			},
+			"range": {
+				"start": 3944,
+				"end": 7850
+			},
+			"kind": {
+				"Merit": "Kindred"
+			}
+		},
+		{
+			"pages": {
+				"start": 118,
+				"end": 124
+			},
+			"range": {
+				"start": 2364,
+				"end": 33730
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 298,
+				"end": 300
+			},
+			"kind": {
+				"Merit": null
+			}
+		}
+	]
+}
