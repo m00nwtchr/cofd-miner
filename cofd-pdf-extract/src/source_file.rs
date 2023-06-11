@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Write, ops::RangeFrom, path::Path};
+use std::{collections::HashMap, ops::RangeFrom, path::Path};
 
 use anyhow::Result;
 use mupdf::Document;
@@ -37,15 +37,6 @@ pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result
 
 			let extract = vec.join("\n");
 
-			// {
-			// 	let str = "\nWhere the Bodies Are Buried ";
-			// 	let pos = extract.find(str);
-
-			// 	if pos.is_some() {
-			// 		println!("{section:?} {:?} {:?}", pos, pos.map(|p| p + str.len()));
-			// 	}
-			// }
-
 			let mut extract = if let Some(range) = &section.range {
 				match range {
 					crate::meta::Span::Range(range) => extract[range.clone()].to_owned(),
@@ -62,8 +53,42 @@ pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result
 					crate::meta::Op::Insert { pos, char } => {
 						extract.insert(*pos, *char);
 					}
+					crate::meta::Op::Delete { range } => {
+						extract.replace_range(range.clone(), "");
+					}
+					crate::meta::Op::Move { range, pos } => {
+						let str = extract[range.clone()].to_owned();
+
+						extract.insert_str(*pos, &str);
+
+						if range.start() > pos {
+							// let range = range.clone();
+							extract.replace_range(
+								(range.start() + str.len())..(range.end() + str.len()),
+								"",
+							);
+						}
+					} // crate::meta::Op::Swap { a, b } => {
+					  // 	let a = a.clone();
+					  // 	let astr = extract[a.clone()].to_owned();
+					  // 	let bstr = extract[b.clone()].to_owned();
+					  // 	println!("{a:?}, {astr}");
+
+					  // 	extract.replace_range(a, &bstr);
+					  // 	let new_bstart = extract.find(&bstr).unwrap();
+					  // 	extract.replace_range(new_bstart..(new_bstart + bstr.len()), &astr);
+					  // }
 				}
 			}
+
+			// {
+			// 	let str = "";
+			// 	let pos = extract.find(str);
+			// 	// 572..989
+			// 	if pos.is_some() {
+			// 		println!("{section:?} {:?} {:?}", pos, pos.map(|p| p + str.len()));
+			// 	}
+			// }
 
 			Section {
 				extract,

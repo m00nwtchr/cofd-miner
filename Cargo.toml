@@ -1,2 +1,5 @@
 [workspace]
 members = ["cofd-pdf-extract", "cofd-schema"]
+
+[profile.release]
+lto = true

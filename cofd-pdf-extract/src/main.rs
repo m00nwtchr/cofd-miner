@@ -6,6 +6,7 @@ use std::{
 };
 
 use anyhow::Result;
+use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use walkdir::{DirEntry, WalkDir};
@@ -33,7 +34,11 @@ fn load_defs() -> Result<Vec<SourceMeta>> {
 				.and_then(|ext| Some(ext.eq("json")))
 				.unwrap_or(false)
 		})
-		.map(|path| -> Result<SourceMeta> { Ok(serde_json::de::from_reader(File::open(path)?)?) })
+		.map(|path| -> Result<SourceMeta> {
+			let meta = serde_json::de::from_reader(File::open(&path)?)?;
+			// serde_json::ser::to_writer_pretty(File::create(&path)?, &j)?;
+			Ok(meta)
+		})
 		.filter_map(|r| r.ok())
 		.collect())
 }
@@ -59,6 +64,8 @@ fn is_pdf(entry: &DirEntry) -> bool {
 }
 
 fn main() -> anyhow::Result<()> {
+	env_logger::init();
+
 	let cache_path = Path::new("cache.json");
 	let cache = RwLock::new(if cache_path.exists() {
 		serde_json::de::from_reader(File::open(cache_path)?)?
@@ -76,7 +83,7 @@ fn main() -> anyhow::Result<()> {
 		.map(|f| f.path().to_owned())
 		.collect();
 
-	let sources: Vec<_> = paths
+	paths
 		.into_par_iter()
 		.filter_map(|path| {
 			if let Ok(Some(hash)) = cache.read().map(|c| c.hash.get(&path).cloned()) {
@@ -96,17 +103,11 @@ fn main() -> anyhow::Result<()> {
 				.par_iter()
 				.find_any(|def| def.hash.eq(&hash));
 			if o.is_none() {
-				println!("Unknown file: {}, Hash: {hash:X}", path.display());
+				debug!("Unknown file: {}, Hash: {hash:X}", path.display());
 			}
 
 			o.map(|def| (path, def))
 		})
-		.collect();
-
-	serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;
-
-	sources
-		.into_par_iter()
 		.map(|(path, source_def)| -> Result<(PathBuf, PdfExtract)> {
 			let json_path = out_path
 				.join(path.file_name().unwrap())
@@ -135,6 +136,8 @@ fn main() -> anyhow::Result<()> {
 			)
 			.unwrap();
 		});
+
+	serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;
 
 	Ok(())
 }

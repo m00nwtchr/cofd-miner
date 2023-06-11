@@ -1,0 +1,133 @@
+{
+	"hash": "C73B198ADD62E08D",
+	"timestamp": 0,
+	"sections": [
+		{
+			"pages": {
+				"start": 41,
+				"end": 43
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 46,
+				"end": 55
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 72,
+				"end": 77
+			},
+			"kind": {
+				"Merit": "Mortal"
+			}
+		},
+		{
+			"pages": {
+				"start": 78,
+				"end": 78
+			},
+			"kind": {
+				"Merit": null
+			},
+			"range": {
+				"start": 0,
+				"end": 2140
+			}
+		},
+		{
+			"pages": {
+				"start": 79,
+				"end": 81
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 83,
+				"end": 86
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"pages": {
+				"start": 88,
+				"end": 90
+			},
+			"kind": {
+				"Merit": null
+			},
+			"range": {
+				"start": 655,
+				"end": 7022
+			},
+			"ops": [
+				{
+					"type": "Delete",
+					"range": {
+						"start": 571,
+						"end": 1764
+					}
+				},
+				{
+					"type": "Move",
+					"range": {
+						"start": 572,
+						"end": 988
+					},
+					"pos": 0
+				}
+			]
+		},
+		{
+			"pages": {
+				"start": 92,
+				"end": 95
+			},
+			"kind": {
+				"Merit": null
+			},
+			"range": {
+				"start": 0,
+				"end": 11786
+			}
+		},
+		{
+			"pages": {
+				"start": 96,
+				"end": 100
+			},
+			"kind": {
+				"Merit": null
+			},
+			"range": {
+				"start": 0,
+				"end": 18986
+			}
+		},
+		{
+			"pages": {
+				"start": 101,
+				"end": 104
+			},
+			"kind": {
+				"Merit": null
+			},
+			"range": {
+				"start": 0,
+				"end": 16341
+			}
+		}
+	]
+}

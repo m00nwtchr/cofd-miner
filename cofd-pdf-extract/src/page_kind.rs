@@ -16,7 +16,7 @@ lazy_static! {
 		(?P<name>[^\s.][^\n.]+)               # Name
 		\s?
 		\(
-			(?: (?P<ltags> [^•]+ ),\s)?       # Tags
+			(?: (?P<ltags> [^•\n]+ ) [,;] \s)?       # Tags
 			(?P<cost>                         # Cost
 				(?:          
 					•{1,5}
@@ -26,13 +26,14 @@ lazy_static! {
 					\s*
 				)+
 			)
-			(?: [,;] \s (?P<rtags> [^•]+ ) )? # Tags
+			(?: [,;] \s (?P<rtags> [^•\n]+ ) )? # Tags
 		\)
 		( (?P<sub>:) \s (?P<subbegin> .* ) )?
+		\s?
 		$
 	").unwrap();
 
-	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Cost|Dice Pool|Action|Duration|Effect|Drawback)s?:\s?(.*)$").unwrap();
+	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note)s?:\s?(.*)$").unwrap();
 	//
 }
 
@@ -56,25 +57,28 @@ pub enum ItemProp {
 	Tags,
 
 	Prerequisites,
+	StyleTags,
 	Cost,
 	DicePool,
 	Action,
 	Duration,
 	Effects,
 	Drawbacks,
+	Notes,
 }
 
 impl ItemProp {
 	fn by_name(str: &str) -> Option<Self> {
 		match str.to_lowercase().as_str() {
 			"prerequisite" | "prerequisites" => Some(Self::Prerequisites),
+			"style tag" | "style tags" => Some(Self::StyleTags),
 			"cost" => Some(Self::Cost),
 			"dice pool" => Some(Self::DicePool),
 			"action" => Some(Self::Action),
 			"duration" => Some(Self::Duration),
 			"effect" | "effects" => Some(Self::Effects),
 			"drawback" | "drawbacks" => Some(Self::Drawbacks),
-
+			"note" | "notes" => Some(Self::Notes),
 			_ => None,
 		}
 	}
