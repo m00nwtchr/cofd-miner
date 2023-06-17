@@ -1,0 +1,60 @@
+{
+	"hash": "18470781060595C3",
+	"timestamp": 0,
+	"sections": [
+		{
+			"name": "Mage Sight Merits",
+			"pages": { "start": 26, "end": 26 },
+			"range": { "start": 767, "end": 1368 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "High Speech Merits",
+			"pages": { "start": 26, "end": 26 },
+			"range": { "start": 2531, "end": 5027 },
+			"kind": { "Merit": null }
+		},
+		{
+			"name": "Supernal Taxonomy",
+			"pages": { "start": 27, "end": 27 },
+			"range": { "start": 631, "end": 1425 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Supernal Watcher",
+			"pages": { "start": 43, "end": 43 },
+			"range": { "start": 3612, "end": 4576 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Yantra Merits",
+			"pages": { "start": 57, "end": 57 },
+			"range": { "start": 958, "end": 3030 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Item Merits",
+			"pages": { "start": 76, "end": 77 },
+			"range": { "start": 5037, "end": 7790 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Grimoire Merits",
+			"pages": { "start": 87, "end": 87 },
+			"range": { "start": 3061, "end": 5172 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Soul Stone Merits",
+			"pages": { "start": 91, "end": 92 },
+			"range": { "start": 963, "end": 7395 },
+			"kind": { "Merit": "Awakened" }
+		},
+		{
+			"name": "Order Archive",
+			"pages": { "start": 97, "end": 97 },
+			"range": { "start": 2628, "end": 4284 },
+			"kind": { "Merit": "Awakened" }
+		}
+	]
+}

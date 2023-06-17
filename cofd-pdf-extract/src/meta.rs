@@ -12,6 +12,14 @@ fn is_empty<T>(v: &Vec<T>) -> bool {
 	v.is_empty()
 }
 
+fn is_empty_str(str: &String) -> bool {
+	str.is_empty() || str.eq("Unnamed")
+}
+
+fn unnamed() -> String {
+	"Unnamed".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MyRangeFrom {
 	pub start: usize,
@@ -22,14 +30,14 @@ impl Into<RangeFrom<usize>> for MyRangeFrom {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Span {
 	Range(Range<usize>),
 	From(MyRangeFrom),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Op {
 	Insert {
@@ -45,8 +53,10 @@ pub enum Op {
 	},
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SectionDefinition {
+	#[serde(default = "unnamed", skip_serializing_if = "is_empty_str")]
+	pub name: String,
 	pub pages: RangeInclusive<usize>,
 	#[serde(default, skip_serializing_if = "is_none")]
 	pub range: Option<Span>,
