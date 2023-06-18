@@ -3,6 +3,7 @@
 	"timestamp": 1387411200,
 	"sections": [
 		{
+			"name": "General Kindred Merits",
 			"pages": {
 				"start": 109,
 				"end": 115
@@ -28,6 +29,7 @@
 			]
 		},
 		{
+			"name": "Carthian Law",
 			"pages": {
 				"start": 116,
 				"end": 116
@@ -41,6 +43,7 @@
 			}
 		},
 		{
+			"name": "Invictus Oaths",
 			"pages": {
 				"start": 116,
 				"end": 117
@@ -54,6 +57,7 @@
 			}
 		},
 		{
+			"name": "Kindred Fighting Merits",
 			"pages": {
 				"start": 117,
 				"end": 118
@@ -67,6 +71,7 @@
 			}
 		},
 		{
+			"name": "General Merits",
 			"pages": {
 				"start": 118,
 				"end": 124
@@ -80,9 +85,14 @@
 			}
 		},
 		{
+			"name": "Ghoul and Mortal Merits",
 			"pages": {
 				"start": 298,
 				"end": 300
+			},
+			"range": {
+				"start": 2242,
+				"end": 12072
 			},
 			"kind": {
 				"Merit": null

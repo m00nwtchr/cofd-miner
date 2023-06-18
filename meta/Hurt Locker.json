@@ -3,74 +3,203 @@
 	"timestamp": 0,
 	"sections": [
 		{
+			"name": "General Merits",
 			"pages": {
 				"start": 41,
 				"end": 43
 			},
-			"kind": {
-				"Merit": null
-			}
-		},
-		{
-			"pages": {
-				"start": 46,
-				"end": 55
+			"range": {
+				"start": 1240,
+				"end": 12782
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "Delete",
+					"range": {
+						"start": 1357,
+						"end": 1876
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 7174,
+						"end": 7196
+					}
+				}
+			]
 		},
 		{
+			"name": "Fighting Merits",
+			"pages": {
+				"start": 46,
+				"end": 56
+			},
+			"range": {
+				"start": 1537,
+				"end": 54785
+			},
+			"kind": {
+				"Merit": null
+			},
+			"ops": [
+				{
+					"type": "Delete",
+					"range": {
+						"start": 1520,
+						"end": 3260
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 2205,
+						"end": 2224
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 5252,
+						"end": 5291
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 11315,
+						"end": 11334
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 17728,
+						"end": 17767
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 24226,
+						"end": 24245
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 30257,
+						"end": 30296
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 36700,
+						"end": 36719
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 42244,
+						"end": 42283
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 47177,
+						"end": 47196
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 47609,
+						"end": 47705
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 49932,
+						"end": 49971
+					}
+				}
+			]
+		},
+		{
+			"name": "Supernatural Merits",
 			"pages": {
 				"start": 72,
 				"end": 77
+			},
+			"range": {
+				"start": 33,
+				"end": 30373
 			},
 			"kind": {
 				"Merit": "Mortal"
 			}
 		},
 		{
+			"name": "Supernatural Resistance",
 			"pages": {
 				"start": 78,
 				"end": 78
 			},
+			"range": {
+				"start": 1706,
+				"end": 2141
+			},
 			"kind": {
 				"Merit": null
-			},
-			"range": {
-				"start": 0,
-				"end": 2140
 			}
 		},
 		{
+			"name": "Atariya Merits",
 			"pages": {
 				"start": 79,
 				"end": 81
 			},
+			"range": {
+				"start": 2759,
+				"end": 12232
+			},
 			"kind": {
 				"Merit": null
 			}
 		},
 		{
+			"name": "Dreamer Merits",
 			"pages": {
 				"start": 83,
 				"end": 86
 			},
+			"range": {
+				"start": 4932,
+				"end": 15903
+			},
 			"kind": {
 				"Merit": null
 			}
 		},
 		{
+			"name": "Infected Merits",
 			"pages": {
 				"start": 88,
 				"end": 90
 			},
-			"kind": {
-				"Merit": null
-			},
 			"range": {
 				"start": 655,
 				"end": 7022
+			},
+			"kind": {
+				"Merit": null
 			},
 			"ops": [
 				{
@@ -91,42 +220,45 @@
 			]
 		},
 		{
+			"name": "Plain Merits",
 			"pages": {
 				"start": 92,
 				"end": 95
 			},
+			"range": {
+				"start": 2442,
+				"end": 11787
+			},
 			"kind": {
 				"Merit": null
-			},
-			"range": {
-				"start": 0,
-				"end": 11786
 			}
 		},
 		{
+			"name": "Lost Boy Merits",
 			"pages": {
 				"start": 96,
 				"end": 100
 			},
+			"range": {
+				"start": 4341,
+				"end": 18986
+			},
 			"kind": {
 				"Merit": null
-			},
-			"range": {
-				"start": 0,
-				"end": 18986
 			}
 		},
 		{
+			"name": "Psychic Vampire Merits",
 			"pages": {
 				"start": 101,
 				"end": 104
 			},
+			"range": {
+				"start": 3452,
+				"end": 16341
+			},
 			"kind": {
 				"Merit": null
-			},
-			"range": {
-				"start": 0,
-				"end": 16341
 			}
 		}
 	]

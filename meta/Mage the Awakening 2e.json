@@ -3,19 +3,21 @@
 	"timestamp": 1462320000,
 	"sections": [
 		{
+			"name": "Awakened Merits",
 			"pages": {
 				"start": 99,
 				"end": 104
 			},
 			"range": {
-				"start": 0,
-				"end": 30938
+				"start": 4349,
+				"end": 30939
 			},
 			"kind": {
 				"Merit": "Awakened"
 			}
 		},
 		{
+			"name": "General Merits",
 			"pages": {
 				"start": 104,
 				"end": 107
@@ -28,22 +30,28 @@
 			}
 		},
 		{
+			"name": "Sleeper Merits",
 			"pages": {
 				"start": 302,
 				"end": 303
 			},
 			"range": {
-				"start": 0,
-				"end": 5959
+				"start": 2904,
+				"end": 5960
 			},
 			"kind": {
 				"Merit": "Sleeper"
 			}
 		},
 		{
+			"name": "Sleepwalker Merits",
 			"pages": {
 				"start": 305,
 				"end": 306
+			},
+			"range": {
+				"start": 1790,
+				"end": 7811
 			},
 			"kind": {
 				"Merit": null

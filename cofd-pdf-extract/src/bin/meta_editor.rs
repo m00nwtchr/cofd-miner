@@ -1,20 +1,23 @@
 use std::{
 	collections::HashMap,
 	fs::{self, File},
-	ops::Range,
+	ops::{Range, RangeBounds},
 	path::{Path, PathBuf},
 };
 
 use eframe::{
-	egui::{self, FontSelection, TextFormat},
-	epaint::{self, Color32, FontId},
+	egui::{self, FontSelection, TextEdit, TextFormat},
+	epaint::{self, text::cursor::Cursor, Color32, FontId},
 };
 
 use cofd_pdf_extract::{
 	hash,
-	meta::{SectionDefinition, SourceMeta, Span},
+	meta::{Op, SectionDefinition, SourceMeta, Span},
 	source_file::{extract_pages, make_section},
 };
+use env_logger::fmt::Color;
+use serde::Serialize;
+use serde_json::ser::PrettyFormatter;
 
 fn main() -> eframe::Result<()> {
 	let native_options = eframe::NativeOptions::default();
@@ -34,6 +37,8 @@ struct MetaEditorApp {
 	selected_section: Option<usize>,
 	show_full_text: bool,
 	last_range: Option<Range<usize>>,
+	pages_start: String,
+	pages_end: String,
 }
 
 impl MetaEditorApp {
@@ -69,6 +74,8 @@ impl MetaEditorApp {
 			selected_section: None,
 			show_full_text: true,
 			last_range: None,
+			pages_end: "".to_string(),
+			pages_start: "".to_string(),
 		}
 	}
 
@@ -80,12 +87,8 @@ impl MetaEditorApp {
 		wrap_width: f32,
 		section: &SectionDefinition,
 	) -> epaint::text::LayoutJob {
-		let mut layout_job = epaint::text::LayoutJob::simple(
-			text.to_string(),
-			font_id.clone(),
-			Color32::GRAY,
-			wrap_width,
-		);
+		let mut layout_job =
+			epaint::text::LayoutJob::simple(text.to_string(), font_id, Color32::GRAY, wrap_width);
 
 		if show_full_text {
 			if let Some(range) = &section.range {
@@ -106,12 +109,12 @@ impl MetaEditorApp {
 					cofd_pdf_extract::meta::Span::Range(range) => range.clone(),
 					cofd_pdf_extract::meta::Span::From(from) => from.start..text.len(),
 				};
-
 				let format = TextFormat {
 					color: Color32::BLACK,
 					background: Color32::GRAY,
 					..Default::default()
 				};
+
 				layout_job.sections.push(epaint::text::LayoutSection {
 					leading_space: 0.0,
 					byte_range,
@@ -148,11 +151,22 @@ impl eframe::App for MetaEditorApp {
 						for (i, section) in self.meta.sections.iter().enumerate() {
 							body.row(18.0, |mut row| {
 								row.col(|ui| {
-									ui.selectable_value(
-										&mut self.selected_section,
-										Some(i),
-										&section.name,
-									);
+									if ui
+										.selectable_value(
+											&mut self.selected_section,
+											Some(i),
+											&section.name,
+										)
+										.clicked()
+									{
+										let selection = self
+											.meta
+											.sections
+											.get(self.selected_section.unwrap())
+											.unwrap();
+										self.pages_start = selection.pages.start().to_string();
+										self.pages_end = selection.pages.end().to_string();
+									}
 								});
 							})
 						}
@@ -161,11 +175,40 @@ impl eframe::App for MetaEditorApp {
 				if let Some(selected_section) = self.selected_section {
 					if let Some(section) = self.meta.sections.get_mut(selected_section) {
 						ui.text_edit_singleline(&mut section.name);
+
+						// ui.push_id("XDDD", |ui| {
+						ui.horizontal_top(|ui| {
+							if ui
+								.add(
+									TextEdit::singleline(&mut self.pages_start)
+										.id_source("pages_start"),
+								)
+								.changed()
+							{
+								section.pages =
+									(self.pages_end.parse().unwrap())..=*section.pages.end();
+							}
+							if ui
+								.add(
+									TextEdit::singleline(&mut self.pages_end)
+										.id_source("pages_end"),
+								)
+								.changed()
+							{
+								section.pages =
+									*section.pages.start()..=(self.pages_end.parse().unwrap())
+							}
+						});
+						// });
 					}
 				}
 
 				if ui.button("Save").clicked() {
-					serde_json::ser::to_writer(File::create(&self.meta_path).unwrap(), &self.meta);
+					let mut ser = serde_json::Serializer::with_formatter(
+						File::create(&self.meta_path).unwrap(),
+						PrettyFormatter::with_indent(b"\t"),
+					);
+					self.meta.serialize(&mut ser);
 				}
 
 				ui.checkbox(&mut self.show_full_text, "Show full text");
@@ -213,11 +256,20 @@ impl eframe::App for MetaEditorApp {
 							}
 						}
 
-						println!("{:?}", self.last_range);
 						output.response.context_menu(|ui| {
 							if ui.button("Set range").clicked() {
 								if let Some(range) = &self.last_range {
 									section_def.range = Some(Span::Range(range.clone()));
+								}
+
+								ui.close_menu();
+							}
+
+							if ui.button("Delete").clicked() {
+								if let Some(range) = &self.last_range {
+									let range = range.start..=(range.end - 1);
+
+									section_def.ops.push(Op::Delete { range })
 								}
 
 								ui.close_menu();
