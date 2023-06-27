@@ -1,6 +1,6 @@
 # cofd-pdf-extract
 
-An application for extraction of Chronicles of Darkness game material from pdfs you own.
+An application for extraction of Chronicles of Darkness game material from pdfs you own. Very much work in progress.
 
 ## Running from source
 
@@ -18,4 +18,4 @@ GUI application for creation of `meta/` files. (Only basic functionality for now
 
 ## Supported books
 
-See: [`meta/`](https://github.com/m00nwtchr/cofd-pdf-extract/tree/master/meta) directory for list of supported books.
+See: [`meta/`](tree/master/meta) directory for list of supported books.
