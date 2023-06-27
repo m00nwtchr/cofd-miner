@@ -18,4 +18,4 @@ GUI application for creation of `meta/` files. (Only basic functionality for now
 
 ## Supported books
 
-See: [`meta/`](tree/master/meta) directory for list of supported books.
+See: [`meta/`](meta/) directory for list of supported books.
