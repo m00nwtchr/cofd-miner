@@ -51,6 +51,10 @@ pub enum Op {
 		range: RangeInclusive<usize>,
 		pos: usize,
 	},
+	RegexReplace {
+		regex: String,
+		replace: String,
+	},
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

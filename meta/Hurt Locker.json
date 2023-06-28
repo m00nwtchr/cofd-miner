@@ -17,18 +17,14 @@
 			},
 			"ops": [
 				{
-					"type": "Delete",
-					"range": {
-						"start": 1357,
-						"end": 1876
-					}
+					"type": "RegexReplace",
+					"regex": "(?s)\\nChapter Two:\\s+Instruments\\s+of Violence(.+)chapter two\\-instruments of violence",
+					"replace": ""
 				},
 				{
-					"type": "Delete",
-					"range": {
-						"start": 7174,
-						"end": 7196
-					}
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+New General Merits",
+					"replace": ""
 				}
 			]
 		},
@@ -49,86 +45,14 @@
 				{
 					"type": "Delete",
 					"range": {
-						"start": 1520,
-						"end": 3260
+						"start": 1519,
+						"end": 3259
 					}
 				},
 				{
-					"type": "Delete",
-					"range": {
-						"start": 2205,
-						"end": 2224
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 5252,
-						"end": 5291
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 11315,
-						"end": 11334
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 17728,
-						"end": 17767
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 24226,
-						"end": 24245
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 30257,
-						"end": 30296
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 36700,
-						"end": 36719
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 42244,
-						"end": 42283
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 47177,
-						"end": 47196
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 47609,
-						"end": 47705
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 49932,
-						"end": 49971
-					}
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(chapter two-instruments of violence|Fighting Merits)",
+					"replace": ""
 				}
 			]
 		},
@@ -144,7 +68,14 @@
 			},
 			"kind": {
 				"Merit": "Mortal"
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(Supernatural Merits|Chapter three-The Other Side|Supernatural Merit Templates)",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Supernatural Resistance",
@@ -172,7 +103,14 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|Atariya)",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Dreamer Merits",
@@ -186,7 +124,14 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Dreamers)",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Infected Merits",
@@ -206,16 +151,21 @@
 					"type": "Delete",
 					"range": {
 						"start": 571,
-						"end": 1764
+						"end": 1765
 					}
 				},
 				{
 					"type": "Move",
 					"range": {
-						"start": 572,
-						"end": 988
+						"start": 571,
+						"end": 987
 					},
 					"pos": 0
+				},
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Infected)",
+					"replace": ""
 				}
 			]
 		},
@@ -231,7 +181,14 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Plain)",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Lost Boy Merits",
@@ -245,7 +202,14 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{2,3}\\s+(Chapter three-The Other Side|The Lost Boys)",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Psychic Vampire Merits",
@@ -259,7 +223,14 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n\\d{3}\\s+(Chapter three-The Other Side|Psychic Vampires)",
+					"replace": ""
+				}
+			]
 		}
 	]
 }

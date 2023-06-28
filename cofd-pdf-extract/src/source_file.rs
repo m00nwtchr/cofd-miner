@@ -3,6 +3,7 @@ use std::{collections::HashMap, ops::RangeFrom, path::Path};
 use anyhow::Result;
 use mupdf::Document;
 use rayon::prelude::*;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -75,6 +76,11 @@ pub fn make_section(
 							"",
 						);
 					}
+				}
+				crate::meta::Op::RegexReplace { regex, replace } => {
+					let regex = Regex::new(regex).unwrap();
+
+					extract = regex.replace_all(&extract, replace).to_string();
 				} // crate::meta::Op::Swap { a, b } => {
 				  // 	let a = a.clone();
 				  // 	let astr = extract[a.clone()].to_owned();

@@ -10,6 +10,12 @@ pub enum PageKind {
 	Merit(Option<String>),
 }
 
+impl Default for PageKind {
+	fn default() -> Self {
+		Self::Merit(None)
+	}
+}
+
 lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(r"(?xm)
 		^

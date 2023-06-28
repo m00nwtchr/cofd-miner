@@ -1,0 +1,69 @@
+{
+	"hash": "2C47B511D2678E1D",
+	"timestamp": 0,
+	"sections": [
+		{
+			"name": "General Werewolf Merits",
+			"pages": {
+				"start": 105,
+				"end": 108
+			},
+			"range": {
+				"start": 2428,
+				"end": 20723
+			},
+			"kind": {
+				"Merit": "Werewolf"
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
+					"replace": ""
+				}
+			]
+		},
+		{
+			"name": "Werewolf Fighting Merits",
+			"pages": {
+				"start": 108,
+				"end": 110
+			},
+			"range": {
+				"start": 4069,
+				"end": 12427
+			},
+			"kind": {
+				"Merit": "Werewolf"
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
+					"replace": ""
+				}
+			]
+		},
+		{
+			"name": "Human Merits",
+			"pages": {
+				"start": 110,
+				"end": 113
+			},
+			"range": {
+				"start": 3499,
+				"end": 25159
+			},
+			"kind": {
+				"Merit": null
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
+					"replace": ""
+				}
+			]
+		}
+	]
+}
