@@ -62,7 +62,18 @@ impl MetaEditorApp {
 			})
 			.filter_map(|r| r.ok())
 			.find(|(meta, path)| meta.hash.eq(&hash))
-			.unwrap();
+			.unwrap_or_else(|| {
+				(
+					SourceMeta {
+						hash,
+						sections: Vec::new(),
+						timestamp: 0,
+					},
+					Path::new("meta")
+						.join(path.file_name().unwrap())
+						.with_extension("json"),
+				)
+			});
 
 		let pages = extract_pages(&path).unwrap();
 
@@ -186,7 +197,7 @@ impl eframe::App for MetaEditorApp {
 								.changed()
 							{
 								section.pages =
-									(self.pages_end.parse().unwrap())..=*section.pages.end();
+									(self.pages_start.parse().unwrap())..=*section.pages.end();
 							}
 							if ui
 								.add(
@@ -201,6 +212,16 @@ impl eframe::App for MetaEditorApp {
 						});
 						// });
 					}
+				}
+
+				if ui.button("Add section").clicked() {
+					self.meta.sections.push(SectionDefinition {
+						name: String::from("Unnamed"),
+						pages: 1..=2,
+						range: None,
+						kind: cofd_pdf_extract::page_kind::PageKind::Merit(None),
+						ops: Vec::new(),
+					})
 				}
 
 				if ui.button("Save").clicked() {
