@@ -1,7 +1,7 @@
 [alias]
 meta-edit = [
 	"run",
-	# "--release",
+	"--release",
 	"--bin",
 	"meta-editor",
 	"--features=meta_editor",

@@ -9,6 +9,7 @@ use anyhow::Result;
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::ser::PrettyFormatter;
 use walkdir::{DirEntry, WalkDir};
 
 mod hash;
@@ -19,6 +20,14 @@ mod source_file;
 
 use meta::SourceMeta;
 use source_file::{extract_text, PdfExtract};
+
+fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
+	let mut ser = serde_json::Serializer::with_formatter(
+		File::create(path).unwrap(),
+		PrettyFormatter::with_indent(b"\t"),
+	);
+	Ok(value.serialize(&mut ser)?)
+}
 
 #[derive(Default, Serialize, Deserialize)]
 struct Cache {
@@ -118,7 +127,7 @@ fn main() -> anyhow::Result<()> {
 			} else {
 				let pdf_extract = extract_text(&path, source_def)?;
 
-				serde_json::ser::to_writer_pretty(File::create(&json_path)?, &pdf_extract)?;
+				to_path_pretty(&json_path, &pdf_extract)?;
 
 				pdf_extract
 			};
@@ -130,11 +139,8 @@ fn main() -> anyhow::Result<()> {
 			// println!("{p:?}");
 			let vecs = p.parse();
 			// println!("{vecs:?}");
-			serde_json::ser::to_writer_pretty(
-				File::create(json_path.with_extension("stage2.json")).unwrap(),
-				&vecs,
-			)
-			.unwrap();
+
+			to_path_pretty(json_path.with_extension("stage2.json"), &vecs).unwrap();
 		});
 
 	serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;

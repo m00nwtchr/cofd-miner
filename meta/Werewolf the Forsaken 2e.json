@@ -1,5 +1,5 @@
 {
-	"hash": "2C47B511D2678E1D",
+	"hash": "3B3E7EBAEFF94CDB",
 	"timestamp": 0,
 	"sections": [
 		{
@@ -64,6 +64,48 @@
 					"replace": ""
 				}
 			]
+		},
+		{
+			"name": "Tribal Affiliate Merits",
+			"pages": {
+				"start": 304,
+				"end": 304
+			},
+			"range": {
+				"start": 2527,
+				"end": 5307
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Moon Birth Merits",
+			"pages": {
+				"start": 305,
+				"end": 305
+			},
+			"range": {
+				"start": 24,
+				"end": 2268
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Wolf-Blooded Merits",
+			"pages": {
+				"start": 305,
+				"end": 305
+			},
+			"range": {
+				"start": 2429,
+				"end": 4262
+			},
+			"kind": {
+				"Merit": null
+			}
 		}
 	]
 }

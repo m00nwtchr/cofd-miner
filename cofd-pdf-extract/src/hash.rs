@@ -6,13 +6,14 @@ use std::{
 };
 
 use anyhow::Result;
-use fasthash::XXHasher;
+// use fasthash::XXHasher;
+use highway::HighwayHasher;
 
 pub fn hash_file(file: &File) -> Result<u64> {
 	let mut reader = BufReader::new(file);
 
 	let digest = {
-		let mut hasher = XXHasher::default();
+		let mut hasher = HighwayHasher::default();
 		let mut buffer = [0; 1024];
 		loop {
 			let count = reader.read(&mut buffer)?;

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use cofd_schema::prelude::DotRange;
+use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,7 @@ impl Default for PageKind {
 }
 
 lazy_static! {
-	static ref MERIT_HEADER_REGEX: Regex = Regex::new(r"(?xm)
+	static ref MERIT_HEADER_REGEX: Regex = Regex::new(r"(?xmi)
 		^
 		(?P<name>[^\s.][^\n.]+)               # Name
 		\s?
@@ -124,6 +125,38 @@ pub struct Item {
 	props: HashMap<ItemProp, PropValue>,
 }
 
+// TODO: Some edge cases don't get merged properly but works ok overall.
+fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
+	let mut out = Vec::new();
+	let mut paragraph = String::new();
+
+	let mut flag = false;
+	for line in vec {
+		if !paragraph.is_empty() && !flag {
+			paragraph.push(' ');
+		} else if flag {
+			flag = false;
+		}
+
+		paragraph.push_str(if !line.ends_with("God-") {
+			line.trim_end_matches('-')
+		} else {
+			flag = true;
+			&line
+		});
+
+		if line.ends_with('.') {
+			out.push(paragraph);
+			paragraph = String::new();
+		}
+	}
+	if !paragraph.is_empty() {
+		out.push(paragraph);
+	}
+
+	out
+}
+
 impl PageKind {
 	pub fn parse(&self, span: &str) -> Vec<Item> {
 		match self {
@@ -136,6 +169,24 @@ impl PageKind {
 				let matches: Vec<_> = MERIT_HEADER_REGEX.captures_iter(&span).collect();
 				for captures in matches.into_iter().rev() {
 					let name = captures.name("name").unwrap().as_str().trim();
+					let name =
+						if name.chars().filter(|f| f.is_uppercase()).count() >= (name.len() / 2) {
+							name.split_whitespace()
+								.map(|f| {
+									let f = f.to_lowercase();
+									if !f.eq("to") && !f.eq("or") && !f.eq("the") && !f.eq("of") {
+										f.to_case(Case::Title)
+									} else {
+										f.to_string()
+									}
+								})
+								.fold(String::new(), |a, b| a + &b + " ")
+								.trim()
+								.to_string()
+						} else {
+							name.to_string()
+						};
+
 					let cost = captures.name("cost");
 
 					let sub = captures.name("sub").is_some();
@@ -170,13 +221,16 @@ impl PageKind {
 
 									if !v.is_empty() {
 										v.reverse();
-										props.insert(ItemProp::Description, PropValue::Vec(v));
+										props.insert(
+											ItemProp::Description,
+											PropValue::Vec(to_paragraphs(v)),
+										);
 										v = Vec::new();
 									}
 								} else {
 									v.push(prop_val);
 									v.reverse();
-									props.insert(prop_key, PropValue::Vec(v));
+									props.insert(prop_key, PropValue::Vec(to_paragraphs(v)));
 									v = Vec::new();
 								}
 							} else {
@@ -185,7 +239,7 @@ impl PageKind {
 						}
 						v.reverse();
 						// let desc = v;
-						v
+						to_paragraphs(v)
 					};
 
 					if let Some(tags) = ltags.or(rtags) {

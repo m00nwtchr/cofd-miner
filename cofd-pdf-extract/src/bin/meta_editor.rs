@@ -1,13 +1,8 @@
 use std::{
 	collections::HashMap,
 	fs::{self, File},
-	ops::{Range, RangeBounds},
+	ops::Range,
 	path::{Path, PathBuf},
-};
-
-use eframe::{
-	egui::{self, FontSelection, TextEdit, TextFormat},
-	epaint::{self, text::cursor::Cursor, Color32, FontId},
 };
 
 use cofd_pdf_extract::{
@@ -15,7 +10,10 @@ use cofd_pdf_extract::{
 	meta::{Op, SectionDefinition, SourceMeta, Span},
 	source_file::{extract_pages, make_section},
 };
-use env_logger::fmt::Color;
+use eframe::{
+	egui::{self, FontSelection, TextEdit, TextFormat},
+	epaint::{self, Color32, FontId},
+};
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
@@ -35,6 +33,7 @@ struct MetaEditorApp {
 	path: PathBuf,
 
 	selected_section: Option<usize>,
+	selected_op: Option<usize>,
 	show_full_text: bool,
 	last_range: Option<Range<usize>>,
 	pages_start: String,
@@ -83,6 +82,7 @@ impl MetaEditorApp {
 			pages,
 			path,
 			selected_section: None,
+			selected_op: None,
 			show_full_text: true,
 			last_range: None,
 			pages_end: "".to_string(),
@@ -156,38 +156,27 @@ impl eframe::App for MetaEditorApp {
 		egui::SidePanel::left("sidebar")
 			.resizable(false)
 			.show(ctx, |ui| {
-				egui_extras::TableBuilder::new(ui)
-					.column(egui_extras::Column::remainder())
-					.body(|mut body| {
-						for (i, section) in self.meta.sections.iter().enumerate() {
-							body.row(18.0, |mut row| {
-								row.col(|ui| {
-									if ui
-										.selectable_value(
-											&mut self.selected_section,
-											Some(i),
-											&section.name,
-										)
-										.clicked()
-									{
-										let selection = self
-											.meta
-											.sections
-											.get(self.selected_section.unwrap())
-											.unwrap();
-										self.pages_start = selection.pages.start().to_string();
-										self.pages_end = selection.pages.end().to_string();
-									}
-								});
-							})
+				ui.label("Sections:");
+				for (i, section) in self.meta.sections.iter().enumerate() {
+					if ui
+						.selectable_value(&mut self.selected_section, Some(i), &section.name)
+						.clicked()
+					{
+						if let Some(selection) = self
+							.selected_section
+							.and_then(|selected_section| self.meta.sections.get(selected_section))
+						{
+							self.pages_start = selection.pages.start().to_string();
+							self.pages_end = selection.pages.end().to_string();
 						}
-					});
+					}
+				}
+				ui.separator();
 
 				if let Some(selected_section) = self.selected_section {
 					if let Some(section) = self.meta.sections.get_mut(selected_section) {
 						ui.text_edit_singleline(&mut section.name);
 
-						// ui.push_id("XDDD", |ui| {
 						ui.horizontal_top(|ui| {
 							if ui
 								.add(
@@ -210,7 +199,36 @@ impl eframe::App for MetaEditorApp {
 									*section.pages.start()..=(self.pages_end.parse().unwrap())
 							}
 						});
-						// });
+						ui.separator();
+
+						ui.label("Operations:");
+						for (i, op) in section.ops.iter().enumerate() {
+							ui.selectable_value(
+								&mut self.selected_op,
+								Some(i),
+								match op {
+									Op::Insert { .. } => "Insert",
+									Op::Delete { .. } => "Delete",
+									Op::Move { .. } => "Move",
+									Op::RegexReplace { .. } => "RegexReplace",
+								},
+							);
+						}
+						ui.separator();
+
+						if let Some(selection) = self
+							.selected_op
+							.and_then(|selected_op| section.ops.get_mut(selected_op))
+						{
+							match selection {
+								Op::Insert { pos, char } => {}
+								Op::Delete { range } => {}
+								Op::Move { range, pos } => {}
+								Op::RegexReplace { regex, replace } => {
+									ui.text_edit_singleline(regex);
+								}
+							}
+						}
 					}
 				}
 
