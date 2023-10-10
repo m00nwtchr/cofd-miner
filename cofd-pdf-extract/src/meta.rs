@@ -1,12 +1,11 @@
 use std::ops::{Range, RangeFrom, RangeInclusive};
 
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
+
+use cofd_schema::book::BookInfo;
 
 use crate::page_kind::PageKind;
-
-fn is_none<T>(v: &Option<T>) -> bool {
-	v.is_none()
-}
 
 fn is_empty<T>(v: &Vec<T>) -> bool {
 	v.is_empty()
@@ -57,12 +56,13 @@ pub enum Op {
 	},
 }
 
+#[skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SectionDefinition {
 	#[serde(default = "unnamed", skip_serializing_if = "is_empty_str")]
 	pub name: String,
 	pub pages: RangeInclusive<usize>,
-	#[serde(default, skip_serializing_if = "is_none")]
+	#[serde(default)]
 	pub range: Option<Span>,
 	pub kind: PageKind,
 	#[serde(default, skip_serializing_if = "is_empty")]
@@ -71,36 +71,8 @@ pub struct SectionDefinition {
 
 #[derive(Serialize, Deserialize)]
 pub struct SourceMeta {
-	#[serde(with = "hex")]
-	pub hash: u64,
-	pub timestamp: u32,
+	pub info: BookInfo,
 	pub sections: Vec<SectionDefinition>,
 }
 
 impl SourceMeta {}
-
-mod hex {
-	use serde::{Deserialize, Serialize};
-
-	pub fn serialize<S>(v: &u64, serializer: S) -> std::result::Result<S::Ok, S::Error>
-	where
-		S: serde::Serializer,
-	{
-		if serializer.is_human_readable() {
-			format!("{v:X}").serialize(serializer)
-		} else {
-			v.serialize(serializer)
-		}
-	}
-	pub fn deserialize<'de, D>(deserializer: D) -> std::result::Result<u64, D::Error>
-	where
-		D: serde::Deserializer<'de>,
-	{
-		if deserializer.is_human_readable() {
-			String::deserialize(deserializer)
-				.and_then(|str| Ok(u64::from_str_radix(&str, 16).unwrap()))
-		} else {
-			u64::deserialize(deserializer)
-		}
-	}
-}

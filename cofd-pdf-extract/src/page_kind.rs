@@ -1,14 +1,22 @@
 use std::collections::HashMap;
 
-use cofd_schema::prelude::DotRange;
 use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+use cofd_schema::item::{Item, ItemProp, PropValue, SubItem};
+use cofd_schema::prelude::DotRange;
+
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub enum PageKind {
-	Merit(Option<String>),
+	Merit(
+		/**
+			* Additional pre-requisites
+			*/
+		Option<String>,
+	),
+	MageSpell,
 }
 
 impl Default for PageKind {
@@ -48,83 +56,6 @@ lazy_static! {
 // 	// Top { children: Vec<Item> },
 // }
 
-fn is_empty<T>(vec: &Vec<T>) -> bool {
-	vec.is_empty()
-}
-
-fn is_empty_map<K, V>(map: &HashMap<K, V>) -> bool {
-	map.is_empty()
-}
-
-#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub enum ItemProp {
-	Description,
-	DotRating,
-	Tags,
-
-	Prerequisites,
-	StyleTags,
-	Cost,
-	DicePool,
-	Action,
-	Duration,
-	Effects,
-	Drawbacks,
-	Notes,
-}
-
-impl ItemProp {
-	fn by_name(str: &str) -> Option<Self> {
-		match str.to_lowercase().as_str() {
-			"prerequisite" | "prerequisites" => Some(Self::Prerequisites),
-			"style tag" | "style tags" => Some(Self::StyleTags),
-			"cost" => Some(Self::Cost),
-			"dice pool" => Some(Self::DicePool),
-			"action" => Some(Self::Action),
-			"duration" => Some(Self::Duration),
-			"effect" | "effects" => Some(Self::Effects),
-			"drawback" | "drawbacks" => Some(Self::Drawbacks),
-			"note" | "notes" => Some(Self::Notes),
-			_ => None,
-		}
-	}
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PropValue {
-	Vec(Vec<String>),
-	Bool(bool),
-	DotRange(DotRange),
-}
-
-impl PropValue {
-	pub fn insert(&mut self, index: usize, element: String) {
-		if let PropValue::Vec(vec) = self {
-			vec.insert(index, element)
-		}
-	}
-}
-
-#[derive(Default, Serialize)]
-pub struct SubItem {
-	name: String,
-	desc: Vec<String>,
-	#[serde(default, skip_serializing_if = "is_empty_map")]
-	props: HashMap<ItemProp, PropValue>,
-}
-
-#[derive(Default, Serialize)]
-pub struct Item {
-	name: String,
-	#[serde(default, skip_serializing_if = "is_empty")]
-	children: Vec<SubItem>,
-	desc: Vec<String>,
-	#[serde(default, skip_serializing_if = "is_empty_map")]
-	props: HashMap<ItemProp, PropValue>,
-}
-
 // TODO: Some edge cases don't get merged properly but works ok overall.
 fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 	let mut out = Vec::new();
@@ -157,18 +88,34 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 	out
 }
 
+fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {
+	let body = span[captures.get(0).unwrap().end()..*str_pos]
+		.split('\n')
+		.filter_map(|str| filter_normalize(str))
+		.collect();
+	*str_pos = captures.get(0).unwrap().start();
+
+	body
+}
+
 impl PageKind {
 	pub fn parse(&self, span: &str) -> Vec<Item> {
-		match self {
-			PageKind::Merit(additional_prereqs) => {
-				let mut out = Vec::new();
+		let mut out = Vec::new();
+		let mut str_pos = span.len();
 
-				let mut children = Vec::new();
-				let mut str_pos = span.len();
+		let mut children: Vec<SubItem> = Vec::new();
 
-				let matches: Vec<_> = MERIT_HEADER_REGEX.captures_iter(&span).collect();
-				for captures in matches.into_iter().rev() {
-					let name = captures.name("name").unwrap().as_str().trim();
+		let matches: Vec<_> = match self {
+			PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(&span).collect(),
+			PageKind::MageSpell => vec![],
+		};
+		for captures in matches.into_iter().rev() {
+			let mut props = HashMap::new();
+
+			let name = captures.name("name").unwrap().as_str().trim();
+
+			let desc = match self {
+				PageKind::Merit(additional_prereqs) => {
 					let name =
 						if name.chars().filter(|f| f.is_uppercase()).count() >= (name.len() / 2) {
 							name.split_whitespace()
@@ -195,13 +142,35 @@ impl PageKind {
 					let ltags = captures.name("ltags").map(|m| m.as_str());
 					let rtags = captures.name("rtags").map(|m| m.as_str());
 
-					let mut props = HashMap::new();
-					let desc = {
-						let body: Vec<String> = span[captures.get(0).unwrap().end()..str_pos]
-							.split('\n')
-							.filter_map(|str| filter_normalize(str))
+					if let Some(tags) = ltags.or(rtags) {
+						props.insert(
+							ItemProp::Tags,
+							PropValue::Vec(tags.split(", ").map(String::from).collect()),
+						);
+					}
+
+					if let Some(cost) = cost {
+						let strs: Vec<&str> = cost
+							.as_str()
+							.split(|c: char| c.is_whitespace() || c.eq(&','))
+							.filter(|str| !str.is_empty() && !str.eq(&"or"))
 							.collect();
-						str_pos = captures.get(0).unwrap().start();
+
+						props.insert(
+							ItemProp::DotRating,
+							PropValue::DotRange(DotRange::from(strs.as_slice())),
+						);
+					}
+
+					if let Some(prereqs) = additional_prereqs {
+						props
+							.entry(ItemProp::Prerequisites)
+							.or_insert(PropValue::Vec(Vec::new()))
+							.insert(0, prereqs.clone());
+					}
+
+					let desc = {
+						let body = get_body(&mut str_pos, span, &captures);
 
 						let mut v: Vec<String> = Vec::new();
 						for el in body.iter().rev() {
@@ -242,43 +211,7 @@ impl PageKind {
 						to_paragraphs(v)
 					};
 
-					if let Some(tags) = ltags.or(rtags) {
-						props.insert(
-							ItemProp::Tags,
-							PropValue::Vec(tags.split(", ").map(String::from).collect()),
-						);
-					}
-
-					if let Some(cost) = cost {
-						let strs: Vec<&str> = cost
-							.as_str()
-							.split(|c: char| c.is_whitespace() || c.eq(&','))
-							.filter(|str| !str.is_empty() && !str.eq(&"or"))
-							.collect();
-
-						props.insert(
-							ItemProp::DotRating,
-							PropValue::DotRange(DotRange::from(strs.as_slice())),
-						);
-					}
-
-					if let Some(prereqs) = additional_prereqs {
-						props
-							.entry(ItemProp::Prerequisites)
-							.or_insert(PropValue::Vec(Vec::new()))
-							.insert(0, prereqs.clone());
-					}
-
-					if !sub {
-						children.reverse();
-						out.push(Item {
-							name: name.to_owned(),
-							desc,
-							children,
-							props,
-						});
-						children = Vec::new();
-					} else {
+					if sub {
 						let mut desc = desc;
 						desc.insert(0, normalize(sub_begin.unwrap().as_str()));
 						children.push(SubItem {
@@ -286,12 +219,27 @@ impl PageKind {
 							desc,
 							props,
 						});
+						continue;
 					}
+
+					desc
 				}
 
-				out
-			}
+				PageKind::MageSpell => {
+					vec![]
+				}
+			};
+
+			children.reverse();
+			out.push(Item {
+				name: name.to_owned(),
+				desc,
+				children,
+				props,
+			});
+			children = Vec::new();
 		}
+		out
 	}
 }
 

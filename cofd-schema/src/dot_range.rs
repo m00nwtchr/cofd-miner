@@ -2,7 +2,7 @@ use std::ops::{RangeFrom, RangeInclusive};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct MyRangeFrom {
 	start: u8,
 }
@@ -12,7 +12,7 @@ impl Into<RangeFrom<u8>> for MyRangeFrom {
 	}
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum DotRange {
 	Num(u8),

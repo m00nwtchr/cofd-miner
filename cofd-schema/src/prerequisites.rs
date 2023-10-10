@@ -1,15 +1,84 @@
-use super::traits::{Attribute, Skill, Template};
+use std::str::FromStr;
 
+use serde::{Deserialize, Serialize};
+
+use crate::{
+	traits::{attribute::Attribute, skill::Skill, SupernaturalTolerance, Template, Trait},
+	DOT_CHAR,
+};
+
+// #[derive(Debug, Serialize, Deserialize)]
+// pub enum NumberPrereq {
+// 	Equal(u8),
+// 	Greater(u8),
+// }
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Prerequisite {
 	Template(Template),
-	Attribute(Attribute),
-	Skill(Skill),
-	Any(PrereqKind),
+	Attribute(Attribute, u8),
+	Skill(Skill, u8),
+	SupernaturalTolerance(SupernaturalTolerance, u8),
+	Trait(Trait, u8),
+	Not(Box<Prerequisite>),
+	Or(Box<Prerequisite>, Box<Prerequisite>),
+	String(String), // Any(PrereqKind),
 }
 
-pub enum PrereqKind {
-	Attribute,
-	Skill,
+impl From<Template> for Prerequisite {
+	fn from(value: Template) -> Self {
+		Prerequisite::Template(value)
+	}
 }
+
+fn parse_val(val: &str) -> Option<u8> {
+	let val = val.trim_end_matches("+");
+	if val.chars().all(|c| c == DOT_CHAR) {
+		Some(val.chars().count() as u8)
+	} else {
+		val.parse().ok()
+	}
+}
+
+impl FromStr for Prerequisite {
+	type Err = strum::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Template::from_str(s).map(Into::into).or_else(|_| {
+			let mut split = s.split_whitespace();
+			let prereq = split.next().unwrap();
+			let val = split.last();
+
+			Attribute::from_str(prereq)
+				.map(|attr| Prerequisite::Attribute(attr, val.and_then(parse_val).unwrap_or(0)))
+				.or_else(|_| {
+					Skill::from_str(prereq).map(|skill| {
+						Prerequisite::Skill(skill, val.and_then(parse_val).unwrap_or(0))
+					})
+				})
+				.or_else(|_| {
+					SupernaturalTolerance::from_str(prereq).map(|st| {
+						Prerequisite::SupernaturalTolerance(
+							st,
+							val.and_then(parse_val).unwrap_or(0),
+						)
+					})
+				})
+				.or_else(|_| {
+					Trait::from_str(prereq).map(|trait_| {
+						Prerequisite::Trait(trait_, val.and_then(parse_val).unwrap_or(0))
+					})
+				})
+				.or_else(|_| Ok(Prerequisite::String(s.to_owned())))
+		})
+	}
+}
+
+// #[derive(Debug, Serialize, Deserialize)]
+// pub enum PrereqKind {
+// 	Template,
+// 	Attribute,
+// 	Skill,
+// }
 
 pub struct Prerequisites {}

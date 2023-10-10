@@ -10,6 +10,7 @@ use cofd_pdf_extract::{
 	meta::{Op, SectionDefinition, SourceMeta, Span},
 	source_file::{extract_pages, make_section},
 };
+use cofd_schema::prelude::BookInfo;
 use eframe::{
 	egui::{self, FontSelection, TextEdit, TextFormat},
 	epaint::{self, Color32, FontId},
@@ -60,13 +61,15 @@ impl MetaEditorApp {
 				Ok((serde_json::de::from_reader(File::open(&path)?)?, path))
 			})
 			.filter_map(|r| r.ok())
-			.find(|(meta, path)| meta.hash.eq(&hash))
+			.find(|(meta, path)| meta.info.hash.eq(&hash))
 			.unwrap_or_else(|| {
 				(
 					SourceMeta {
-						hash,
+						info: BookInfo {
+							hash,
+							publication_date: 0,
+						},
 						sections: Vec::new(),
-						timestamp: 0,
 					},
 					Path::new("meta")
 						.join(path.file_name().unwrap())

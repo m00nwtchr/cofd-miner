@@ -1,6 +1,8 @@
 {
-	"hash": "6545B34A4E989DCA",
-	"timestamp": 1462320000,
+	"info": {
+		"hash": "6545B34A4E989DCA",
+		"publication_date": 1462320000
+	},
 	"sections": [
 		{
 			"name": "Awakened Merits",
@@ -56,6 +58,18 @@
 			"kind": {
 				"Merit": null
 			}
+		},
+		{
+			"name": "Death",
+			"pages": {
+				"start": 128,
+				"end": 134
+			},
+			"range": {
+				"start": 908,
+				"end": 28038
+			},
+			"kind": "MageSpell"
 		}
 	]
 }

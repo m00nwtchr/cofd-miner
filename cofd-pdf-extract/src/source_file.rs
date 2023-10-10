@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::RangeFrom, path::Path};
+use std::{collections::HashMap, ops::RangeFrom, path::Path, str::FromStr};
 
 use anyhow::Result;
 use mupdf::Document;
@@ -6,9 +6,15 @@ use rayon::prelude::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
+use cofd_schema::{
+	book::{Book, BookInfo},
+	item::{Item, ItemProp, PropValue},
+	prerequisites::Prerequisite,
+};
+
 use crate::{
 	meta::{MyRangeFrom, SectionDefinition, SourceMeta},
-	page_kind::{Item, PageKind},
+	page_kind::PageKind,
 };
 
 pub fn extract_pages(path: &impl AsRef<Path>) -> Result<HashMap<usize, String>> {
@@ -109,7 +115,10 @@ pub fn extract_text(path: &impl AsRef<Path>, source_meta: &SourceMeta) -> Result
 		.map(|section| make_section(&pages, section, false))
 		.collect();
 
-	Ok(PdfExtract { sections })
+	Ok(PdfExtract {
+		info: source_meta.info,
+		sections,
+	})
 }
 
 // Stage 2
@@ -128,15 +137,70 @@ impl Section {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PdfExtract {
+	info: BookInfo,
 	sections: Vec<Section>,
 	// errors: Vec<Error>,
 }
 
+// #[serde_as]
+// #[derive(Serialize)]
+// pub struct PdfParse {
+// 	info: BookInfo,
+// 	merits: Vec<Item>,
+// }
+
+fn convert_properties(properties: &mut HashMap<ItemProp, PropValue>) {
+	for (prop, value) in properties {
+		match prop {
+			ItemProp::Prerequisites => {
+				if let PropValue::Vec(vec) = value {
+					let mut prereqs = Vec::new();
+
+					for str in vec {
+						if let Ok(prereq) = Prerequisite::from_str(str) {
+							prereqs.push(prereq);
+						}
+					}
+
+					if !prereqs.is_empty() {
+						*value = PropValue::Prerequisites(prereqs);
+					}
+				}
+			}
+			// ItemProp::DicePool => todo!(),
+			_ => {}
+		}
+	}
+}
+
 impl PdfExtract {
-	pub fn parse(&self) -> Vec<Item> {
-		self.sections
+	pub fn parse(self) -> Book {
+		let mut parse = Book {
+			info: self.info,
+			merits: Default::default(),
+			mage_spells: Default::default(),
+		};
+
+		let sections: Vec<(PageKind, Vec<Item>)> = self
+			.sections
 			.par_iter()
-			.flat_map(|span| span.parse())
-			.collect()
+			.map(|span| (span.kind.clone(), span.parse()))
+			.map(|(kind, mut parsed)| {
+				parsed
+					.par_iter_mut()
+					.for_each(|item| convert_properties(&mut item.props));
+
+				(kind, parsed)
+			})
+			.collect();
+
+		for (kind, vec) in sections {
+			match kind {
+				PageKind::Merit(_) => parse.merits.extend(vec),
+				PageKind::MageSpell => parse.mage_spells.extend(vec),
+			}
+		}
+
+		parse
 	}
 }

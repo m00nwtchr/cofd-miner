@@ -11,7 +11,7 @@ path = "src/bin/meta_editor.rs"
 required-features = ["meta_editor"]
 
 [features]
-default = ["meta_editor"]
+# default = ["meta_editor"]
 meta_editor = ["dep:eframe", "dep:egui_extras"]
 
 [dependencies]
@@ -32,6 +32,7 @@ walkdir = "2"
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_with = "3.3"
 
 anyhow = "1"
 thiserror = "1"

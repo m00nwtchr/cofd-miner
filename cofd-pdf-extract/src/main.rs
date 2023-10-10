@@ -23,7 +23,7 @@ use source_file::{extract_text, PdfExtract};
 
 fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 	let mut ser = serde_json::Serializer::with_formatter(
-		File::create(path).unwrap(),
+		File::create(path)?,
 		PrettyFormatter::with_indent(b"\t"),
 	);
 	Ok(value.serialize(&mut ser)?)
@@ -85,6 +85,12 @@ fn main() -> anyhow::Result<()> {
 	let source_file_defs = load_defs()?;
 
 	let out_path = Path::new("./out");
+	let extract_path = out_path.join("extract");
+
+	if !extract_path.exists() {
+		std::fs::create_dir_all(&extract_path)?;
+	}
+
 	let paths: Vec<PathBuf> = WalkDir::new("pdf")
 		.into_iter()
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
@@ -110,7 +116,7 @@ fn main() -> anyhow::Result<()> {
 		.filter_map(|(path, hash)| {
 			let o = source_file_defs
 				.par_iter()
-				.find_any(|def| def.hash.eq(&hash));
+				.find_any(|def| def.info.hash.eq(&hash));
 			if o.is_none() {
 				debug!("Unknown file: {}, Hash: {hash:X}", path.display());
 			}
@@ -118,7 +124,7 @@ fn main() -> anyhow::Result<()> {
 			o.map(|def| (path, def))
 		})
 		.map(|(path, source_def)| -> Result<(PathBuf, PdfExtract)> {
-			let json_path = out_path
+			let json_path = extract_path
 				.join(path.file_name().unwrap())
 				.with_extension("json");
 
@@ -132,15 +138,19 @@ fn main() -> anyhow::Result<()> {
 				pdf_extract
 			};
 
-			Ok((json_path, pdf_extract))
+			Ok((path, pdf_extract))
 		})
 		.filter_map(|f| f.ok())
-		.for_each(|(json_path, p)| {
+		.for_each(|(path, p)| {
+			let json_path = out_path
+				.join(path.file_name().unwrap())
+				.with_extension("json");
+
 			// println!("{p:?}");
 			let vecs = p.parse();
 			// println!("{vecs:?}");
 
-			to_path_pretty(json_path.with_extension("stage2.json"), &vecs).unwrap();
+			to_path_pretty(json_path, &vecs).unwrap();
 		});
 
 	serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;

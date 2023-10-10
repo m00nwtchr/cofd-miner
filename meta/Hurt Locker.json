@@ -1,6 +1,8 @@
 {
-	"hash": "A76966C7A997D8A4",
-	"timestamp": 0,
+	"info": {
+		"hash": "A76966C7A997D8A4",
+		"publication_date": 0
+	},
 	"sections": [
 		{
 			"name": "General Merits",
@@ -25,6 +27,18 @@
 					"type": "RegexReplace",
 					"regex": "\\n\\d{2}\\s+New General Merits",
 					"replace": ""
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 5843,
+						"end": 5846
+					}
+				},
+				{
+					"type": "Insert",
+					"pos": 5843,
+					"char": ","
 				}
 			]
 		},
@@ -53,6 +67,13 @@
 					"type": "RegexReplace",
 					"regex": "\\n\\d{2}\\s+(chapter two-instruments of violence|Fighting Merits)",
 					"replace": ""
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 44798,
+						"end": 45759
+					}
 				}
 			]
 		},
