@@ -157,7 +157,7 @@ fn convert_properties(
 	item_or_properties: &mut Either<&mut Item, &mut HashMap<ItemProp, PropValue>>,
 ) {
 	for (prop, value) in match item_or_properties {
-		Either::Left(item) => &mut item.props,
+		Either::Left(item) => &mut item.properties,
 		Either::Right(properties) => properties,
 	} {
 		match prop {

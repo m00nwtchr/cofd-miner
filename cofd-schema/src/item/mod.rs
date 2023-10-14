@@ -62,7 +62,7 @@ pub struct Item {
 	pub name: String,
 	#[serde(default, skip_serializing_if = "crate::is_empty")]
 	pub children: Vec<SubItem>,
-	pub desc: Vec<String>,
+	pub description: Vec<String>,
 	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
-	pub props: HashMap<ItemProp, PropValue>,
+	pub properties: HashMap<ItemProp, PropValue>,
 }

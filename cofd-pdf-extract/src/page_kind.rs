@@ -242,9 +242,9 @@ impl PageKind {
 			children.reverse();
 			out.push(Item {
 				name: name.to_owned(),
-				desc: to_paragraphs(desc),
+				description: to_paragraphs(desc),
 				children,
-				props,
+				properties: props,
 			});
 			children = Vec::new();
 		}
