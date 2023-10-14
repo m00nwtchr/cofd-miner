@@ -182,7 +182,7 @@ fn convert_properties(
 	}
 	if let Either::Left(item) = item_or_properties {
 		for child in &mut item.children {
-			convert_properties(&mut Either::Right(&mut child.props));
+			convert_properties(&mut Either::Right(&mut child.properties));
 		}
 	}
 }

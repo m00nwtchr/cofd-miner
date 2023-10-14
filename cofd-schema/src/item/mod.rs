@@ -52,9 +52,9 @@ impl PropValue {
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct SubItem {
 	pub name: String,
-	pub desc: Vec<String>,
+	pub description: Vec<String>,
 	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
-	pub props: HashMap<ItemProp, PropValue>,
+	pub properties: HashMap<ItemProp, PropValue>,
 }
 
 #[derive(Default, Debug, Serialize, Deserialize)]

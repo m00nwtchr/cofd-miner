@@ -62,10 +62,6 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 
 	let mut flag = false;
 	for line in vec {
-		if line.contains("him-") {
-			println!("{:?}", v);
-		}
-
 		if !paragraph.is_empty() && !flag {
 			paragraph.push(' ');
 		} else if flag {
@@ -229,8 +225,8 @@ impl PageKind {
 
 						children.push(SubItem {
 							name: name.to_owned(),
-							desc: to_paragraphs(desc),
-							props,
+							description: to_paragraphs(desc),
+							properties: props,
 						});
 						continue;
 					}
