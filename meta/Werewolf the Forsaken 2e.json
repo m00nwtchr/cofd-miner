@@ -1,7 +1,7 @@
 {
 	"info": {
 		"hash": "3B3E7EBAEFF94CDB",
-		"publication_date": 0
+		"publication_date": "2015-03-04"
 	},
 	"sections": [
 		{
@@ -22,6 +22,13 @@
 					"type": "RegexReplace",
 					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
 					"replace": ""
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 4234,
+						"end": 4234
+					}
 				}
 			]
 		},
@@ -43,6 +50,20 @@
 					"type": "RegexReplace",
 					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
 					"replace": ""
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 794,
+						"end": 794
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 7570,
+						"end": 7571
+					}
 				}
 			]
 		},

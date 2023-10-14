@@ -39,6 +39,10 @@ pub enum Span {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Op {
+	Replace {
+		range: RangeInclusive<usize>,
+		replace: String,
+	},
 	Insert {
 		pos: usize,
 		char: char,

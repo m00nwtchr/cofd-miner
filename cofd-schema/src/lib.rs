@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 pub mod book;
+pub mod dice_pool;
 pub mod dot_range;
 pub mod item;
 pub mod prerequisites;

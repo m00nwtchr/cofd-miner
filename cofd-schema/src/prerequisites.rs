@@ -18,10 +18,11 @@ pub enum Prerequisite {
 	Template(Template),
 	Attribute(Attribute, u8),
 	Skill(Skill, u8),
-	SupernaturalTolerance(SupernaturalTolerance, u8),
 	Trait(Trait, u8),
+	SupernaturalTolerance(SupernaturalTolerance, u8),
+	Or(Vec<Prerequisite>),
 	Not(Box<Prerequisite>),
-	Or(Box<Prerequisite>, Box<Prerequisite>),
+	Unknown(String, u8),
 	String(String), // Any(PrereqKind),
 }
 
@@ -45,31 +46,30 @@ impl FromStr for Prerequisite {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		Template::from_str(s).map(Into::into).or_else(|_| {
-			let mut split = s.split_whitespace();
-			let prereq = split.next().unwrap();
-			let val = split.last();
-
-			Attribute::from_str(prereq)
-				.map(|attr| Prerequisite::Attribute(attr, val.and_then(parse_val).unwrap_or(0)))
-				.or_else(|_| {
-					Skill::from_str(prereq).map(|skill| {
-						Prerequisite::Skill(skill, val.and_then(parse_val).unwrap_or(0))
+			if let Some((prereq, dots)) = s.rsplit_once(' ') {
+				Attribute::from_str(prereq)
+					.map(|attr| Prerequisite::Attribute(attr, parse_val(dots).unwrap_or(0)))
+					.or_else(|_| {
+						Skill::from_str(prereq)
+							.map(|skill| Prerequisite::Skill(skill, parse_val(dots).unwrap_or(0)))
 					})
-				})
-				.or_else(|_| {
-					SupernaturalTolerance::from_str(prereq).map(|st| {
-						Prerequisite::SupernaturalTolerance(
-							st,
-							val.and_then(parse_val).unwrap_or(0),
-						)
+					.or_else(|_| {
+						SupernaturalTolerance::from_str(prereq).map(|st| {
+							Prerequisite::SupernaturalTolerance(st, parse_val(dots).unwrap_or(0))
+						})
 					})
-				})
-				.or_else(|_| {
-					Trait::from_str(prereq).map(|trait_| {
-						Prerequisite::Trait(trait_, val.and_then(parse_val).unwrap_or(0))
+					.or_else(|_| {
+						Trait::from_str(prereq)
+							.map(|trait_| Prerequisite::Trait(trait_, parse_val(dots).unwrap_or(0)))
 					})
-				})
-				.or_else(|_| Ok(Prerequisite::String(s.to_owned())))
+					.or_else(|_| {
+						Ok(parse_val(dots)
+							.map(|d| Prerequisite::Unknown(prereq.to_owned(), d))
+							.unwrap_or_else(|| Prerequisite::String(s.to_owned())))
+					})
+			} else {
+				Ok(Prerequisite::String(s.to_owned()))
+			}
 		})
 	}
 }

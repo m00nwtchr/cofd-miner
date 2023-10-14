@@ -5,7 +5,7 @@ use std::{
 	sync::RwLock,
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,7 @@ struct Cache {
 }
 
 fn load_defs() -> Result<Vec<SourceMeta>> {
-	Ok(fs::read_dir("meta")?
+	fs::read_dir("meta")?
 		.into_iter()
 		.filter_map(|entry| entry.ok().map(|e| e.path()))
 		.filter(|path| {
@@ -43,13 +43,14 @@ fn load_defs() -> Result<Vec<SourceMeta>> {
 				.and_then(|ext| Some(ext.eq("json")))
 				.unwrap_or(false)
 		})
-		.map(|path| -> Result<SourceMeta> {
-			let meta = serde_json::de::from_reader(File::open(&path)?)?;
-			// serde_json::ser::to_writer_pretty(File::create(&path)?, &j)?;
-			Ok(meta)
+		.map(|path| {
+			let meta = File::open(&path)
+				.map_err(|err| anyhow!(err))
+				.and_then(|file| serde_json::de::from_reader(file).map_err(|err| anyhow!(err)));
+			(path, meta)
 		})
-		.filter_map(|r| r.ok())
-		.collect())
+		.map(|(path, res)| res.map_err(|err| anyhow!("{}: {}", path.display(), err)))
+		.collect()
 }
 
 fn is_hidden(entry: &DirEntry) -> bool {

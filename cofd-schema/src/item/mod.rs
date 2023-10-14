@@ -1,44 +1,35 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use strum::EnumString;
 
 use crate::{dot_range::DotRange, prerequisites::Prerequisite};
 
 pub mod merit;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Hash, PartialEq, Eq, EnumString)]
+#[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemProp {
 	Description,
 	DotRating,
 	Tags,
 
+	#[strum(serialize = "Prerequisites", serialize = "Prerequisite")]
 	Prerequisites,
+	#[strum(to_string = "Style Tags", serialize = "Style Tag")]
 	StyleTags,
 	Cost,
+	#[strum(to_string = "Dice Pool")]
 	DicePool,
 	Action,
 	Duration,
+	#[strum(serialize = "Effects", serialize = "Effect")]
 	Effects,
+	#[strum(serialize = "Drawbacks", serialize = "Drawback")]
 	Drawbacks,
+	#[strum(serialize = "Notes", serialize = "Note")]
 	Notes,
-}
-
-impl ItemProp {
-	pub fn by_name(str: &str) -> Option<Self> {
-		match str.to_lowercase().as_str() {
-			"prerequisite" | "prerequisites" => Some(Self::Prerequisites),
-			"style tag" | "style tags" => Some(Self::StyleTags),
-			"cost" => Some(Self::Cost),
-			"dice pool" => Some(Self::DicePool),
-			"action" => Some(Self::Action),
-			"duration" => Some(Self::Duration),
-			"effect" | "effects" => Some(Self::Effects),
-			"drawback" | "drawbacks" => Some(Self::Drawbacks),
-			"note" | "notes" => Some(Self::Notes),
-			_ => None,
-		}
-	}
 }
 
 #[derive(Debug, Serialize, Deserialize)]

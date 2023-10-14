@@ -1,9 +1,9 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
+use strum::{AsRefStr, Display, EnumIs, EnumString};
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalSkill {
 	Academics,
@@ -14,9 +14,12 @@ pub enum MentalSkill {
 	Occult,
 	Politics,
 	Science,
+
+	// DE Skills
+	Enigmas,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum PhysicalSkill {
 	Athletics,
@@ -27,9 +30,13 @@ pub enum PhysicalSkill {
 	Stealth,
 	Survival,
 	Weaponry,
+
+	// DE Skills
+	Archery,
+	Riding,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum SocialSkill {
 	AnimalKen,
@@ -42,7 +49,8 @@ pub enum SocialSkill {
 	Subterfuge,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, EnumIs)]
+#[serde(untagged)]
 pub enum Skill {
 	Mental(MentalSkill),
 	Physical(PhysicalSkill),
@@ -57,6 +65,22 @@ impl FromStr for Skill {
 			.map(Into::into)
 			.or_else(|_| PhysicalSkill::from_str(s).map(Into::into))
 			.or_else(|_| SocialSkill::from_str(s).map(Into::into))
+	}
+}
+
+impl Display for Skill {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.as_ref())
+	}
+}
+
+impl AsRef<str> for Skill {
+	fn as_ref(&self) -> &str {
+		match self {
+			Skill::Mental(s) => s.as_ref(),
+			Skill::Physical(s) => s.as_ref(),
+			Skill::Social(s) => s.as_ref(),
+		}
 	}
 }
 

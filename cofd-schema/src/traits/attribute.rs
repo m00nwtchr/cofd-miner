@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
+use strum::{AsRefStr, Display, EnumIs, EnumString};
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalAttribute {
 	Intelligence,
@@ -11,7 +11,7 @@ pub enum MentalAttribute {
 	Resolve,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum PhysicalAttribute {
 	Strength,
@@ -19,7 +19,7 @@ pub enum PhysicalAttribute {
 	Stamina,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum SocialAttribute {
 	Presence,
@@ -27,11 +27,28 @@ pub enum SocialAttribute {
 	Composure,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, EnumIs)]
+#[serde(untagged)]
 pub enum Attribute {
 	Mental(MentalAttribute),
 	Physical(PhysicalAttribute),
 	Social(SocialAttribute),
+}
+
+impl std::fmt::Display for Attribute {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.as_ref())
+	}
+}
+
+impl AsRef<str> for Attribute {
+	fn as_ref(&self) -> &str {
+		match self {
+			Self::Mental(attr) => attr.as_ref(),
+			Self::Physical(attr) => attr.as_ref(),
+			Self::Social(attr) => attr.as_ref(),
+		}
+	}
 }
 
 impl FromStr for Attribute {

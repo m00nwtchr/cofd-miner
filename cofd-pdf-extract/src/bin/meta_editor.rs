@@ -67,7 +67,7 @@ impl MetaEditorApp {
 					SourceMeta {
 						info: BookInfo {
 							hash,
-							publication_date: 0,
+							..Default::default()
 						},
 						sections: Vec::new(),
 					},
@@ -214,6 +214,7 @@ impl eframe::App for MetaEditorApp {
 									Op::Delete { .. } => "Delete",
 									Op::Move { .. } => "Move",
 									Op::RegexReplace { .. } => "RegexReplace",
+									Op::Replace { .. } => "Replace",
 								},
 							);
 						}
@@ -229,6 +230,9 @@ impl eframe::App for MetaEditorApp {
 								Op::Move { range, pos } => {}
 								Op::RegexReplace { regex, replace } => {
 									ui.text_edit_singleline(regex);
+								}
+								Op::Replace { range, replace } => {
+									ui.text_edit_singleline(replace);
 								}
 							}
 						}
@@ -312,6 +316,19 @@ impl eframe::App for MetaEditorApp {
 									let range = range.start..=(range.end - 1);
 
 									section_def.ops.push(Op::Delete { range })
+								}
+
+								ui.close_menu();
+							}
+
+							if ui.button("Replace").clicked() {
+								if let Some(range) = &self.last_range {
+									let range = range.start..=(range.end - 1);
+
+									section_def.ops.push(Op::Replace {
+										range,
+										replace: String::new(),
+									})
 								}
 
 								ui.close_menu();

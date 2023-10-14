@@ -1,7 +1,7 @@
 {
 	"info": {
 		"hash": "5035D593CD90296C",
-		"publication_date": 0
+		"publication_date": "2019-06-19"
 	},
 	"sections": [
 		{
@@ -16,7 +16,16 @@
 			},
 			"kind": {
 				"Merit": "Awakened"
-			}
+			},
+			"ops": [
+				{
+					"type": "Delete",
+					"range": {
+						"start": 250,
+						"end": 256
+					}
+				}
+			]
 		},
 		{
 			"name": "High Speech Merits",
@@ -30,7 +39,44 @@
 			},
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "Delete",
+					"range": {
+						"start": 1928,
+						"end": 1928
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 1836,
+						"end": 1842
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 2262,
+						"end": 2268
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 1061,
+						"end": 1067
+					}
+				},
+				{
+					"type": "Delete",
+					"range": {
+						"start": 105,
+						"end": 105
+					}
+				}
+			]
 		},
 		{
 			"name": "Supernal Taxonomy",

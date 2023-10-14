@@ -1,7 +1,7 @@
 {
 	"info": {
 		"hash": "A76966C7A997D8A4",
-		"publication_date": 0
+		"publication_date": "2016-12-07"
 	},
 	"sections": [
 		{
@@ -67,13 +67,6 @@
 					"type": "RegexReplace",
 					"regex": "\\n\\d{2}\\s+(chapter two-instruments of violence|Fighting Merits)",
 					"replace": ""
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 44798,
-						"end": 45759
-					}
 				}
 			]
 		},

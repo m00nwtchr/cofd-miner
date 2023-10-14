@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
+use strum::{AsRefStr, Display, EnumString};
 
 pub mod attribute;
 pub mod skill;
@@ -7,9 +7,10 @@ pub mod skill;
 #[derive(Debug, Serialize, Deserialize, EnumString)]
 #[strum(ascii_case_insensitive)]
 pub enum Template {
-	#[strum(serialize = "Mage", serialize = "Awakened")]
+	Mortal,
+	#[strum(to_string = "Mage", serialize = "Awakened")]
 	Mage,
-	#[strum(serialize = "Vampire", serialize = "Kindred")]
+	#[strum(to_string = "Vampire", serialize = "Kindred")]
 	Vampire,
 	Werewolf,
 	Promethean,
@@ -58,8 +59,44 @@ pub enum SupernaturalTolerance {
 
 #[derive(Debug, Serialize, Deserialize, EnumString)]
 #[strum(ascii_case_insensitive)]
+pub enum Fuel {
+	Mana,
+	Vitae,
+	Essence,
+	Pyros,
+	Glamour,
+	Plasm,
+	Pillar,
+	Aether,
+	// Satiety,
+}
+
+#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[strum(ascii_case_insensitive)]
+pub enum Integrity {
+	Integrity,
+	Wisdom,
+	Humanity,
+	Harmony,
+	Pilgrimage,
+	Clarity,
+	Memory,
+	Cover,
+	Satiety,
+	Instability,
+}
+
+#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[strum(ascii_case_insensitive)]
 pub enum Trait {
+	Speed,
+	Defense,
+	Initative,
+	Perception,
+	Health,
 	Willpower,
-	// Attribute(Attribute),
-	// Skill(Skill),
+
+	Beats,
+
+	Size,
 }

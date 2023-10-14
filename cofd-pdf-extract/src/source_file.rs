@@ -1,6 +1,7 @@
 use std::{collections::HashMap, ops::RangeFrom, path::Path, str::FromStr};
 
 use anyhow::Result;
+use either::Either;
 use mupdf::Document;
 use rayon::prelude::*;
 use regex::Regex;
@@ -64,6 +65,9 @@ pub fn make_section(
 	if !flag {
 		for op in &section.ops {
 			match op {
+				crate::meta::Op::Replace { range, replace } => {
+					extract.replace_range(range.clone(), &replace);
+				}
 				crate::meta::Op::Insert { pos, char } => {
 					extract.insert(*pos, *char);
 				}
@@ -149,8 +153,13 @@ pub struct PdfExtract {
 // 	merits: Vec<Item>,
 // }
 
-fn convert_properties(properties: &mut HashMap<ItemProp, PropValue>) {
-	for (prop, value) in properties {
+fn convert_properties(
+	item_or_properties: &mut Either<&mut Item, &mut HashMap<ItemProp, PropValue>>,
+) {
+	for (prop, value) in match item_or_properties {
+		Either::Left(item) => &mut item.props,
+		Either::Right(properties) => properties,
+	} {
 		match prop {
 			ItemProp::Prerequisites => {
 				if let PropValue::Vec(vec) = value {
@@ -171,6 +180,11 @@ fn convert_properties(properties: &mut HashMap<ItemProp, PropValue>) {
 			_ => {}
 		}
 	}
+	if let Either::Left(item) = item_or_properties {
+		for child in &mut item.children {
+			convert_properties(&mut Either::Right(&mut child.props));
+		}
+	}
 }
 
 impl PdfExtract {
@@ -188,7 +202,7 @@ impl PdfExtract {
 			.map(|(kind, mut parsed)| {
 				parsed
 					.par_iter_mut()
-					.for_each(|item| convert_properties(&mut item.props));
+					.for_each(|item| convert_properties(&mut Either::Left(item)));
 
 				(kind, parsed)
 			})
