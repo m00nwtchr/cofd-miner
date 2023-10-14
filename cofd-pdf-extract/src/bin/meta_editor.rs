@@ -1,5 +1,5 @@
 use std::{
-	collections::HashMap,
+	collections::{BTreeMap, HashMap},
 	fs::{self, File},
 	ops::Range,
 	path::{Path, PathBuf},
@@ -30,7 +30,7 @@ fn main() -> eframe::Result<()> {
 struct MetaEditorApp {
 	meta: SourceMeta,
 	meta_path: PathBuf,
-	pages: HashMap<usize, String>,
+	pages: BTreeMap<usize, String>,
 	path: PathBuf,
 
 	selected_section: Option<usize>,

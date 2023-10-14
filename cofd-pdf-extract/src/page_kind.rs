@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use convert_case::{Case, Casing};
@@ -58,8 +58,6 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 	let mut out = Vec::new();
 	let mut paragraph = String::new();
 
-	let v = vec.clone();
-
 	let mut flag = false;
 	for line in vec {
 		if !paragraph.is_empty() && !flag {
@@ -112,7 +110,7 @@ impl PageKind {
 			PageKind::MageSpell => vec![],
 		};
 		for captures in matches.into_iter().rev() {
-			let mut props = HashMap::new();
+			let mut props = BTreeMap::new();
 
 			let name = normalize(captures.name("name").unwrap().as_str());
 			let name = if name.chars().all(|f| f.is_uppercase() || !f.is_alphabetic()) {

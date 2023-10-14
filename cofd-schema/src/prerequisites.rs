@@ -14,6 +14,7 @@ use crate::{
 // }
 
 #[derive(Debug, Serialize, Deserialize)]
+// #[serde(untagged)]
 pub enum Prerequisite {
 	Template(Template),
 	Attribute(Attribute, u8),
@@ -23,6 +24,7 @@ pub enum Prerequisite {
 	Or(Vec<Prerequisite>),
 	Not(Box<Prerequisite>),
 	Unknown(String, u8),
+	#[serde(untagged)]
 	String(String), // Any(PrereqKind),
 }
 

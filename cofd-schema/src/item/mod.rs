@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
@@ -7,7 +7,9 @@ use crate::{dot_range::DotRange, prerequisites::Prerequisite};
 
 pub mod merit;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Hash, PartialEq, Eq, EnumString)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString,
+)]
 #[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemProp {
@@ -54,7 +56,7 @@ pub struct SubItem {
 	pub name: String,
 	pub description: Vec<String>,
 	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
-	pub properties: HashMap<ItemProp, PropValue>,
+	pub properties: BTreeMap<ItemProp, PropValue>,
 }
 
 #[derive(Default, Debug, Serialize, Deserialize)]
@@ -64,5 +66,5 @@ pub struct Item {
 	pub children: Vec<SubItem>,
 	pub description: Vec<String>,
 	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
-	pub properties: HashMap<ItemProp, PropValue>,
+	pub properties: BTreeMap<ItemProp, PropValue>,
 }

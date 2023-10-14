@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::RangeFrom, path::Path, str::FromStr};
+use std::{collections::BTreeMap, ops::RangeFrom, path::Path, str::FromStr};
 
 use anyhow::Result;
 use either::Either;
@@ -18,7 +18,7 @@ use crate::{
 	page_kind::PageKind,
 };
 
-pub fn extract_pages(path: &impl AsRef<Path>) -> Result<HashMap<usize, String>> {
+pub fn extract_pages(path: &impl AsRef<Path>) -> Result<BTreeMap<usize, String>> {
 	let document = Document::open(path.as_ref().to_str().unwrap())?;
 
 	let pages = document
@@ -32,14 +32,17 @@ pub fn extract_pages(path: &impl AsRef<Path>) -> Result<HashMap<usize, String>> 
 }
 
 pub fn make_section(
-	pages: &HashMap<usize, String>,
+	pages: &BTreeMap<usize, String>,
 	section: &SectionDefinition,
 	flag: bool,
 ) -> Section {
-	let vec: Vec<String> = (section.pages.clone())
-		.into_par_iter()
-		.filter_map(|i| pages.get(&i))
-		.flat_map(|page| {
+	// (section.pages.clone())
+	// 	.into_par_iter()
+	// 	.filter_map(|i| pages.get(&i))
+	let vec: Vec<String> = pages
+		.range(section.pages.clone())
+		.par_bridge()
+		.flat_map(|(_, page)| {
 			page.split("\n")
 				.filter(|line| !line.is_empty())
 				.collect::<Vec<_>>()
@@ -154,7 +157,7 @@ pub struct PdfExtract {
 // }
 
 fn convert_properties(
-	item_or_properties: &mut Either<&mut Item, &mut HashMap<ItemProp, PropValue>>,
+	item_or_properties: &mut Either<&mut Item, &mut BTreeMap<ItemProp, PropValue>>,
 ) {
 	for (prop, value) in match item_or_properties {
 		Either::Left(item) => &mut item.properties,
@@ -214,6 +217,8 @@ impl PdfExtract {
 				PageKind::MageSpell => parse.mage_spells.extend(vec),
 			}
 		}
+		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));
+		parse.mage_spells.sort_by(|a, b| a.name.cmp(&b.name));
 
 		parse
 	}

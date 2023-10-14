@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub mod book;
 pub mod dice_pool;
@@ -10,7 +10,7 @@ pub mod traits;
 pub mod prelude {
 	pub use super::book::BookInfo;
 	pub use super::dot_range::DotRange;
-	pub use super::item::merit::{Merit, MeritFeature};
+	// pub use super::item::merit::{Merit, MeritFeature};
 	pub use super::traits::attribute::{
 		Attribute, MentalAttribute, PhysicalAttribute, SocialAttribute,
 	};
@@ -19,7 +19,7 @@ pub mod prelude {
 
 pub static DOT_CHAR: char = '•';
 
-pub(crate) fn is_empty_map<K, V>(map: &HashMap<K, V>) -> bool {
+pub(crate) fn is_empty_map<K, V>(map: &BTreeMap<K, V>) -> bool {
 	map.is_empty()
 }
 
