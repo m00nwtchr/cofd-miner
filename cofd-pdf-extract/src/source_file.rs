@@ -36,17 +36,9 @@ pub fn make_section(
 	section: &SectionDefinition,
 	flag: bool,
 ) -> Section {
-	// (section.pages.clone())
-	// 	.into_par_iter()
-	// 	.filter_map(|i| pages.get(&i))
 	let vec: Vec<String> = pages
 		.range(section.pages.clone())
-		.par_bridge()
-		.flat_map(|(_, page)| {
-			page.split("\n")
-				.filter(|line| !line.is_empty())
-				.collect::<Vec<_>>()
-		})
+		.flat_map(|(_, page)| page.split("\n").filter(|line| !line.is_empty()))
 		.map(str::to_owned)
 		.collect();
 
