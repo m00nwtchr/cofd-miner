@@ -35,7 +35,7 @@ impl From<Template> for Prerequisite {
 }
 
 fn parse_val(val: &str) -> Option<u8> {
-	let val = val.trim_end_matches("+");
+	let val = val.trim_end_matches('+');
 	if val.chars().all(|c| c == DOT_CHAR) {
 		Some(val.chars().count() as u8)
 	} else {

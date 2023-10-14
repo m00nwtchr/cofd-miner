@@ -36,13 +36,9 @@ struct Cache {
 
 fn load_defs() -> Result<Vec<SourceMeta>> {
 	fs::read_dir("meta")?
-		.into_iter()
+		.par_bridge()
 		.filter_map(|entry| entry.ok().map(|e| e.path()))
-		.filter(|path| {
-			path.extension()
-				.and_then(|ext| Some(ext.eq("json")))
-				.unwrap_or(false)
-		})
+		.filter(|path| path.extension().map(|ext| ext.eq("json")).unwrap_or(false))
 		.map(|path| {
 			let meta = File::open(&path)
 				.map_err(|err| anyhow!(err))
@@ -57,7 +53,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
 	entry
 		.file_name()
 		.to_str()
-		.map(|s| s.starts_with("."))
+		.map(|s| s.starts_with('.'))
 		.unwrap_or(false)
 }
 

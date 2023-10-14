@@ -36,8 +36,7 @@ mod hex {
 		D: serde::Deserializer<'de>,
 	{
 		if deserializer.is_human_readable() {
-			String::deserialize(deserializer)
-				.and_then(|str| Ok(u64::from_str_radix(&str, 16).unwrap()))
+			String::deserialize(deserializer).map(|str| u64::from_str_radix(&str, 16).unwrap())
 		} else {
 			u64::deserialize(deserializer)
 		}

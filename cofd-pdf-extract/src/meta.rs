@@ -23,9 +23,9 @@ fn unnamed() -> String {
 pub struct MyRangeFrom {
 	pub start: usize,
 }
-impl Into<RangeFrom<usize>> for MyRangeFrom {
-	fn into(self) -> RangeFrom<usize> {
-		self.start..
+impl From<MyRangeFrom> for RangeFrom<usize> {
+	fn from(val: MyRangeFrom) -> Self {
+		val.start..
 	}
 }
 

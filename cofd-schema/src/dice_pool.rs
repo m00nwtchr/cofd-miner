@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
 use std::convert::AsRef;
-use std::string::ToString;
 use std::{
-	cmp::{max, min},
 	fmt::Display,
 	ops::{Add, Sub},
 };
+
+use serde::{Deserialize, Serialize};
 
 use crate::traits::attribute::Attribute;
 use crate::traits::skill::Skill;

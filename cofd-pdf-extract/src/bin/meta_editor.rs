@@ -50,13 +50,8 @@ impl MetaEditorApp {
 
 		let (meta, meta_path) = fs::read_dir("meta")
 			.unwrap()
-			.into_iter()
 			.filter_map(|entry| entry.ok().map(|e| e.path()))
-			.filter(|path| {
-				path.extension()
-					.and_then(|ext| Some(ext.eq("json")))
-					.unwrap_or(false)
-			})
+			.filter(|path| path.extension().map(|ext| ext.eq("json")).unwrap_or(false))
 			.map(|path| -> anyhow::Result<(SourceMeta, PathBuf)> {
 				Ok((serde_json::de::from_reader(File::open(&path)?)?, path))
 			})
@@ -135,8 +130,9 @@ impl MetaEditorApp {
 					format,
 				});
 
+				#[allow(clippy::single_match)]
 				match range {
-					cofd_pdf_extract::meta::Span::Range(range) => {
+					Span::Range(range) => {
 						let byte_range = range.end..text.len();
 
 						layout_job.sections.push(epaint::text::LayoutSection {
@@ -155,7 +151,7 @@ impl MetaEditorApp {
 }
 
 impl eframe::App for MetaEditorApp {
-	fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+	fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
 		egui::SidePanel::left("sidebar")
 			.resizable(false)
 			.show(ctx, |ui| {
@@ -225,13 +221,13 @@ impl eframe::App for MetaEditorApp {
 							.and_then(|selected_op| section.ops.get_mut(selected_op))
 						{
 							match selection {
-								Op::Insert { pos, char } => {}
-								Op::Delete { range } => {}
-								Op::Move { range, pos } => {}
-								Op::RegexReplace { regex, replace } => {
+								Op::Insert { pos: _, char: _ } => {}
+								Op::Delete { range: _ } => {}
+								Op::Move { range: _, pos: _ } => {}
+								Op::RegexReplace { regex, replace: _ } => {
 									ui.text_edit_singleline(regex);
 								}
-								Op::Replace { range, replace } => {
+								Op::Replace { range: _, replace } => {
 									ui.text_edit_singleline(replace);
 								}
 							}
@@ -277,7 +273,7 @@ impl eframe::App for MetaEditorApp {
 								text,
 								font_id.clone(),
 								wrap_width,
-								&section_def,
+								section_def,
 							);
 							layout_job.wrap.max_width = wrap_width;
 							ui.fonts(|f| f.layout_job(layout_job))

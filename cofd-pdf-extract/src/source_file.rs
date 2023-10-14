@@ -38,7 +38,7 @@ pub fn make_section(
 ) -> Section {
 	let vec: Vec<String> = pages
 		.range(section.pages.clone())
-		.flat_map(|(_, page)| page.split("\n").filter(|line| !line.is_empty()))
+		.flat_map(|(_, page)| page.split('\n').filter(|line| !line.is_empty()))
 		.map(str::to_owned)
 		.collect();
 
@@ -61,7 +61,7 @@ pub fn make_section(
 		for op in &section.ops {
 			match op {
 				crate::meta::Op::Replace { range, replace } => {
-					extract.replace_range(range.clone(), &replace);
+					extract.replace_range(range.clone(), replace);
 				}
 				crate::meta::Op::Insert { pos, char } => {
 					extract.insert(*pos, *char);
@@ -171,7 +171,7 @@ fn convert_properties(
 					}
 				}
 			}
-			// ItemProp::DicePool => todo!(),
+			ItemProp::DicePool => {}
 			_ => {}
 		}
 	}

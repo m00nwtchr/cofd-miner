@@ -1,3 +1,4 @@
+#![allow(clippy::tabs_in_doc_comments)]
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
@@ -13,8 +14,8 @@ use cofd_schema::prelude::DotRange;
 pub enum PageKind {
 	Merit(
 		/**
-			* Additional pre-requisites
-			*/
+		 * Additional pre-requisites
+		 */
 		Option<String>,
 	),
 	MageSpell,
@@ -91,7 +92,7 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {
 	let body = span[captures.get(0).unwrap().end()..*str_pos]
 		.split('\n')
-		.filter_map(|str| filter_normalize(str))
+		.filter_map(filter_normalize)
 		.collect();
 	*str_pos = captures.get(0).unwrap().start();
 
@@ -106,7 +107,7 @@ impl PageKind {
 		let mut children: Vec<SubItem> = Vec::new();
 
 		let matches: Vec<_> = match self {
-			PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(&span).collect(),
+			PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(span).collect(),
 			PageKind::MageSpell => vec![],
 		};
 		for captures in matches.into_iter().rev() {
@@ -254,8 +255,7 @@ fn normalize(str: &str) -> String {
 	str.trim()
 		.replace('\n', " ")
 		.replace("  ", " ")
-		.replace('‘', "'")
-		.replace('’', "'")
+		.replace(['‘', '’'], "'")
 }
 
 fn filter_normalize(str: &str) -> Option<String> {
