@@ -12,14 +12,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::ser::PrettyFormatter;
 use walkdir::{DirEntry, WalkDir};
 
-mod hash;
-mod meta;
-mod page_kind;
-// mod parser;
-mod source_file;
-
-use meta::SourceMeta;
-use source_file::{extract_text, PdfExtract};
+use cofd_pdf_extract::source_file::{extract_text, PdfExtract};
+use cofd_pdf_extract::{hash, meta::SourceMeta};
 
 fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 	let mut ser = serde_json::Serializer::with_formatter(

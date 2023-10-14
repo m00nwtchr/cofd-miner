@@ -3,7 +3,7 @@ name = "cofd-pdf-extract"
 version = "0.1.0"
 edition = "2021"
 publish = false
-default-run = "cofd-pdf-extract"
+default-run = "pdf-extract"
 
 [[bin]]
 name = "meta-editor"
