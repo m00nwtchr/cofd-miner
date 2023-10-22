@@ -3,6 +3,8 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIs, EnumString};
 
+pub(crate) trait AttributeMarker {}
+
 #[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalAttribute {
@@ -34,6 +36,11 @@ pub enum Attribute {
 	Physical(PhysicalAttribute),
 	Social(SocialAttribute),
 }
+
+impl AttributeMarker for MentalAttribute {}
+impl AttributeMarker for PhysicalAttribute {}
+impl AttributeMarker for SocialAttribute {}
+impl AttributeMarker for Attribute {}
 
 impl std::fmt::Display for Attribute {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

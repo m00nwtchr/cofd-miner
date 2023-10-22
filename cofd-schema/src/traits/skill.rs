@@ -3,6 +3,8 @@ use std::{fmt::Display, str::FromStr};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIs, EnumString};
 
+pub(crate) trait SkillMarker {}
+
 #[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalSkill {
@@ -56,6 +58,11 @@ pub enum Skill {
 	Physical(PhysicalSkill),
 	Social(SocialSkill),
 }
+
+impl SkillMarker for MentalSkill {}
+impl SkillMarker for PhysicalSkill {}
+impl SkillMarker for SocialSkill {}
+impl SkillMarker for Skill {}
 
 impl FromStr for Skill {
 	type Err = strum::ParseError;

@@ -3,7 +3,10 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, ParseError};
 
-use self::{attribute::Attribute, skill::Skill};
+use self::{
+	attribute::{Attribute, MentalAttribute, PhysicalAttribute, SocialAttribute},
+	skill::{Skill, SkillMarker},
+};
 
 pub mod attribute;
 pub mod skill;
@@ -116,15 +119,31 @@ pub enum Trait {
 	SupernaturalTolerance(SupernaturalTolerance),
 }
 
+impl From<MentalAttribute> for Trait {
+	fn from(value: MentalAttribute) -> Self {
+		Self::Attribute(value.into())
+	}
+}
+impl From<PhysicalAttribute> for Trait {
+	fn from(value: PhysicalAttribute) -> Self {
+		Self::Attribute(value.into())
+	}
+}
+impl From<SocialAttribute> for Trait {
+	fn from(value: SocialAttribute) -> Self {
+		Self::Attribute(value.into())
+	}
+}
+
 impl From<Attribute> for Trait {
 	fn from(value: Attribute) -> Self {
 		Self::Attribute(value)
 	}
 }
 
-impl From<Skill> for Trait {
-	fn from(value: Skill) -> Self {
-		Self::Skill(value)
+impl<T: Into<Skill> + SkillMarker> From<T> for Trait {
+	fn from(value: T) -> Self {
+		Self::Skill(value.into())
 	}
 }
 

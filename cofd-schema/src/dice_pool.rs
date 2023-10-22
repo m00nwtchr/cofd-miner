@@ -106,40 +106,31 @@ impl<T: Into<DicePool>> Sub<T> for DicePool {
 	}
 }
 
-impl<T: Into<Trait>> From<T> for DicePool {
-	fn from(value: T) -> Self {
-		DicePool::Trait(value.into())
-	}
-}
-
-// impl TryFrom<u8> for DicePool {
-// 	type Error;
-
-// 	fn try_from(value: u8) -> Result<Self, Self::Error> {
-// 		Self::Mod(value.try_into()?);
-// 		todo!()
-// 	}
-// }
-
 impl From<i8> for DicePool {
 	fn from(val: i8) -> Self {
 		Self::Mod(val)
 	}
 }
 
-impl Add for Attribute {
-	type Output = DicePool;
-
-	fn add(self, rhs: Self) -> Self::Output {
-		DicePool::Trait(self.into()) + DicePool::Trait(rhs.into())
+impl<T: Into<Trait>> From<T> for DicePool {
+	fn from(value: T) -> Self {
+		DicePool::Trait(value.into())
 	}
 }
 
-impl Add<Skill> for Attribute {
+impl<T: Into<DicePool>> Add<T> for Attribute {
 	type Output = DicePool;
 
-	fn add(self, rhs: Skill) -> Self::Output {
-		DicePool::Trait(self.into()) + DicePool::Trait(rhs.into())
+	fn add(self, rhs: T) -> Self::Output {
+		DicePool::Trait(self.into()) + rhs.into()
+	}
+}
+
+impl<T: Into<DicePool>> Add<T> for Skill {
+	type Output = DicePool;
+
+	fn add(self, rhs: T) -> Self::Output {
+		DicePool::Trait(self.into()) + rhs.into()
 	}
 }
 
