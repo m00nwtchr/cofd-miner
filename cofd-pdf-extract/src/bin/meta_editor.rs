@@ -5,17 +5,16 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use cofd_pdf_extract::{
-	hash,
-	meta::{Op, SectionMeta, SourceMeta, Span},
-};
-use cofd_schema::prelude::BookInfo;
 use eframe::{
 	egui::{self, FontSelection, TextEdit, TextFormat},
 	epaint::{self, Color32, FontId},
 };
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
+
+use cofd_meta_schema::{Op, PageKind, SectionMeta, SourceMeta, Span};
+use cofd_pdf_extract::{hash, process_section};
+use cofd_schema::prelude::BookInfo;
 
 fn main() -> eframe::Result<()> {
 	let native_options = eframe::NativeOptions::default();
@@ -71,7 +70,7 @@ impl MetaEditorApp {
 				)
 			});
 
-		let pages = extract_pages(&path).unwrap();
+		let pages = cofd_pdf_extract::extract_pages(&path).unwrap();
 
 		Self {
 			meta,
@@ -103,8 +102,8 @@ impl MetaEditorApp {
 				layout_job.sections.clear();
 
 				let byte_range = match range {
-					cofd_pdf_extract::meta::Span::Range(range) => 0..range.start,
-					cofd_pdf_extract::meta::Span::From(from) => 0..from.start,
+					Span::Range(range) => 0..range.start,
+					Span::From(from) => 0..from.start,
 				};
 
 				layout_job.sections.push(epaint::text::LayoutSection {
@@ -114,8 +113,8 @@ impl MetaEditorApp {
 				});
 
 				let byte_range = match range {
-					cofd_pdf_extract::meta::Span::Range(range) => range.clone(),
-					cofd_pdf_extract::meta::Span::From(from) => from.start..text.len(),
+					Span::Range(range) => range.clone(),
+					Span::From(from) => from.start..text.len(),
 				};
 				let format = TextFormat {
 					color: Color32::BLACK,
@@ -239,7 +238,7 @@ impl eframe::App for MetaEditorApp {
 						name: String::from("Unnamed"),
 						pages: 1..=2,
 						range: None,
-						kind: cofd_pdf_extract::page_kind::PageKind::Merit(None),
+						kind: PageKind::Merit(None),
 						ops: Vec::new(),
 					})
 				}
@@ -277,7 +276,8 @@ impl eframe::App for MetaEditorApp {
 							layout_job.wrap.max_width = wrap_width;
 							ui.fonts(|f| f.layout_job(layout_job))
 						};
-						let section = make_section(&self.pages, section_def, self.show_full_text);
+						let section =
+							process_section(&self.pages, section_def, self.show_full_text);
 
 						let mut text: &str = section.extract.as_str();
 						use egui::TextBuffer as _;

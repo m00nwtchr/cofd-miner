@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use lazy_static::lazy_static;
-use source::extract_text;
+pub use source::{extract_pages, extract_text, process_section};
 
 use cofd_meta_schema::SourceMeta;
 use cofd_schema::book::Book;

@@ -21,7 +21,7 @@ impl Section {
 	}
 }
 
-pub fn extract_section(
+pub fn process_section(
 	pages: &BTreeMap<usize, String>,
 	section: &SectionMeta,
 	flag: bool,
@@ -95,13 +95,14 @@ pub fn extract_section(
 		kind: section.kind.clone(),
 	}
 }
+pub use crate::backend::extract_pages;
 
 pub fn extract_text(path: impl AsRef<Path>, source_meta: &SourceMeta) -> Result<PdfExtract> {
 	let pages = crate::backend::extract_pages(path)?;
 	let sections = source_meta
 		.sections
 		.par_iter()
-		.map(|section| extract_section(&pages, section, false))
+		.map(|section| process_section(&pages, section, false))
 		.collect();
 
 	Ok(PdfExtract {
