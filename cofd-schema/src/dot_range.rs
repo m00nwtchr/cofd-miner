@@ -1,13 +1,16 @@
 use std::{
+	fmt::{Display, Write},
 	ops::{RangeFrom, RangeInclusive},
 	str::FromStr,
 };
 
 use serde::{Deserialize, Serialize};
 
+use crate::DOT_CHAR;
+
 #[derive(Serialize, Debug, Deserialize)]
 pub struct MyRangeFrom {
-	start: u8,
+	pub start: u8,
 }
 impl From<MyRangeFrom> for RangeFrom<u8> {
 	fn from(val: MyRangeFrom) -> Self {
@@ -60,5 +63,32 @@ impl FromStr for DotRange {
 		} else {
 			DotRange::Set(value.iter().filter_map(|str| dot_to_num(str)).collect())
 		})
+	}
+}
+
+impl Display for DotRange {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let str = String::from(DOT_CHAR);
+		match self {
+			DotRange::Num(num) => f.write_str(&str.repeat((*num).into())),
+			DotRange::Set(set) => {
+				let mut out = String::new();
+				for num in set {
+					if !out.is_empty() {
+						out += ", ";
+					}
+					out += &str.repeat((*num).into())
+				}
+				f.write_str(&out)
+			}
+			DotRange::Range(range) => f.write_fmt(format_args!(
+				"{} to {}",
+				&str.repeat((*range.start()).into()),
+				&str.repeat((*range.end()).into())
+			)),
+			DotRange::RangeFrom(range) => {
+				f.write_fmt(format_args!("{}+", &str.repeat(range.start.into())))
+			}
+		}
 	}
 }

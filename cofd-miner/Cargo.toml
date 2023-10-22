@@ -31,7 +31,9 @@ pdf_extract = ["dep:walkdir", "dep:env_logger", "dep:serde_json"]
 cofd-schema.workspace = true
 cofd-meta-schema.workspace = true
 
-mupdf = { version = "0.4", default-features = false, optional = true }
+mupdf = { version = "0.4", default-features = false, optional = true, features = [
+	"sys-lib",
+] }
 lopdf = { version = "0.31", optional = true }
 
 either = "1"
