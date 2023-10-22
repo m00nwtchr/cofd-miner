@@ -1,4 +1,7 @@
-use std::ops::{RangeFrom, RangeInclusive};
+use std::{
+	ops::{RangeFrom, RangeInclusive},
+	str::FromStr,
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -29,9 +32,21 @@ fn dot_to_num(str: &str) -> Option<u8> {
 	}
 }
 
-impl From<&[&str]> for DotRange {
-	fn from(value: &[&str]) -> Self {
-		if value.len() == 1 {
+impl FromStr for DotRange {
+	type Err = strum::ParseError;
+
+	fn from_str(arg: &str) -> std::result::Result<Self, strum::ParseError> {
+		let binding = arg
+			.to_lowercase()
+			.replace(' ', "")
+			.replace("or", ",")
+			.replace("to", "-");
+		let value: Vec<_> = binding
+			.split(|c: char| c.eq(&',') || c.eq(&'-'))
+			.filter(|str| !str.is_empty())
+			.collect();
+
+		Ok(if value.len() == 1 {
 			let value = value[0];
 			if value.contains('+') {
 				DotRange::RangeFrom(MyRangeFrom {
@@ -40,10 +55,10 @@ impl From<&[&str]> for DotRange {
 			} else {
 				DotRange::Num(dot_to_num(value).unwrap_or(0))
 			}
-		} else if value.len() == 3 && value.contains(&"to") {
-			DotRange::Range(dot_to_num(value[0]).unwrap()..=dot_to_num(value[2]).unwrap())
+		} else if value.len() == 2 && arg.contains("to") {
+			DotRange::Range(dot_to_num(value[0]).unwrap()..=dot_to_num(value[1]).unwrap())
 		} else {
 			DotRange::Set(value.iter().filter_map(|str| dot_to_num(str)).collect())
-		}
+		})
 	}
 }

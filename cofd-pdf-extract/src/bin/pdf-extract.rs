@@ -1,19 +1,19 @@
 use std::{
 	collections::HashMap,
-	fs::{self, File},
+	fs::File,
 	path::{Path, PathBuf},
 	sync::RwLock,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::ser::PrettyFormatter;
 use walkdir::{DirEntry, WalkDir};
 
-use cofd_pdf_extract::source_file::{extract_text, PdfExtract};
-use cofd_pdf_extract::{hash, meta::SourceMeta};
+use cofd_pdf_extract::parse::PdfExtract;
+use cofd_pdf_extract::{hash, source};
 
 fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 	let mut ser = serde_json::Serializer::with_formatter(
@@ -26,21 +26,8 @@ fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()>
 #[derive(Default, Serialize, Deserialize)]
 struct Cache {
 	hash: HashMap<PathBuf, u64>,
-}
-
-fn load_defs() -> Result<Vec<SourceMeta>> {
-	fs::read_dir("meta")?
-		.par_bridge()
-		.filter_map(|entry| entry.ok().map(|e| e.path()))
-		.filter(|path| path.extension().map(|ext| ext.eq("json")).unwrap_or(false))
-		.map(|path| {
-			let meta = File::open(&path)
-				.map_err(|err| anyhow!(err))
-				.and_then(|file| serde_json::de::from_reader(file).map_err(|err| anyhow!(err)));
-			(path, meta)
-		})
-		.map(|(path, res)| res.map_err(|err| anyhow!("{}: {}", path.display(), err)))
-		.collect()
+	#[serde(default, skip)]
+	dirty: bool,
 }
 
 fn is_hidden(entry: &DirEntry) -> bool {
@@ -73,8 +60,6 @@ fn main() -> anyhow::Result<()> {
 		Cache::default()
 	});
 
-	let source_file_defs = load_defs()?;
-
 	let out_path = Path::new("./out");
 	let extract_path = out_path.join("extract");
 
@@ -98,53 +83,29 @@ fn main() -> anyhow::Result<()> {
 				let hash = hash::hash(&path).ok().map(|hash| (path, hash));
 
 				if let Some((path, hash)) = &hash {
-					cache.write().unwrap().hash.insert(path.clone(), *hash);
+					let mut cache = cache.write().unwrap();
+					cache.hash.insert(path.clone(), *hash);
+					cache.dirty = true;
 				}
 
 				hash
 			}
 		})
-		.filter_map(|(path, hash)| {
-			let o = source_file_defs
-				.par_iter()
-				.find_any(|def| def.info.hash.eq(&hash));
-			if o.is_none() {
-				debug!("Unknown file: {}, Hash: {hash:X}", path.display());
-			}
-
-			o.map(|def| (path, def))
+		.flat_map(|(path, hash)| cofd_pdf_extract::get_meta(hash).map(|meta| (path, meta)))
+		.flat_map(|(path, meta)| {
+			cofd_pdf_extract::parse_book_with_meta(&path, meta).map(|book| (path, book))
 		})
-		.map(|(path, source_def)| -> Result<(PathBuf, PdfExtract)> {
-			let json_path = extract_path
-				.join(path.file_name().unwrap())
-				.with_extension("json");
-
-			let pdf_extract = if json_path.exists() {
-				serde_json::de::from_reader(File::open(&json_path)?)?
-			} else {
-				let pdf_extract = extract_text(&path, source_def)?;
-
-				to_path_pretty(&json_path, &pdf_extract)?;
-
-				pdf_extract
-			};
-
-			Ok((path, pdf_extract))
-		})
-		.filter_map(|f| f.ok())
-		.for_each(|(path, p)| {
+		.for_each(|(path, book)| {
 			let json_path = out_path
 				.join(path.file_name().unwrap())
 				.with_extension("json");
 
-			// println!("{p:?}");
-			let vecs = p.parse();
-			// println!("{vecs:?}");
-
-			to_path_pretty(json_path, &vecs).unwrap();
+			to_path_pretty(json_path, &book).unwrap();
 		});
 
-	serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;
+	if cache.read().unwrap().dirty {
+		serde_json::ser::to_writer(File::create(cache_path)?, &cache.into_inner()?)?;
+	}
 
 	Ok(())
 }

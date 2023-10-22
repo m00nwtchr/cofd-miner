@@ -10,36 +10,51 @@ name = "meta-editor"
 path = "src/bin/meta_editor.rs"
 required-features = ["meta_editor"]
 
+[[bin]]
+name = "pdf-extract"
+path = "src/bin/pdf-extract.rs"
+required-features = ["pdf_extract"]
+
 [features]
-# default = ["meta_editor"]
-meta_editor = ["dep:eframe", "dep:egui_extras"]
+default = ["mupdf"]
+mupdf = ["dep:mupdf"]
+lopdf = ["dep:lopdf"]
+
+meta_editor = [
+	"dep:eframe",
+	"dep:egui_extras",
+	"dep:env_logger",
+	"dep:serde_json",
+]
+pdf_extract = ["dep:walkdir", "dep:env_logger", "dep:serde_json"]
 
 [dependencies]
-mupdf = { version = "0.4", default-features = false }
+cofd-schema = { path = "../cofd-schema" }
+cofd-meta-schema = { path = "../cofd-meta-schema" }
+
+mupdf = { version = "0.4", default-features = false, optional = true }
+lopdf = { version = "0.31", optional = true }
 
 either = "1"
-
 rayon = "1.7"
 log = "0.4"
-env_logger = "0.10"
+lazy_static = "1"
 
 convert_case = "0.6"
 highway = "1.1.0"
-
 regex = "1.8"
-# once_cell = "1.18"
-lazy_static = "1"
-
-walkdir = "2"
 
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
 serde_with = "3.3"
+rmp-serde = "1"
 
 anyhow = "1"
-thiserror = "1"
+# thiserror = "1"
 
-cofd-schema = { path = "../cofd-schema" }
+###
+walkdir = { version = "2", optional = true }
+env_logger = { version = "0.10", optional = true }
+serde_json = { version = "1", optional = true }
 
 ### Meta Editor Deps
 eframe = { version = "0.23", optional = true, default-features = false, features = [
@@ -48,8 +63,10 @@ eframe = { version = "0.23", optional = true, default-features = false, features
 ] }
 egui_extras = { version = "0.23", optional = true }
 
-# [dependencies.lopdf]
-# # version = "0.31"
-# git = "https://github.com/m00nwtchr/lopdf.git"
-# branch = "unicode"
-# # path = "./lopdf"
+[build-dependencies]
+cofd-meta-schema = { path = "../cofd-meta-schema" }
+
+anyhow = "1"
+
+serde_json = { version = "1" }
+rmp-serde = "1"

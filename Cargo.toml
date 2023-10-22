@@ -1,5 +1,5 @@
 [workspace]
-members = ["cofd-pdf-extract", "cofd-schema"]
+members = ["cofd-pdf-extract", "cofd-meta-schema", "cofd-schema"]
 resolver = "2"
 
 [profile.release]

@@ -1,24 +1,10 @@
-// use serde::{Deserialize, Serialize};
-// use serde_with::skip_serializing_none;
+use serde::{Deserialize, Serialize};
+use strum::EnumString;
 
-// use crate::item::{ItemProp, PropValue};
-// use crate::prelude::DotRange;
-
-// #[skip_serializing_none]
-// #[derive(Serialize, Deserialize)]
-// pub struct MeritFeature {
-// 	pub name: String,
-// 	pub description: Vec<String>,
-// 	pub effects: Vec<String>,
-// 	pub extras: Option<HashMap<ItemProp, PropValue>>,
-// }
-
-// #[skip_serializing_none]
-// #[derive(Serialize, Deserialize)]
-// pub struct Merit {
-// 	pub name: String,
-// 	pub rating: DotRange,
-// 	pub description: Vec<String>,
-// 	pub features: Vec<MeritFeature>,
-// 	pub extras: Option<HashMap<ItemProp, PropValue>>,
-// }
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[strum(ascii_case_insensitive)]
+pub enum MeritTag {
+	Style,
+	#[strum(to_string = "Supernatural Merit")]
+	Supernatural,
+}

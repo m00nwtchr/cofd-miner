@@ -1,11 +1,15 @@
 use std::ops::{Range, RangeFrom, RangeInclusive};
 
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 
+pub use crate::page_kind::PageKind;
 use cofd_schema::book::BookInfo;
 
-use crate::page_kind::PageKind;
+mod page_kind;
+
+fn is_none<T>(v: &Option<T>) -> bool {
+	v.is_none()
+}
 
 fn is_empty<T>(v: &Vec<T>) -> bool {
 	v.is_empty()
@@ -32,8 +36,8 @@ impl From<MyRangeFrom> for RangeFrom<usize> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Span {
-	Range(Range<usize>),
 	From(MyRangeFrom),
+	Range(Range<usize>),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,23 +64,22 @@ pub enum Op {
 	},
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SectionDefinition {
+pub struct SectionMeta {
 	#[serde(default = "unnamed", skip_serializing_if = "is_empty_str")]
 	pub name: String,
 	pub pages: RangeInclusive<usize>,
-	#[serde(default)]
+	#[serde(default, skip_serializing_if = "is_none")]
 	pub range: Option<Span>,
 	pub kind: PageKind,
 	#[serde(default, skip_serializing_if = "is_empty")]
 	pub ops: Vec<Op>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SourceMeta {
 	pub info: BookInfo,
-	pub sections: Vec<SectionDefinition>,
+	pub sections: Vec<SectionMeta>,
 }
 
 impl SourceMeta {}

@@ -1,4 +1,5 @@
 use std::convert::AsRef;
+use std::str::FromStr;
 use std::{
 	fmt::Display,
 	ops::{Add, Sub},
@@ -8,13 +9,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::attribute::Attribute;
 use crate::traits::skill::Skill;
-use crate::traits::Trait;
+use crate::traits::{DerivedTrait, SupernaturalTolerance, Trait};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum DicePool {
-	Mod(i16),
-	Attribute(Attribute),
-	Skill(Skill),
+	Mod(i8),
+
 	Trait(Trait),
 
 	Min(Box<DicePool>, Box<DicePool>),
@@ -22,6 +22,9 @@ pub enum DicePool {
 
 	Add(Box<DicePool>, Box<DicePool>),
 	Sub(Box<DicePool>, Box<DicePool>),
+	Vs(Box<DicePool>, Box<DicePool>),
+
+	Key(String),
 }
 
 impl DicePool {
@@ -47,6 +50,40 @@ impl DicePool {
 	}
 }
 
+impl FromStr for DicePool {
+	type Err = strum::ParseError;
+
+	fn from_str(str: &str) -> Result<Self, Self::Err> {
+		let mut char = None;
+
+		if let Some((l, r)) = str.split_once("vs") {
+			let p1 = DicePool::from_str(l.trim())?;
+			let p2 = DicePool::from_str(r.trim_matches(&['.', ' '][..]))?;
+
+			Ok(DicePool::Vs(Box::new(p1), Box::new(p2)))
+		} else if let Some((l, r)) = str.rsplit_once(|c: char| {
+			let f = c.eq(&'+') || c.eq(&'-');
+			if f {
+				char = Some(c);
+			}
+			f
+		}) {
+			let p1 = DicePool::from_str(l.trim())?;
+			let p2 = DicePool::from_str(r.trim())?;
+
+			Ok(match char {
+				Some('+') => p1 + p2,
+				Some('-') => p1 - p2,
+				_ => unreachable!(),
+			})
+		} else {
+			Trait::from_str(str)
+				.map(DicePool::Trait)
+				.or_else(|_| Ok(DicePool::Key(str.to_string())))
+		}
+	}
+}
+
 impl Default for DicePool {
 	fn default() -> Self {
 		Self::Mod(0)
@@ -69,26 +106,23 @@ impl<T: Into<DicePool>> Sub<T> for DicePool {
 	}
 }
 
-impl<T: Into<Attribute>> From<T> for DicePool {
+impl<T: Into<Trait>> From<T> for DicePool {
 	fn from(value: T) -> Self {
-		DicePool::Attribute(value.into())
+		DicePool::Trait(value.into())
 	}
 }
 
-impl From<Skill> for DicePool {
-	fn from(skill: Skill) -> Self {
-		Self::Skill(skill)
-	}
-}
+// impl TryFrom<u8> for DicePool {
+// 	type Error;
 
-impl From<Trait> for DicePool {
-	fn from(trait_: Trait) -> Self {
-		Self::Trait(trait_)
-	}
-}
+// 	fn try_from(value: u8) -> Result<Self, Self::Error> {
+// 		Self::Mod(value.try_into()?);
+// 		todo!()
+// 	}
+// }
 
-impl From<i16> for DicePool {
-	fn from(val: i16) -> Self {
+impl From<i8> for DicePool {
+	fn from(val: i8) -> Self {
 		Self::Mod(val)
 	}
 }
@@ -97,7 +131,7 @@ impl Add for Attribute {
 	type Output = DicePool;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		DicePool::Attribute(self) + DicePool::Attribute(rhs)
+		DicePool::Trait(self.into()) + DicePool::Trait(rhs.into())
 	}
 }
 
@@ -105,7 +139,7 @@ impl Add<Skill> for Attribute {
 	type Output = DicePool;
 
 	fn add(self, rhs: Skill) -> Self::Output {
-		DicePool::Attribute(self) + DicePool::Skill(rhs)
+		DicePool::Trait(self.into()) + DicePool::Trait(rhs.into())
 	}
 }
 
@@ -113,13 +147,16 @@ impl Display for DicePool {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			DicePool::Mod(val) => val.fmt(f),
-			DicePool::Attribute(attr) => f.write_str(attr.as_ref()),
-			DicePool::Skill(skill) => f.write_str(skill.as_ref()),
+
 			DicePool::Trait(trait_) => f.write_str(trait_.as_ref()),
-			DicePool::Min(p1, p2) => f.write_fmt(format_args!("min({p1}, {p2})")),
-			DicePool::Max(p1, p2) => f.write_fmt(format_args!("max({p1}, {p2})")),
+
+			DicePool::Key(key) => f.write_str(&key),
+
+			DicePool::Min(p1, p2) => f.write_fmt(format_args!("Lower of {p1} and {p2}")),
+			DicePool::Max(p1, p2) => f.write_fmt(format_args!("Higher of {p1} and {p2}")),
 			DicePool::Add(p1, p2) => f.write_fmt(format_args!("{p1} + {p2}")),
 			DicePool::Sub(p1, p2) => f.write_fmt(format_args!("{p1} - {p2}")),
+			DicePool::Vs(p1, p2) => f.write_fmt(format_args!("{p1} vs {p2}")),
 		}
 	}
 }

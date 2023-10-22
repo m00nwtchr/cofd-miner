@@ -3,7 +3,8 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
-use crate::{dot_range::DotRange, prerequisites::Prerequisite};
+use crate::{dice_pool::DicePool, dot_range::DotRange, prerequisites::Prerequisite};
+use merit::MeritTag;
 
 pub mod merit;
 
@@ -13,7 +14,7 @@ pub mod merit;
 #[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemProp {
-	Description,
+	// Description,
 	DotRating,
 	Tags,
 
@@ -40,7 +41,9 @@ pub enum PropValue {
 	Vec(Vec<String>),
 	Bool(bool),
 	DotRange(DotRange),
+	DicePool(DicePool),
 	Prerequisites(Vec<Prerequisite>),
+	Tags(Vec<MeritTag>),
 }
 
 impl PropValue {
@@ -55,7 +58,7 @@ impl PropValue {
 pub struct SubItem {
 	pub name: String,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
+	#[serde(default, skip_serializing_if = "crate::is_empty_map", flatten)]
 	pub properties: BTreeMap<ItemProp, PropValue>,
 }
 
@@ -65,6 +68,6 @@ pub struct Item {
 	#[serde(default, skip_serializing_if = "crate::is_empty")]
 	pub children: Vec<SubItem>,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "crate::is_empty_map")]
+	#[serde(default, skip_serializing_if = "crate::is_empty_map", flatten)]
 	pub properties: BTreeMap<ItemProp, PropValue>,
 }

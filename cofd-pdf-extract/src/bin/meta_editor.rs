@@ -1,5 +1,5 @@
 use std::{
-	collections::{BTreeMap, HashMap},
+	collections::BTreeMap,
 	fs::{self, File},
 	ops::Range,
 	path::{Path, PathBuf},
@@ -7,8 +7,7 @@ use std::{
 
 use cofd_pdf_extract::{
 	hash,
-	meta::{Op, SectionDefinition, SourceMeta, Span},
-	source_file::{extract_pages, make_section},
+	meta::{Op, SectionMeta, SourceMeta, Span},
 };
 use cofd_schema::prelude::BookInfo;
 use eframe::{
@@ -94,7 +93,7 @@ impl MetaEditorApp {
 		text: &str,
 		font_id: FontId,
 		wrap_width: f32,
-		section: &SectionDefinition,
+		section: &SectionMeta,
 	) -> epaint::text::LayoutJob {
 		let mut layout_job =
 			epaint::text::LayoutJob::simple(text.to_string(), font_id, Color32::GRAY, wrap_width);
@@ -236,7 +235,7 @@ impl eframe::App for MetaEditorApp {
 				}
 
 				if ui.button("Add section").clicked() {
-					self.meta.sections.push(SectionDefinition {
+					self.meta.sections.push(SectionMeta {
 						name: String::from("Unnamed"),
 						pages: 1..=2,
 						range: None,
