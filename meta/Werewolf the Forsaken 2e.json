@@ -94,6 +94,14 @@
 						"end": 10449
 					},
 					"replace": "Effect: Y"
+				},
+				{
+					"type": "Replace",
+					"range": {
+						"start": 7085,
+						"end": 7085
+					},
+					"replace": "Effect: Y"
 				}
 			]
 		},
