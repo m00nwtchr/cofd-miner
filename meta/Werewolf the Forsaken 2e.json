@@ -12,7 +12,7 @@
 			},
 			"range": {
 				"start": 2428,
-				"end": 20723
+				"end": 23012
 			},
 			"kind": {
 				"Merit": "Werewolf"
@@ -74,8 +74,7 @@
 				"end": 113
 			},
 			"range": {
-				"start": 3499,
-				"end": 25159
+				"start": 3499
 			},
 			"kind": {
 				"Merit": null
@@ -85,6 +84,14 @@
 					"type": "RegexReplace",
 					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
 					"replace": ""
+				},
+				{
+					"type": "Replace",
+					"range": {
+						"start": 10449,
+						"end": 10449
+					},
+					"replace": "Effect: Y"
 				}
 			]
 		},
@@ -95,8 +102,7 @@
 				"end": 304
 			},
 			"range": {
-				"start": 2527,
-				"end": 5307
+				"start": 2527
 			},
 			"kind": {
 				"Merit": null

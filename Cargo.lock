@@ -360,7 +360,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cofd-pdf-extract"
+name = "cofd-miner"
 version = "0.1.0"
 dependencies = [
  "anyhow",

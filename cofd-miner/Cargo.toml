@@ -1,8 +1,7 @@
 [package]
-name = "cofd-pdf-extract"
+name = "cofd-miner"
 version = "0.1.0"
 edition = "2021"
-publish = false
 default-run = "pdf-extract"
 
 [[bin]]
@@ -29,8 +28,8 @@ meta_editor = [
 pdf_extract = ["dep:walkdir", "dep:env_logger", "dep:serde_json"]
 
 [dependencies]
-cofd-schema = { path = "../cofd-schema" }
-cofd-meta-schema = { path = "../cofd-meta-schema" }
+cofd-schema.workspace = true
+cofd-meta-schema.workspace = true
 
 mupdf = { version = "0.4", default-features = false, optional = true }
 lopdf = { version = "0.31", optional = true }
@@ -64,7 +63,7 @@ eframe = { version = "0.23", optional = true, default-features = false, features
 egui_extras = { version = "0.23", optional = true }
 
 [build-dependencies]
-cofd-meta-schema = { path = "../cofd-meta-schema" }
+cofd-meta-schema.workspace = true
 
 anyhow = "1"
 

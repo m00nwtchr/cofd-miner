@@ -14,6 +14,7 @@ pub mod skill;
 #[derive(Debug, Serialize, Deserialize, EnumString)]
 #[strum(ascii_case_insensitive)]
 pub enum Template {
+	#[strum(to_string = "Mortal", serialize = "Human")]
 	Mortal,
 	#[strum(to_string = "Mage", serialize = "Awakened")]
 	Mage,

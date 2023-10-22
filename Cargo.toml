@@ -1,6 +1,11 @@
 [workspace]
-members = ["cofd-pdf-extract", "cofd-meta-schema", "cofd-schema"]
+members = ["cofd-miner", "cofd-meta-schema", "cofd-schema"]
 resolver = "2"
+
+[workspace.dependencies]
+cofd-schema = { path = "./cofd-schema" }
+cofd-meta-schema = { path = "./cofd-meta-schema" }
+
 
 [profile.release]
 lto = true

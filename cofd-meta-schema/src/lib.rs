@@ -36,8 +36,8 @@ impl From<MyRangeFrom> for RangeFrom<usize> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Span {
-	From(MyRangeFrom),
 	Range(Range<usize>),
+	From(MyRangeFrom),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

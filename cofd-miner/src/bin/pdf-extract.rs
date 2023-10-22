@@ -6,14 +6,12 @@ use std::{
 };
 
 use anyhow::Result;
-use log::debug;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::ser::PrettyFormatter;
 use walkdir::{DirEntry, WalkDir};
 
-use cofd_pdf_extract::parse::PdfExtract;
-use cofd_pdf_extract::{hash, source};
+use cofd_miner::hash;
 
 fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 	let mut ser = serde_json::Serializer::with_formatter(
@@ -61,10 +59,8 @@ fn main() -> anyhow::Result<()> {
 	});
 
 	let out_path = Path::new("./out");
-	let extract_path = out_path.join("extract");
-
-	if !extract_path.exists() {
-		std::fs::create_dir_all(&extract_path)?;
+	if !out_path.exists() {
+		std::fs::create_dir_all(out_path)?;
 	}
 
 	let paths: Vec<PathBuf> = WalkDir::new("pdf")
@@ -91,9 +87,9 @@ fn main() -> anyhow::Result<()> {
 				hash
 			}
 		})
-		.flat_map(|(path, hash)| cofd_pdf_extract::get_meta(hash).map(|meta| (path, meta)))
+		.flat_map(|(path, hash)| cofd_miner::get_meta(hash).map(|meta| (path, meta)))
 		.flat_map(|(path, meta)| {
-			cofd_pdf_extract::parse_book_with_meta(&path, meta).map(|book| (path, book))
+			cofd_miner::parse_book_with_meta(&path, meta).map(|book| (path, book))
 		})
 		.for_each(|(path, book)| {
 			let json_path = out_path

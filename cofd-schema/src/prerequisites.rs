@@ -3,9 +3,7 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	traits::{
-		attribute::Attribute, skill::Skill, DerivedTrait, SupernaturalTolerance, Template, Trait,
-	},
+	traits::{Template, Trait},
 	DOT_CHAR,
 };
 
@@ -51,8 +49,10 @@ impl FromStr for Prerequisite {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		Template::from_str(s).map(Into::into).or_else(|_| {
-			if let Some((prereq, dots)) = s.rsplit_once(' ') {
-				if let Some((l, r)) = prereq.split_once("or") {
+			if let Some((prereq, dots)) = s.find('•').map(|f| s.split_at(f - 1)) {
+				let prereq = prereq.trim();
+				let dots = dots.trim();
+				if let Some((l, r)) = prereq.split_once(" or ") {
 					let l = Trait::from_str(l.trim())?;
 					let r = Trait::from_str(r.trim())?;
 
@@ -64,6 +64,7 @@ impl FromStr for Prerequisite {
 					Trait::from_str(prereq)
 						.map(|trait_| Prerequisite::Trait(trait_, parse_val(dots).unwrap_or(0)))
 						.or_else(|_| {
+							// println!("{s} - {prereq} ({dots})");
 							Ok(parse_val(dots)
 								.map(|d| Prerequisite::Unknown(prereq.to_owned(), d))
 								.unwrap_or_else(|| Prerequisite::String(s.to_owned())))

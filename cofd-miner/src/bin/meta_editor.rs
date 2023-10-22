@@ -13,7 +13,7 @@ use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
 use cofd_meta_schema::{Op, PageKind, SectionMeta, SourceMeta, Span};
-use cofd_pdf_extract::{hash, process_section};
+use cofd_miner::{hash, process_section};
 use cofd_schema::prelude::BookInfo;
 
 fn main() -> eframe::Result<()> {
@@ -70,7 +70,7 @@ impl MetaEditorApp {
 				)
 			});
 
-		let pages = cofd_pdf_extract::extract_pages(&path).unwrap();
+		let pages = cofd_miner::extract_pages(&path).unwrap();
 
 		Self {
 			meta,

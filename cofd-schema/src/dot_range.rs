@@ -55,7 +55,7 @@ impl FromStr for DotRange {
 			} else {
 				DotRange::Num(dot_to_num(value).unwrap_or(0))
 			}
-		} else if value.len() == 2 && arg.contains("to") {
+		} else if value.len() == 2 && binding.contains('-') {
 			DotRange::Range(dot_to_num(value[0]).unwrap()..=dot_to_num(value[1]).unwrap())
 		} else {
 			DotRange::Set(value.iter().filter_map(|str| dot_to_num(str)).collect())

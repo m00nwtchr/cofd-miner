@@ -1,15 +1,13 @@
-use std::convert::AsRef;
-use std::str::FromStr;
 use std::{
+	convert::AsRef,
 	fmt::Display,
 	ops::{Add, Sub},
+	str::FromStr,
 };
 
 use serde::{Deserialize, Serialize};
 
-use crate::traits::attribute::Attribute;
-use crate::traits::skill::Skill;
-use crate::traits::{DerivedTrait, SupernaturalTolerance, Trait};
+use crate::traits::{attribute::Attribute, skill::Skill, Trait};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum DicePool {
