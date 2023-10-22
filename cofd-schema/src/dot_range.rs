@@ -66,28 +66,31 @@ impl FromStr for DotRange {
 	}
 }
 
+pub fn num_to_dots(n: impl Into<usize>) -> String {
+	String::from(DOT_CHAR).repeat(n.into())
+}
+
 impl Display for DotRange {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let str = String::from(DOT_CHAR);
 		match self {
-			DotRange::Num(num) => f.write_str(&str.repeat((*num).into())),
+			DotRange::Num(num) => f.write_str(&num_to_dots(*num)),
 			DotRange::Set(set) => {
 				let mut out = String::new();
 				for num in set {
 					if !out.is_empty() {
 						out += ", ";
 					}
-					out += &str.repeat((*num).into())
+					out += &num_to_dots(*num)
 				}
 				f.write_str(&out)
 			}
 			DotRange::Range(range) => f.write_fmt(format_args!(
 				"{} to {}",
-				&str.repeat((*range.start()).into()),
-				&str.repeat((*range.end()).into())
+				&num_to_dots(*range.start()),
+				&num_to_dots(*range.end())
 			)),
 			DotRange::RangeFrom(range) => {
-				f.write_fmt(format_args!("{}+", &str.repeat(range.start.into())))
+				f.write_fmt(format_args!("{}+", &num_to_dots(range.start)))
 			}
 		}
 	}

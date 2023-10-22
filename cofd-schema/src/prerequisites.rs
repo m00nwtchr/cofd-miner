@@ -1,8 +1,9 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
+	dot_range::num_to_dots,
 	traits::{Template, Trait},
 	DOT_CHAR,
 };
@@ -26,7 +27,7 @@ pub enum Prerequisite {
 
 	Unknown(String, u8),
 	#[serde(untagged)]
-	String(String),
+	Special(String),
 }
 
 impl From<Template> for Prerequisite {
@@ -64,16 +65,41 @@ impl FromStr for Prerequisite {
 					Trait::from_str(prereq)
 						.map(|trait_| Prerequisite::Trait(trait_, parse_val(dots).unwrap_or(0)))
 						.or_else(|_| {
-							// println!("{s} - {prereq} ({dots})");
 							Ok(parse_val(dots)
 								.map(|d| Prerequisite::Unknown(prereq.to_owned(), d))
-								.unwrap_or_else(|| Prerequisite::String(s.to_owned())))
+								.unwrap_or_else(|| Prerequisite::Special(s.to_owned())))
 						})
 				}
 			} else {
-				Ok(Prerequisite::String(s.to_owned()))
+				Ok(Prerequisite::Special(s.to_owned()))
 			}
 		})
+	}
+}
+
+impl Display for Prerequisite {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Prerequisite::Template(template) => template.fmt(f),
+			Prerequisite::Trait(trait_, num) => {
+				f.write_fmt(format_args!("{trait_} {}", num_to_dots(*num)))
+			}
+			Prerequisite::TraitOr(traits, num) => {
+				let mut str = String::new();
+				for trait_ in traits {
+					if !str.is_empty() {
+						str += " or "
+					}
+					str += trait_.as_ref();
+				}
+				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
+			}
+			Prerequisite::Not(_) => todo!(),
+			Prerequisite::Unknown(str, num) => {
+				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
+			}
+			Prerequisite::Special(special) => f.write_str(special),
+		}
 	}
 }
 

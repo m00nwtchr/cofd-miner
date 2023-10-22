@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, ParseError};
@@ -11,7 +11,7 @@ use self::{
 pub mod attribute;
 pub mod skill;
 
-#[derive(Debug, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Serialize, Deserialize, EnumString, Display)]
 #[strum(ascii_case_insensitive)]
 pub enum Template {
 	#[strum(to_string = "Mortal", serialize = "Human")]
@@ -180,5 +180,11 @@ impl AsRef<str> for Trait {
 			Trait::DerivedTrait(dt) => dt.as_ref(),
 			Trait::SupernaturalTolerance(st) => st.as_ref(),
 		}
+	}
+}
+
+impl Display for Trait {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str(self.as_ref())
 	}
 }
