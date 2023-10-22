@@ -65,6 +65,7 @@ pub struct SubItem {
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Item {
 	pub name: String,
+	pub page: usize,
 	#[serde(default, skip_serializing_if = "crate::is_empty")]
 	pub children: Vec<SubItem>,
 	pub description: Vec<String>,

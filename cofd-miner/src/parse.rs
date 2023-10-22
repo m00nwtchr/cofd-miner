@@ -94,7 +94,7 @@ impl PdfExtract {
 		let sections: Vec<(PageKind, Vec<Item>)> = self
 			.sections
 			.par_iter()
-			.map(|span| (span.kind.clone(), span.parse()))
+			.map(|span| (span.kind.clone(), parse_span(span)))
 			.map(|(kind, mut parsed)| {
 				parsed
 					.par_iter_mut()
@@ -189,14 +189,14 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 	body
 }
 
-pub fn parse(page_kind: &PageKind, span: &str) -> Vec<Item> {
+pub fn parse_span(span: &Section) -> Vec<Item> {
 	let mut out = Vec::new();
-	let mut str_pos = span.len();
+	let mut str_pos = span.extract.len();
 
 	let mut children: Vec<SubItem> = Vec::new();
 
-	let matches: Vec<_> = match page_kind {
-		PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(span).collect(),
+	let matches: Vec<_> = match span.kind {
+		PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(&span.extract).collect(),
 		PageKind::MageSpell => vec![],
 	};
 	for captures in matches.into_iter().rev() {
@@ -224,7 +224,7 @@ pub fn parse(page_kind: &PageKind, span: &str) -> Vec<Item> {
 			name.to_string()
 		};
 
-		let desc = match page_kind {
+		let desc = match &span.kind {
 			PageKind::Merit(additional_prereqs) => {
 				let cost = captures.name("cost");
 
@@ -262,7 +262,7 @@ pub fn parse(page_kind: &PageKind, span: &str) -> Vec<Item> {
 				}
 
 				let desc = {
-					let body = get_body(&mut str_pos, span, &captures);
+					let body = get_body(&mut str_pos, &span.extract, &captures);
 
 					let mut lines: Vec<String> = Vec::new();
 					for el in body.iter().rev() {
@@ -320,9 +320,19 @@ pub fn parse(page_kind: &PageKind, span: &str) -> Vec<Item> {
 			}
 		};
 
+		let pos = captures.get(0).unwrap().start();
+
+		let page = span
+			.page_ranges
+			.iter()
+			.find(|(_, range)| range.contains(&pos))
+			.map(|(p, _)| p)
+			.unwrap_or(&0);
+
 		children.reverse();
 		out.push(Item {
 			name: name.to_owned(),
+			page: *page,
 			description: to_paragraphs(desc),
 			children,
 			properties: props,

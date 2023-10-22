@@ -1,24 +1,23 @@
-use std::{collections::BTreeMap, ops::RangeFrom, path::Path};
+use std::{
+	collections::{BTreeMap, HashMap},
+	ops::{Range, RangeFrom},
+	path::Path,
+};
 
 use anyhow::Result;
-use cofd_meta_schema::{MyRangeFrom, Op, PageKind, SectionMeta, SourceMeta, Span};
-use cofd_schema::item::Item;
 use rayon::prelude::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
+pub use crate::backend::extract_pages;
 use crate::parse::PdfExtract;
+use cofd_meta_schema::{MyRangeFrom, Op, PageKind, SectionMeta, SourceMeta, Span};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {
 	pub kind: PageKind,
 	pub extract: String,
-}
-
-impl Section {
-	pub fn parse(&self) -> Vec<Item> {
-		crate::parse::parse(&self.kind, &self.extract)
-	}
+	pub page_ranges: HashMap<usize, Range<usize>>,
 }
 
 pub fn process_section(
@@ -26,13 +25,31 @@ pub fn process_section(
 	section: &SectionMeta,
 	flag: bool,
 ) -> Section {
-	let vec: Vec<String> = pages
+	let pages: BTreeMap<usize, String> = pages
 		.range(section.pages.clone())
-		.flat_map(|(_, page)| page.split('\n').filter(|line| !line.is_empty()))
-		.map(str::to_owned)
+		.map(|(page_i, page)| {
+			(
+				*page_i,
+				page.split('\n')
+					.filter(|line| !line.is_empty())
+					.map(str::to_owned)
+					.collect::<Vec<String>>()
+					.join("\n"),
+			)
+		})
+		// .map(str::to_owned)
 		.collect();
 
-	let extract = vec.join("\n");
+	let mut page_ranges = HashMap::new();
+	let mut start = 0;
+	let mut end = 0;
+	for (i, page) in &pages {
+		end += page.len();
+		page_ranges.insert(*i, start..end);
+		start = end;
+	}
+
+	let extract = pages.into_values().collect::<Vec<String>>().join("\n");
 
 	let mut extract = if flag {
 		extract
@@ -65,7 +82,6 @@ pub fn process_section(
 					extract.insert_str(*pos, &str);
 
 					if range.start() > pos {
-						// let range = range.clone();
 						extract.replace_range(
 							(range.start() + str.len())..(range.end() + str.len()),
 							"",
@@ -93,9 +109,9 @@ pub fn process_section(
 	Section {
 		extract,
 		kind: section.kind.clone(),
+		page_ranges,
 	}
 }
-pub use crate::backend::extract_pages;
 
 pub fn extract_text(path: impl AsRef<Path>, source_meta: &SourceMeta) -> Result<PdfExtract> {
 	let pages = crate::backend::extract_pages(path)?;
@@ -106,7 +122,7 @@ pub fn extract_text(path: impl AsRef<Path>, source_meta: &SourceMeta) -> Result<
 		.collect();
 
 	Ok(PdfExtract {
-		info: source_meta.info,
+		info: source_meta.info.clone(),
 		sections,
 	})
 }

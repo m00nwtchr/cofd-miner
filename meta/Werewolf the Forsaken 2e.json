@@ -1,7 +1,9 @@
 {
 	"info": {
+		"name": "Werewolf the Forsaken 2e",
+		"shortName": "WtF 2e",
 		"hash": "3B3E7EBAEFF94CDB",
-		"publication_date": "2015-03-04"
+		"publicationDate": "2015-03-04"
 	},
 	"sections": [
 		{

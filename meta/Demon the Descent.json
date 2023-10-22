@@ -1,7 +1,9 @@
 {
 	"info": {
+		"name": "Demon the Descent",
+		"shortName": "DtD",
 		"hash": "9FF21DBAE1301AEF",
-		"publication_date": "2014-03-24"
+		"publicationDate": "2014-03-24"
 	},
 	"sections": []
 }

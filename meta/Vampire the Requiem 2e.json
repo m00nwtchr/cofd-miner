@@ -1,7 +1,9 @@
 {
 	"info": {
+		"name": "Vampire the Requiem 2e",
+		"shortName": "VtR 2e",
 		"hash": "A4B653D08D7503AF",
-		"publication_date": "2013-12-19"
+		"publicationDate": "2013-12-19"
 	},
 	"sections": [
 		{

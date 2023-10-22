@@ -1,7 +1,9 @@
 {
 	"info": {
+		"name": "Chronicles of Darkness",
+		"shortName": "CofD",
 		"hash": "2FF31F5BA518C6B7",
-		"publication_date": "2015-12-12"
+		"publicationDate": "2015-12-12"
 	},
 	"sections": [
 		{

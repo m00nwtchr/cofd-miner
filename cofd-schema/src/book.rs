@@ -2,8 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::item::Item;
 
-#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct BookInfo {
+	pub name: String,
+	pub short_name: String,
 	#[serde(with = "hex")]
 	pub hash: u64,
 	pub publication_date: chrono::NaiveDate,

@@ -1,7 +1,9 @@
 {
 	"info": {
+		"name": "Mage the Awakening 2e",
+		"shortName": "MtAw 2e",
 		"hash": "6545B34A4E989DCA",
-		"publication_date": "2016-05-04"
+		"publicationDate": "2016-05-04"
 	},
 	"sections": [
 		{
