@@ -1,6 +1,6 @@
-# cofd-pdf-extract
+# cofd-miner
 
-An application for extraction of Chronicles of Darkness game material from pdfs you own. Very much work in progress.
+A library for extraction of Chronicles of Darkness game material from pdfs you own. Very much work in progress.
 
 ## Running from source
 
