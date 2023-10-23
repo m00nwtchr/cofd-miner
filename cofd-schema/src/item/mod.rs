@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, fmt::Display};
 
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
+use strum::{Display, EnumString};
 
 use crate::{
 	dice_pool::DicePool,
@@ -13,7 +13,7 @@ use merit::MeritTag;
 pub mod merit;
 
 #[derive(
-	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString,
+	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString, Display,
 )]
 #[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
@@ -48,6 +48,19 @@ pub enum PropValue {
 	DicePool(DicePool),
 	Prerequisites(Prerequisites),
 	Tags(Vec<MeritTag>),
+}
+
+impl Display for PropValue {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			PropValue::Vec(vec) => vec.join("\n").fmt(f),
+			PropValue::Bool(b) => b.fmt(f),
+			PropValue::DotRange(dr) => dr.fmt(f),
+			PropValue::DicePool(d) => d.fmt(f),
+			PropValue::Prerequisites(p) => p.fmt(f),
+			PropValue::Tags(_) => todo!(),
+		}
+	}
 }
 
 impl PropValue {
