@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::{attribute::Attribute, skill::Skill, Trait};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum DicePool {
 	Mod(i8),
 

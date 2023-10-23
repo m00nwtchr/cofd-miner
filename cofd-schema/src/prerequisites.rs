@@ -14,7 +14,7 @@ use crate::{
 // 	Greater(u8),
 // }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Prerequisite {
 	Template(Template),

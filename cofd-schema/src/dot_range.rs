@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::DOT_CHAR;
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Clone, Debug, Deserialize)]
 pub struct MyRangeFrom {
 	pub start: u8,
 }
@@ -18,7 +18,7 @@ impl From<MyRangeFrom> for RangeFrom<u8> {
 	}
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Clone, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum DotRange {
 	Num(u8),

@@ -35,7 +35,7 @@ pub enum ItemProp {
 	Notes,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PropValue {
 	Vec(Vec<String>),
@@ -54,7 +54,7 @@ impl PropValue {
 	}
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SubItem {
 	pub name: String,
 	pub description: Vec<String>,
@@ -62,7 +62,7 @@ pub struct SubItem {
 	pub properties: BTreeMap<ItemProp, PropValue>,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Item {
 	pub name: String,
 	pub page: usize,

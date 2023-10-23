@@ -109,7 +109,7 @@ pub enum DerivedTrait {
 	Size,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Trait {
 	Attribute(Attribute),
