@@ -1,13 +1,13 @@
-# cofd-pdf-extract
+# cofd-miner
 
-An application for extraction of Chronicles of Darkness game material from pdfs you own. Very much work in progress.
+A library for extraction of Chronicles of Darkness game material from pdfs you own. Very much work in progress.
 
-## Running from source
+## Example program: running from source
 
 1. Install [Rust](https://www.rust-lang.org/learn/get-started)
 2. Create `pdf` directory.
 3. Place pdfs there.
-4. Run `cargo run`
+4. Run `cargo run --bin pdf-extract --features pdf_extract`
 5. Output json files in `out`
 
 ## Metadata editor
