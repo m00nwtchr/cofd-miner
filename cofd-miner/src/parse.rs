@@ -43,7 +43,7 @@ fn convert_properties(
 					}
 
 					if !prereqs.is_empty() {
-						*value = PropValue::Prerequisites(prereqs);
+						*value = PropValue::Prerequisites(prereqs.into());
 					}
 				}
 			}

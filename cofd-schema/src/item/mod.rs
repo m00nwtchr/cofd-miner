@@ -3,7 +3,11 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
-use crate::{dice_pool::DicePool, dot_range::DotRange, prerequisites::Prerequisite};
+use crate::{
+	dice_pool::DicePool,
+	dot_range::DotRange,
+	prerequisites::{Prerequisite, Prerequisites},
+};
 use merit::MeritTag;
 
 pub mod merit;
@@ -42,7 +46,7 @@ pub enum PropValue {
 	Bool(bool),
 	DotRange(DotRange),
 	DicePool(DicePool),
-	Prerequisites(Vec<Prerequisite>),
+	Prerequisites(Prerequisites),
 	Tags(Vec<MeritTag>),
 }
 

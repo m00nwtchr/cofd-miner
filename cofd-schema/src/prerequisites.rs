@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::{fmt::Display, ops::Deref, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 
@@ -103,11 +103,33 @@ impl Display for Prerequisite {
 	}
 }
 
-// #[derive(Debug, Serialize, Deserialize)]
-// pub enum PrereqKind {
-// 	Template,
-// 	Attribute,
-// 	Skill,
-// }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Prerequisites(Vec<Prerequisite>);
 
-pub struct Prerequisites {}
+impl From<Vec<Prerequisite>> for Prerequisites {
+	fn from(value: Vec<Prerequisite>) -> Self {
+		Prerequisites(value)
+	}
+}
+
+impl Deref for Prerequisites {
+	type Target = Vec<Prerequisite>;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl Display for Prerequisites {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let mut str = String::new();
+		for prereq in &self.0 {
+			if !str.is_empty() {
+				str += ", "
+			}
+			str += &prereq.to_string();
+		}
+		f.write_str(&str)
+	}
+}
