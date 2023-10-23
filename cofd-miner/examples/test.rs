@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use cofd_pdf_extract::parse_book;
+use cofd_miner::parse_book;
 
 fn main() {
 	let args: Vec<_> = std::env::args().collect();

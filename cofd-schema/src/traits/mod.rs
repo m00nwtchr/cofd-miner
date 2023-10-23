@@ -11,7 +11,7 @@ use self::{
 pub mod attribute;
 pub mod skill;
 
-#[derive(Debug, Serialize, Deserialize, EnumString, Display)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display)]
 #[strum(ascii_case_insensitive)]
 pub enum Template {
 	#[strum(to_string = "Mortal", serialize = "Human")]
@@ -49,7 +49,7 @@ pub enum Template {
 	Stigmatic,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString, AsRefStr)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum SupernaturalTolerance {
 	Gnosis,
@@ -94,7 +94,7 @@ pub enum Integrity {
 	Instability,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
 #[strum(ascii_case_insensitive)]
 pub enum DerivedTrait {
 	Speed,

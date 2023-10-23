@@ -24,9 +24,6 @@ pub fn get_meta(hash: u64) -> Option<&'static SourceMeta> {
 }
 
 pub fn parse_book_with_meta(path: impl AsRef<Path>, source: &SourceMeta) -> anyhow::Result<Book> {
-	let hash = hash(&path)?;
-	let source = get_meta(hash).expect("");
-
 	extract_text(path, source).map(|extract| extract.parse())
 }
 
