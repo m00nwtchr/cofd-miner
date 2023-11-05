@@ -24,6 +24,7 @@ pub enum ItemType {
 	#[serde(rename_all = "camelCase")]
 	Merit {
 		dot_rating: DotRange,
+		#[serde(default, skip_serializing_if = "crate::is_empty")]
 		prerequisites: Prerequisites,
 		#[serde(default, skip_serializing_if = "crate::is_empty")]
 		style_tags: Vec<MeritTag>,

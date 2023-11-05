@@ -107,7 +107,7 @@ impl Display for Prerequisite {
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct Prerequisites(#[serde(skip_serializing_if = "crate::is_empty")] Vec<Prerequisite>);
+pub struct Prerequisites(Vec<Prerequisite>);
 
 impl From<Vec<Prerequisite>> for Prerequisites {
 	fn from(value: Vec<Prerequisite>) -> Self {

@@ -132,6 +132,7 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 }
 
 #[allow(clippy::too_many_lines)]
+#[warn(clippy::missing_panics_doc)]
 pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 	let mut out = Vec::new();
 	let mut str_pos = span.extract.len();
