@@ -36,10 +36,10 @@ mupdf = { version = "0.4", default-features = false, optional = true, features =
 ] }
 lopdf = { version = "0.31", optional = true }
 
-either = "1"
 rayon = "1.7"
 log = "0.4"
 lazy_static = "1"
+strum = "0.25"
 
 convert_case = "0.6"
 highway = "1.1.0"

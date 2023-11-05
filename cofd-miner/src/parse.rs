@@ -1,20 +1,20 @@
 use std::{collections::BTreeMap, str::FromStr};
 
 use convert_case::{Case, Casing};
-use either::Either;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
-use crate::source::Section;
+use crate::{
+	parser_item::{convert_item, ItemProp, ParserItem, ParserSubItem, PropValue},
+	source::Section,
+};
 use cofd_meta_schema::PageKind;
 use cofd_schema::{
 	book::{Book, BookInfo},
-	dice_pool::DicePool,
-	item::{merit::MeritTag, Item, ItemProp, PropValue, SubItem},
+	item::Item,
 	prelude::DotRange,
-	prerequisites::Prerequisite,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,65 +22,6 @@ pub struct PdfExtract {
 	pub info: BookInfo,
 	pub sections: Vec<Section>,
 	// errors: Vec<Error>,
-}
-
-fn convert_properties(
-	item_or_properties: &mut Either<&mut Item, &mut BTreeMap<ItemProp, PropValue>>,
-) {
-	for (prop, value) in match item_or_properties {
-		Either::Left(item) => &mut item.properties,
-		Either::Right(properties) => properties,
-	} {
-		match prop {
-			ItemProp::Prerequisites => {
-				if let PropValue::Vec(vec) = value {
-					let mut prereqs = Vec::new();
-
-					for str in vec {
-						if let Ok(prereq) = Prerequisite::from_str(str) {
-							prereqs.push(prereq);
-						}
-					}
-
-					if !prereqs.is_empty() {
-						*value = PropValue::Prerequisites(prereqs.into());
-					}
-				}
-			}
-			ItemProp::Tags => {
-				if let PropValue::Vec(vec) = value {
-					let mut tags = Vec::new();
-
-					for str in vec {
-						if let Ok(prereq) = MeritTag::from_str(str) {
-							tags.push(prereq);
-						}
-					}
-
-					if !tags.is_empty() {
-						*value = PropValue::Tags(tags);
-					}
-				}
-			}
-			ItemProp::DicePool => {
-				if let PropValue::Vec(vec) = value {
-					if vec.len() == 1 {
-						let str = vec.first().unwrap();
-
-						if let Ok(pool) = DicePool::from_str(str) {
-							*value = PropValue::DicePool(pool);
-						}
-					}
-				}
-			}
-			_ => {}
-		}
-	}
-	if let Either::Left(item) = item_or_properties {
-		for child in &mut item.children {
-			convert_properties(&mut Either::Right(&mut child.properties));
-		}
-	}
 }
 
 impl PdfExtract {
@@ -95,11 +36,11 @@ impl PdfExtract {
 			.sections
 			.par_iter()
 			.map(|span| (span.kind.clone(), parse_span(span)))
-			.map(|(kind, mut parsed)| {
-				parsed
-					.par_iter_mut()
-					.for_each(|item| convert_properties(&mut Either::Left(item)));
-
+			.map(|(kind, parsed)| {
+				let parsed = parsed
+					.into_par_iter()
+					.map(|item| convert_item(&kind, item))
+					.collect();
 				(kind, parsed)
 			})
 			.collect();
@@ -189,11 +130,11 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 	body
 }
 
-pub fn parse_span(span: &Section) -> Vec<Item> {
+pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 	let mut out = Vec::new();
 	let mut str_pos = span.extract.len();
 
-	let mut children: Vec<SubItem> = Vec::new();
+	let mut children: Vec<ParserSubItem> = Vec::new();
 
 	let matches: Vec<_> = match span.kind {
 		PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(&span.extract).collect(),
@@ -304,7 +245,7 @@ pub fn parse_span(span: &Section) -> Vec<Item> {
 					let mut desc = desc;
 					desc.insert(0, normalize(sub_begin.unwrap().as_str()));
 
-					children.push(SubItem {
+					children.push(ParserSubItem {
 						name: name.to_owned(),
 						description: to_paragraphs(desc),
 						properties: props,
@@ -330,7 +271,7 @@ pub fn parse_span(span: &Section) -> Vec<Item> {
 			.unwrap_or(&0);
 
 		children.reverse();
-		out.push(Item {
+		out.push(ParserItem {
 			name: name.to_owned(),
 			page: *page,
 			description: to_paragraphs(desc),

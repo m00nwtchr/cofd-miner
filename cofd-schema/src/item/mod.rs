@@ -1,91 +1,56 @@
-use std::{collections::BTreeMap, fmt::Display};
-
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
 
-use crate::{
-	dice_pool::DicePool,
-	dot_range::DotRange,
-	prerequisites::{Prerequisite, Prerequisites},
-};
+use crate::{dice_pool::DicePool, dot_range::DotRange, prerequisites::Prerequisites};
 use merit::MeritTag;
+use self::merit::MeritSubItem;
 
 pub mod merit;
 
-#[derive(
-	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString, Display,
-)]
-#[strum(ascii_case_insensitive)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum ItemProp {
-	// Description,
-	DotRating,
-	Tags,
-
-	#[strum(serialize = "Prerequisites", serialize = "Prerequisite")]
-	Prerequisites,
-	#[strum(to_string = "Style Tags", serialize = "Style Tag")]
-	StyleTags,
-	Cost,
-	#[strum(to_string = "Dice Pool")]
-	DicePool,
-	Action,
-	Duration,
-	#[strum(serialize = "Effects", serialize = "Effect")]
-	Effects,
-	#[strum(serialize = "Drawbacks", serialize = "Drawback")]
-	Drawbacks,
-	#[strum(serialize = "Notes", serialize = "Note")]
-	Notes,
+pub struct ActionFields {
+	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	pub cost: Vec<String>,
+	pub dice_pool: DicePool,
+	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	pub action: Vec<String>,
+	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	pub duration: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum PropValue {
-	Vec(Vec<String>),
-	Bool(bool),
-	DotRange(DotRange),
-	DicePool(DicePool),
-	Prerequisites(Prerequisites),
-	Tags(Vec<MeritTag>),
+pub enum ItemType {
+	#[serde(rename_all = "camelCase")]
+	Merit {
+		dot_rating: DotRange,
+		prerequisites: Prerequisites,
+		#[serde(default, skip_serializing_if = "crate::is_empty")]
+		style_tags: Vec<MeritTag>,
+		#[serde(default, skip_serializing_if = "crate::is_empty")]
+		drawbacks: Vec<String>,
+
+		#[serde(default, skip_serializing_if = "crate::is_empty")]
+		children: Vec<MeritSubItem>,
+
+		#[serde(flatten)]
+		action: Option<ActionFields>,
+
+		#[serde(default, skip_serializing_if = "crate::is_empty")]
+		notes: Vec<String>,
+	},
 }
 
-impl Display for PropValue {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			PropValue::Vec(vec) => vec.join("\n").fmt(f),
-			PropValue::Bool(b) => b.fmt(f),
-			PropValue::DotRange(dr) => dr.fmt(f),
-			PropValue::DicePool(d) => d.fmt(f),
-			PropValue::Prerequisites(p) => p.fmt(f),
-			PropValue::Tags(_) => todo!(),
-		}
-	}
-}
-
-impl PropValue {
-	pub fn insert(&mut self, index: usize, element: String) {
-		if let PropValue::Vec(vec) = self {
-			vec.insert(index, element)
-		}
-	}
-}
-
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct SubItem {
-	pub name: String,
-	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "crate::is_empty_map", flatten)]
-	pub properties: BTreeMap<ItemProp, PropValue>,
-}
-
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Item {
 	pub name: String,
 	pub page: usize,
+
 	#[serde(default, skip_serializing_if = "crate::is_empty")]
-	pub children: Vec<SubItem>,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "crate::is_empty_map", flatten)]
-	pub properties: BTreeMap<ItemProp, PropValue>,
+	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	pub effects: Vec<String>,
+
+	#[serde(flatten)]
+	pub inner: ItemType,
 }

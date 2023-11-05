@@ -19,10 +19,6 @@ pub mod prelude {
 
 pub static DOT_CHAR: char = '•';
 
-pub(crate) fn is_empty_map<K, V>(map: &BTreeMap<K, V>) -> bool {
-	map.is_empty()
-}
-
 pub(crate) fn is_empty<T>(vec: &Vec<T>) -> bool {
 	vec.is_empty()
 }
