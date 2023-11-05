@@ -23,8 +23,7 @@ pub enum Prerequisite {
 	TraitOr(Vec<Trait>, u8),
 
 	// Or(Vec<Prerequisite>),
-	Not(Box<Prerequisite>),
-
+	// Not(Box<Prerequisite>),
 	Unknown(String, u8),
 	#[serde(untagged)]
 	Special(String),
@@ -96,7 +95,7 @@ impl Display for Prerequisite {
 				}
 				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
 			}
-			Prerequisite::Not(_) => todo!(),
+			// Prerequisite::Not(_) => todo!(),
 			Prerequisite::Unknown(str, num) => {
 				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
 			}

@@ -15,9 +15,9 @@ pub struct BookInfo {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Book {
 	pub info: BookInfo,
-	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub merits: Vec<Item>,
-	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub mage_spells: Vec<Item>,
 }
 

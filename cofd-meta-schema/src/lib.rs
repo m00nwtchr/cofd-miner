@@ -7,18 +7,6 @@ use cofd_schema::book::BookInfo;
 
 mod page_kind;
 
-fn is_none<T>(v: &Option<T>) -> bool {
-	v.is_none()
-}
-
-fn is_empty<T>(v: &Vec<T>) -> bool {
-	v.is_empty()
-}
-
-fn is_empty_str(str: &String) -> bool {
-	str.is_empty() || str.eq("Unnamed")
-}
-
 fn unnamed() -> String {
 	"Unnamed".to_string()
 }
@@ -66,13 +54,13 @@ pub enum Op {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SectionMeta {
-	#[serde(default = "unnamed", skip_serializing_if = "is_empty_str")]
+	#[serde(default = "unnamed", skip_serializing_if = "String::is_empty")]
 	pub name: String,
 	pub pages: RangeInclusive<usize>,
-	#[serde(default, skip_serializing_if = "is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub range: Option<Span>,
 	pub kind: PageKind,
-	#[serde(default, skip_serializing_if = "is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub ops: Vec<Op>,
 }
 

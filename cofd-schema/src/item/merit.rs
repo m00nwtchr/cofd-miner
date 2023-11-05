@@ -24,9 +24,9 @@ impl Display for MeritTag {
 pub struct MeritSubItem {
 	pub name: String,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub prerequisites: Prerequisites,
 	pub dot_rating: DotRange,
-	#[serde(default, skip_serializing_if = "crate::is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub drawbacks: Vec<String>,
 }

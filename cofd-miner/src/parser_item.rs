@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, str::FromStr};
 
 use cofd_meta_schema::PageKind;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
+use strum::EnumString;
 
 use cofd_schema::{
 	dice_pool::DicePool,
@@ -15,7 +15,7 @@ use cofd_schema::{
 };
 
 #[derive(
-	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString, Display,
+	Debug, Clone, Copy, Serialize, Deserialize, PartialOrd, Ord, PartialEq, Eq, EnumString,
 )]
 #[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
@@ -59,19 +59,11 @@ impl PropValue {
 	}
 }
 
-fn is_empty_map<K, V>(map: &BTreeMap<K, V>) -> bool {
-	map.is_empty()
-}
-
-fn is_empty<T>(vec: &Vec<T>) -> bool {
-	vec.is_empty()
-}
-
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct ParserSubItem {
 	pub name: String,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "is_empty_map", flatten)]
+	#[serde(default, skip_serializing_if = "BTreeMap::is_empty", flatten)]
 	pub properties: BTreeMap<ItemProp, PropValue>,
 }
 
@@ -79,10 +71,10 @@ pub struct ParserSubItem {
 pub struct ParserItem {
 	pub name: String,
 	pub page: usize,
-	#[serde(default, skip_serializing_if = "is_empty")]
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub children: Vec<ParserSubItem>,
 	pub description: Vec<String>,
-	#[serde(default, skip_serializing_if = "is_empty_map", flatten)]
+	#[serde(default, skip_serializing_if = "BTreeMap::is_empty", flatten)]
 	pub properties: BTreeMap<ItemProp, PropValue>,
 }
 
