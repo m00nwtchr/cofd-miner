@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::{convert::Into, fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, ParseError};
@@ -165,10 +165,10 @@ impl FromStr for Trait {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		Attribute::from_str(s)
-			.map(|attr| attr.into())
-			.or_else(|_| Skill::from_str(s).map(|skill| skill.into()))
-			.or_else(|_| SupernaturalTolerance::from_str(s).map(|st| st.into()))
-			.or_else(|_| DerivedTrait::from_str(s).map(|trait_| trait_.into()))
+			.map(Into::into)
+			.or_else(|_| Skill::from_str(s).map(Into::into))
+			.or_else(|_| SupernaturalTolerance::from_str(s).map(Into::into))
+			.or_else(|_| DerivedTrait::from_str(s).map(Into::into))
 	}
 }
 

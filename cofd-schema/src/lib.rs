@@ -1,5 +1,5 @@
-use std::collections::BTreeMap;
-
+#![deny(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
 pub mod book;
 pub mod dice_pool;
 pub mod dot_range;

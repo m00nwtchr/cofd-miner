@@ -25,11 +25,12 @@ pub struct PdfExtract {
 }
 
 impl PdfExtract {
+	#[must_use]
 	pub fn parse(self) -> Book {
 		let mut parse = Book {
 			info: self.info,
-			merits: Default::default(),
-			mage_spells: Default::default(),
+			merits: Vec::default(),
+			mage_spells: Vec::default(),
 		};
 
 		let sections: Vec<(PageKind, Vec<Item>)> = self
@@ -130,6 +131,7 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 	body
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 	let mut out = Vec::new();
 	let mut str_pos = span.extract.len();
@@ -157,7 +159,7 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 			} else {
 				let mut name = name.to_case(Case::Title);
 				for i in is {
-					name.replace_range(i..(i + 1), "-");
+					name.replace_range(i..=i, "-");
 				}
 				name
 			}
@@ -246,7 +248,7 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 					desc.insert(0, normalize(sub_begin.unwrap().as_str()));
 
 					children.push(ParserSubItem {
-						name: name.to_owned(),
+						name: name.clone(),
 						description: to_paragraphs(desc),
 						properties: props,
 					});
@@ -267,12 +269,11 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 			.page_ranges
 			.iter()
 			.find(|(_, range)| range.contains(&pos))
-			.map(|(p, _)| p)
-			.unwrap_or(&0);
+			.map_or(&0, |(p, _)| p);
 
 		children.reverse();
 		out.push(ParserItem {
-			name: name.to_owned(),
+			name: name.clone(),
 			page: *page,
 			description: to_paragraphs(desc),
 			children,

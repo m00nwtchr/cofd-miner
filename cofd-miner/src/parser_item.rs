@@ -54,7 +54,7 @@ pub enum PropValue {
 impl PropValue {
 	pub fn insert(&mut self, index: usize, element: String) {
 		if let PropValue::Vec(vec) = self {
-			vec.insert(index, element)
+			vec.insert(index, element);
 		}
 	}
 }
@@ -110,6 +110,7 @@ fn convert_tags(vec: Vec<String>) -> Vec<MeritTag> {
 	tags
 }
 
+#[warn(clippy::needless_pass_by_value)]
 fn convert_dice_pool(vec: Vec<String>) -> Option<DicePool> {
 	if vec.len() == 1 {
 		let str = vec.first().unwrap();
@@ -121,6 +122,7 @@ fn convert_dice_pool(vec: Vec<String>) -> Option<DicePool> {
 	None
 }
 
+#[allow(clippy::too_many_lines)]
 pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> Item {
 	let mut properties = item.properties;
 	Item {

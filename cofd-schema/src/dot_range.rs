@@ -1,5 +1,5 @@
 use std::{
-	fmt::{Display, Write},
+	fmt::Display,
 	ops::{RangeFrom, RangeInclusive},
 	str::FromStr,
 };
@@ -27,6 +27,7 @@ pub enum DotRange {
 	RangeFrom(MyRangeFrom),
 }
 
+#[warn(clippy::cast_possible_truncation)]
 fn dot_to_num(str: &str) -> Option<u8> {
 	if str.chars().all(|f| f.eq(&'•')) {
 		Some(str.chars().count() as u8)
@@ -80,7 +81,7 @@ impl Display for DotRange {
 					if !out.is_empty() {
 						out += ", ";
 					}
-					out += &num_to_dots(*num)
+					out += &num_to_dots(*num);
 				}
 				f.write_str(&out)
 			}

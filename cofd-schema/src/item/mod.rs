@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use self::merit::MeritSubItem;
 use crate::{dice_pool::DicePool, dot_range::DotRange, prerequisites::Prerequisites};
 use merit::MeritTag;
-use self::merit::MeritSubItem;
 
 pub mod merit;
 

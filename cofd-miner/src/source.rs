@@ -20,6 +20,8 @@ pub struct Section {
 	pub page_ranges: HashMap<usize, Range<usize>>,
 }
 
+#[must_use]
+#[warn(clippy::missing_panics_doc)]
 pub fn process_section(
 	pages: &BTreeMap<usize, String>,
 	section: &SectionMeta,

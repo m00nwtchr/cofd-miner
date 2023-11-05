@@ -139,7 +139,7 @@ impl Display for DicePool {
 
 			DicePool::Trait(trait_) => f.write_str(trait_.as_ref()),
 
-			DicePool::Key(key) => f.write_str(&key),
+			DicePool::Key(key) => f.write_str(key),
 
 			DicePool::Min(p1, p2) => f.write_fmt(format_args!("Lower of {p1} and {p2}")),
 			DicePool::Max(p1, p2) => f.write_fmt(format_args!("Higher of {p1} and {p2}")),

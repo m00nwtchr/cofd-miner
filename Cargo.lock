@@ -382,6 +382,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "strum",
+ "thiserror",
  "walkdir",
 ]
 

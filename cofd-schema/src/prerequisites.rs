@@ -36,6 +36,7 @@ impl From<Template> for Prerequisite {
 	}
 }
 
+#[warn(clippy::cast_possible_truncation)]
 fn parse_val(val: &str) -> Option<u8> {
 	let val = val.trim_end_matches('+');
 	if val.chars().all(|c| c == DOT_CHAR) {
@@ -65,9 +66,10 @@ impl FromStr for Prerequisite {
 					Trait::from_str(prereq)
 						.map(|trait_| Prerequisite::Trait(trait_, parse_val(dots).unwrap_or(0)))
 						.or_else(|_| {
-							Ok(parse_val(dots)
-								.map(|d| Prerequisite::Unknown(prereq.to_owned(), d))
-								.unwrap_or_else(|| Prerequisite::Special(s.to_owned())))
+							Ok(parse_val(dots).map_or_else(
+								|| Prerequisite::Special(s.to_owned()),
+								|d| Prerequisite::Unknown(prereq.to_owned(), d),
+							))
 						})
 				}
 			} else {
@@ -88,7 +90,7 @@ impl Display for Prerequisite {
 				let mut str = String::new();
 				for trait_ in traits {
 					if !str.is_empty() {
-						str += " or "
+						str += " or ";
 					}
 					str += trait_.as_ref();
 				}
@@ -126,7 +128,7 @@ impl Display for Prerequisites {
 		let mut str = String::new();
 		for prereq in &self.0 {
 			if !str.is_empty() {
-				str += ", "
+				str += ", ";
 			}
 			str += &prereq.to_string();
 		}

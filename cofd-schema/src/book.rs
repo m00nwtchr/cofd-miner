@@ -24,6 +24,7 @@ pub struct Book {
 mod hex {
 	use serde::{Deserialize, Serialize};
 
+	#[allow(clippy::trivially_copy_pass_by_ref)]
 	pub fn serialize<S>(v: &u64, serializer: S) -> std::result::Result<S::Ok, S::Error>
 	where
 		S: serde::Serializer,
