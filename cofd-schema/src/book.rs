@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::item::Item;
+use crate::item::{merit::Merit, Item};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -16,9 +16,9 @@ pub struct BookInfo {
 pub struct Book {
 	pub info: BookInfo,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub merits: Vec<Item>,
+	pub merits: Vec<Item<Merit>>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub mage_spells: Vec<Item>,
+	pub mage_spells: Vec<Item<Merit>>,
 }
 
 mod hex {

@@ -7,8 +7,8 @@ use strum::EnumString;
 use cofd_schema::{
 	dice_pool::DicePool,
 	item::{
-		merit::{MeritSubItem, MeritTag},
-		ActionFields, Item, ItemType,
+		merit::{Merit, MeritSubItem, MeritTag},
+		ActionFields, Item, ItemKind,
 	},
 	prelude::DotRange,
 	prerequisites::{Prerequisite, Prerequisites},
@@ -115,21 +115,24 @@ fn convert_dice_pool(vec: Vec<String>) -> Option<DicePool> {
 }
 
 #[allow(clippy::too_many_lines)]
-pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> Item {
+pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 	let mut properties = item.properties;
-	Item {
-		name: item.name,
-		page: item.page,
-		description: item.description,
-		effects: properties
-			.remove(&ItemProp::Effects)
-			.and_then(|v| match v {
-				PropValue::Vec(ve) => Some(ve),
-				_ => None,
-			})
-			.unwrap_or_default(),
-		inner: match kind {
-			PageKind::Merit(_) => ItemType::Merit {
+
+	let effects = properties
+		.remove(&ItemProp::Effects)
+		.and_then(|v| match v {
+			PropValue::Vec(ve) => Some(ve),
+			_ => None,
+		})
+		.unwrap_or_default();
+
+	match &kind {
+		PageKind::Merit(_) => ItemKind::Merit(Item {
+			name: item.name,
+			page: item.page,
+			description: item.description,
+			effects,
+			inner: Merit {
 				dot_rating: properties
 					.remove(&ItemProp::DotRating)
 					.and_then(|v| match v {
@@ -234,7 +237,8 @@ pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> Item {
 					})
 					.unwrap_or_default(),
 			},
-			PageKind::MageSpell => todo!(),
-		},
+		}),
+
+		PageKind::MageSpell => todo!(),
 	}
 }

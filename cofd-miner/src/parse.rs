@@ -13,7 +13,7 @@ use crate::{
 use cofd_meta_schema::PageKind;
 use cofd_schema::{
 	book::{Book, BookInfo},
-	item::Item,
+	item::ItemKind,
 	prelude::DotRange,
 };
 
@@ -33,7 +33,7 @@ impl PdfExtract {
 			mage_spells: Vec::default(),
 		};
 
-		let sections: Vec<(PageKind, Vec<Item>)> = self
+		let sections: Vec<(PageKind, Vec<ItemKind>)> = self
 			.sections
 			.par_iter()
 			.map(|span| (span.kind.clone(), parse_span(span)))
@@ -48,8 +48,14 @@ impl PdfExtract {
 
 		for (kind, vec) in sections {
 			match kind {
-				PageKind::Merit(_) => parse.merits.extend(vec),
-				PageKind::MageSpell => parse.mage_spells.extend(vec),
+				PageKind::Merit(_) => parse.merits.extend(vec.into_iter().map(|i| match i {
+					ItemKind::Merit(merit) => merit,
+					// _ => unreachable!(),
+				})),
+				PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
+					ItemKind::Merit(_) => todo!(),
+					// _ => unreachable!(),
+				})),
 			}
 		}
 		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));

@@ -1,10 +1,7 @@
 use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
 
-use self::merit::MeritSubItem;
-use crate::{dice_pool::DicePool, dot_range::DotRange, prerequisites::Prerequisites};
-use merit::MeritTag;
-
+use self::merit::Merit;
+use crate::dice_pool::DicePool;
 pub mod merit;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,33 +16,12 @@ pub struct ActionFields {
 	pub duration: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type")]
-pub enum ItemType {
-	#[serde(rename_all = "camelCase")]
-	Merit {
-		dot_rating: DotRange,
-		#[serde(default, skip_serializing_if = "Vec::is_empty")]
-		prerequisites: Prerequisites,
-		#[serde(default, skip_serializing_if = "Vec::is_empty")]
-		style_tags: Vec<MeritTag>,
-		#[serde(default, skip_serializing_if = "Vec::is_empty")]
-		drawbacks: Vec<String>,
-
-		#[serde(default, skip_serializing_if = "Vec::is_empty")]
-		children: Vec<MeritSubItem>,
-
-		// #[serde(default, skip_serializing_if = "Option::is_none")]
-		#[serde(flatten)]
-		action: Option<ActionFields>,
-
-		#[serde(default, skip_serializing_if = "Vec::is_empty")]
-		notes: Vec<String>,
-	},
+pub enum ItemKind {
+	Merit(Item<Merit>),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Item {
+pub struct Item<T> {
 	pub name: String,
 	pub page: usize,
 
@@ -55,5 +31,5 @@ pub struct Item {
 	pub effects: Vec<String>,
 
 	#[serde(flatten)]
-	pub inner: ItemType,
+	pub inner: T,
 }
