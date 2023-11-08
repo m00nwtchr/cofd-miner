@@ -20,13 +20,11 @@ pub struct Section {
 	pub page_ranges: HashMap<usize, Range<usize>>,
 }
 
-#[must_use]
-#[warn(clippy::missing_panics_doc)]
 pub fn process_section(
 	pages: &BTreeMap<usize, String>,
 	section: &SectionMeta,
 	flag: bool,
-) -> Section {
+) -> anyhow::Result<Section> {
 	let pages: BTreeMap<usize, String> = pages
 		.range(section.pages.clone())
 		.map(|(page_i, page)| {
@@ -91,7 +89,7 @@ pub fn process_section(
 					}
 				}
 				Op::RegexReplace { regex, replace } => {
-					let regex = Regex::new(regex).unwrap();
+					let regex = Regex::new(regex)?;
 
 					extract = regex.replace_all(&extract, replace).to_string();
 				} // Op::Swap { a, b } => {
@@ -108,16 +106,16 @@ pub fn process_section(
 		}
 	}
 
-	Section {
+	Ok(Section {
 		extract,
 		kind: section.kind.clone(),
 		page_ranges,
-	}
+	})
 }
 
 pub fn extract_text(path: impl AsRef<Path>, source_meta: &SourceMeta) -> Result<PdfExtract> {
 	let pages = crate::backend::extract_pages(path)?;
-	let sections = source_meta
+	let sections: Result<Vec<_>> = source_meta
 		.sections
 		.par_iter()
 		.map(|section| process_section(&pages, section, false))
@@ -125,6 +123,6 @@ pub fn extract_text(path: impl AsRef<Path>, source_meta: &SourceMeta) -> Result<
 
 	Ok(PdfExtract {
 		info: source_meta.info.clone(),
-		sections,
+		sections: sections?,
 	})
 }

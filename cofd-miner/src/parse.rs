@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, str::FromStr};
 
+use anyhow::Result;
 use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
 use rayon::prelude::*;
@@ -28,24 +29,24 @@ pub struct PdfExtract {
 }
 
 impl PdfExtract {
-	#[must_use]
-	pub fn parse(self) -> Book {
-		let sections: Vec<(PageKind, Vec<ItemKind>)> = self
+	pub fn parse(self) -> Result<Book> {
+		let sections: Result<Vec<(PageKind, Vec<ItemKind>)>> = self
 			.sections
 			.par_iter()
-			.map(|span| (span.kind.clone(), parse_span(&self.info, span)))
-			.map(|(kind, parsed)| {
-				let parsed = parsed
+			.map(|span| parse_span(&self.info, span).map(|parsed| (span.kind.clone(), parsed)))
+			.map(|result| {
+				let (kind, parsed) = result?;
+				let parsed: Vec<ItemKind> = parsed
 					.into_par_iter()
 					.map(|item| convert_item(&kind, item))
 					.collect();
-				(kind, parsed)
+				Ok((kind, parsed))
 			})
 			.collect();
 
 		let mut parse = Book::from(self.info);
 
-		for (kind, vec) in sections {
+		for (kind, vec) in sections? {
 			match kind {
 				PageKind::Merit(_) => parse.merits.extend(vec.into_iter().map(|i| match i {
 					ItemKind::Merit(merit) => merit,
@@ -69,7 +70,7 @@ impl PdfExtract {
 		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));
 		parse.mage_spells.sort_by(|a, b| a.name.cmp(&b.name));
 
-		parse
+		Ok(parse)
 	}
 }
 
@@ -146,8 +147,7 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 }
 
 #[allow(clippy::too_many_lines)]
-#[warn(clippy::missing_panics_doc)]
-pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
+pub fn parse_span(info: &BookInfo, span: &Section) -> Result<Vec<ParserItem>> {
 	let mut out = Vec::new();
 	let mut str_pos = span.extract.len();
 
@@ -161,7 +161,7 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 	for captures in matches.into_iter().rev() {
 		let mut props = BTreeMap::new();
 
-		let name = normalize(captures.name("name").unwrap().as_str());
+		let name = normalize(captures.name("name").map_or("", |f| f.as_str()));
 		let name = if name.chars().all(|f| f.is_uppercase() || !f.is_alphabetic()) {
 			let is: Vec<_> = name
 				.chars()
@@ -207,7 +207,7 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 				if let Some(cost) = cost {
 					props.insert(
 						ItemProp::DotRating,
-						PropValue::DotRange(DotRange::from_str(cost.as_str()).unwrap()),
+						PropValue::DotRange(DotRange::from_str(cost.as_str())?),
 					);
 				}
 
@@ -226,31 +226,31 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 					let mut lines: Vec<String> = Vec::new();
 					for el in body.iter().rev() {
 						if let Some(prop) = PROP_REGEX.captures(el) {
-							let prop_key =
-								ItemProp::from_str(prop.get(1).unwrap().as_str()).unwrap();
+							if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
+								let prop_key = ItemProp::from_str(prop_key.as_str())?;
 
-							let prop_val = prop.get(2).unwrap().as_str().to_owned();
-
-							lines.push(prop_val);
-							lines.reverse();
-							match prop_key {
-								ItemProp::Prerequisites => {
-									props.insert(
-										ItemProp::Prerequisites,
-										PropValue::Vec(
-											to_paragraphs(lines)
-												.join(" ")
-												.split(", ")
-												.map(str::to_owned)
-												.collect(),
-										),
-									);
+								lines.push(prop_val.as_str().to_owned());
+								lines.reverse();
+								match prop_key {
+									ItemProp::Prerequisites => {
+										props.insert(
+											ItemProp::Prerequisites,
+											PropValue::Vec(
+												to_paragraphs(lines)
+													.join(" ")
+													.split(", ")
+													.map(str::to_owned)
+													.collect(),
+											),
+										);
+									}
+									_ => {
+										props
+											.insert(prop_key, PropValue::Vec(to_paragraphs(lines)));
+									}
 								}
-								_ => {
-									props.insert(prop_key, PropValue::Vec(to_paragraphs(lines)));
-								}
+								lines = Vec::new();
 							}
-							lines = Vec::new();
 						} else {
 							lines.push(el.clone());
 						}
@@ -259,9 +259,9 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 					lines
 				};
 
-				if sub {
+				if let Some(sub_begin) = sub_begin {
 					let mut desc = desc;
-					desc.insert(0, normalize(sub_begin.unwrap().as_str()));
+					desc.insert(0, normalize(sub_begin.as_str()));
 
 					children.push(ParserSubItem {
 						name: name.clone(),
@@ -277,25 +277,27 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 			PageKind::Gift(_) => todo!(),
 		};
 
-		let pos = captures.get(0).unwrap().start();
+		if let Some(match_) = captures.get(0) {
+			let pos = match_.start();
 
-		let page = span
-			.page_ranges
-			.iter()
-			.find(|(_, range)| range.contains(&pos))
-			.map_or(&0, |(p, _)| p);
+			let page = span
+				.page_ranges
+				.iter()
+				.find(|(_, range)| range.contains(&pos))
+				.map_or(&0, |(p, _)| p);
 
-		children.reverse();
-		out.push(ParserItem {
-			name: name.clone(),
-			reference: BookReference(info.id, *page),
-			description: to_paragraphs(desc),
-			children,
-			properties: props,
-		});
-		children = Vec::new();
+			children.reverse();
+			out.push(ParserItem {
+				name: name.clone(),
+				reference: BookReference(info.id, *page),
+				description: to_paragraphs(desc),
+				children,
+				properties: props,
+			});
+			children = Vec::new();
+		}
 	}
-	out
+	Ok(out)
 }
 
 fn normalize(str: &str) -> String {

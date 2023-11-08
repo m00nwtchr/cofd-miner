@@ -103,8 +103,7 @@ fn convert_tags(vec: Vec<String>) -> Vec<MeritTag> {
 	tags
 }
 
-#[warn(clippy::needless_pass_by_value)]
-fn convert_dice_pool(vec: Vec<String>) -> Option<DicePool> {
+fn convert_dice_pool(vec: &[String]) -> Option<DicePool> {
 	if vec.len() == 1 {
 		let str = vec.first().unwrap();
 
@@ -127,7 +126,7 @@ fn convert_action(properties: &mut BTreeMap<ItemProp, PropValue>) -> Option<Acti
 	let dice_pool = properties
 		.remove(&ItemProp::DicePool)
 		.and_then(|i| match i {
-			PropValue::Vec(v) => convert_dice_pool(v),
+			PropValue::Vec(v) => convert_dice_pool(&v),
 			_ => None,
 		});
 	let duration = properties
