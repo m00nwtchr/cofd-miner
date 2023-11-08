@@ -28,12 +28,17 @@ pub enum DotRange {
 }
 
 #[warn(clippy::cast_possible_truncation)]
-fn dot_to_num(str: &str) -> Option<u8> {
+#[must_use]
+pub fn dots_to_num(str: &str) -> Option<u8> {
 	if str.chars().all(|f| f.eq(&'•')) {
 		Some(str.chars().count() as u8)
 	} else {
 		None
 	}
+}
+
+pub fn num_to_dots(n: impl Into<usize>) -> String {
+	String::from(DOT_CHAR).repeat(n.into())
 }
 
 impl FromStr for DotRange {
@@ -54,21 +59,18 @@ impl FromStr for DotRange {
 			let value = value[0];
 			if value.contains('+') {
 				DotRange::RangeFrom(MyRangeFrom {
-					start: dot_to_num(value.trim_end_matches('+')).unwrap_or(0),
+					start: dots_to_num(value.trim_end_matches('+'))
+						.ok_or(strum::ParseError::VariantNotFound)?, // TODO: custom error types
 				})
 			} else {
-				DotRange::Num(dot_to_num(value).unwrap_or(0))
+				DotRange::Num(dots_to_num(value).unwrap_or(0))
 			}
 		} else if value.len() == 2 && binding.contains('-') {
-			DotRange::Range(dot_to_num(value[0]).unwrap()..=dot_to_num(value[1]).unwrap())
+			DotRange::Range(dots_to_num(value[0]).unwrap()..=dots_to_num(value[1]).unwrap())
 		} else {
-			DotRange::Set(value.iter().filter_map(|str| dot_to_num(str)).collect())
+			DotRange::Set(value.iter().filter_map(|str| dots_to_num(str)).collect())
 		})
 	}
-}
-
-pub fn num_to_dots(n: impl Into<usize>) -> String {
-	String::from(DOT_CHAR).repeat(n.into())
 }
 
 impl Display for DotRange {

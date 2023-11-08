@@ -10,7 +10,7 @@ use error::CofDMinerError;
 use lazy_static::lazy_static;
 pub use source::{extract_pages, extract_text, process_section};
 
-use cofd_meta_schema::SourceMeta;
+use cofd_meta::SourceMeta;
 use cofd_schema::book::Book;
 use hash::hash;
 

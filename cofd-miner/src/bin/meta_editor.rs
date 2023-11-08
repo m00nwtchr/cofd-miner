@@ -12,7 +12,7 @@ use eframe::{
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
-use cofd_meta_schema::{Op, PageKind, SectionMeta, SourceMeta, Span};
+use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta, Span};
 use cofd_miner::{hash, process_section};
 use cofd_schema::prelude::BookInfo;
 

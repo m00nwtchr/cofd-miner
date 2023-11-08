@@ -1,10 +1,11 @@
 use std::{collections::BTreeMap, str::FromStr};
 
-use cofd_meta_schema::PageKind;
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
+use cofd_meta::PageKind;
 use cofd_schema::{
+	book::BookReference,
 	dice_pool::DicePool,
 	item::{
 		merit::{Merit, MeritSubItem, MeritTag},
@@ -70,7 +71,7 @@ pub struct ParserSubItem {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct ParserItem {
 	pub name: String,
-	pub page: usize,
+	pub reference: BookReference,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub children: Vec<ParserSubItem>,
 	pub description: Vec<String>,
@@ -114,6 +115,40 @@ fn convert_dice_pool(vec: Vec<String>) -> Option<DicePool> {
 	None
 }
 
+fn convert_action(properties: &mut BTreeMap<ItemProp, PropValue>) -> Option<ActionFields> {
+	let cost = properties.remove(&ItemProp::Cost).and_then(|i| match i {
+		PropValue::Vec(v) => Some(v),
+		_ => None,
+	});
+	let action = properties.remove(&ItemProp::Action).and_then(|i| match i {
+		PropValue::Vec(v) => Some(v),
+		_ => None,
+	});
+	let dice_pool = properties
+		.remove(&ItemProp::DicePool)
+		.and_then(|i| match i {
+			PropValue::Vec(v) => convert_dice_pool(v),
+			_ => None,
+		});
+	let duration = properties
+		.remove(&ItemProp::Duration)
+		.and_then(|i| match i {
+			PropValue::Vec(v) => Some(v),
+			_ => None,
+		});
+
+	if cost.is_some() || action.is_some() || dice_pool.is_some() || duration.is_some() {
+		Some(ActionFields {
+			cost: cost.unwrap_or_default(),
+			dice_pool,
+			action: action.unwrap_or_default(),
+			duration: duration.unwrap_or_default(),
+		})
+	} else {
+		None
+	}
+}
+
 #[allow(clippy::too_many_lines)]
 pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 	let mut properties = item.properties;
@@ -129,7 +164,7 @@ pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 	match &kind {
 		PageKind::Merit(_) => ItemKind::Merit(Item {
 			name: item.name,
-			page: item.page,
+			reference: item.reference,
 			description: item.description,
 			effects,
 			inner: Merit {
@@ -147,7 +182,7 @@ pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 						_ => None,
 					})
 					.unwrap_or_default(),
-				style_tags: properties
+				tags: properties
 					.remove(&ItemProp::StyleTags)
 					.and_then(|v| match v {
 						PropValue::Vec(vec) => Some(convert_tags(vec)),
@@ -193,42 +228,7 @@ pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 							.unwrap_or_default(),
 					})
 					.collect(),
-				action: {
-					let cost = properties.remove(&ItemProp::Cost).and_then(|i| match i {
-						PropValue::Vec(v) => Some(v),
-						_ => None,
-					});
-					let action = properties.remove(&ItemProp::Action).and_then(|i| match i {
-						PropValue::Vec(v) => Some(v),
-						_ => None,
-					});
-					let dice_pool = properties
-						.remove(&ItemProp::DicePool)
-						.and_then(|i| match i {
-							PropValue::Vec(v) => convert_dice_pool(v),
-							_ => None,
-						});
-					let duration = properties
-						.remove(&ItemProp::Duration)
-						.and_then(|i| match i {
-							PropValue::Vec(v) => Some(v),
-							_ => None,
-						});
-
-					if cost.is_some()
-						|| action.is_some() || dice_pool.is_some()
-						|| duration.is_some()
-					{
-						Some(ActionFields {
-							cost: cost.unwrap_or_default(),
-							dice_pool: dice_pool.unwrap_or_default(),
-							action: action.unwrap_or_default(),
-							duration: duration.unwrap_or_default(),
-						})
-					} else {
-						None
-					}
-				},
+				action: convert_action(&mut properties),
 				notes: properties
 					.remove(&ItemProp::Notes)
 					.and_then(|v| match v {
@@ -238,7 +238,7 @@ pub(crate) fn convert_item(kind: &PageKind, item: ParserItem) -> ItemKind {
 					.unwrap_or_default(),
 			},
 		}),
-
 		PageKind::MageSpell => todo!(),
+		PageKind::Gift(_) => todo!(),
 	}
 }

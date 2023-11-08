@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use self::merit::Merit;
-use crate::dice_pool::DicePool;
+use self::{gift::FacetKind, merit::Merit};
+use crate::{book::BookReference, dice_pool::DicePool};
+
+pub mod gift;
 pub mod merit;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,7 +11,7 @@ pub mod merit;
 pub struct ActionFields {
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub cost: Vec<String>,
-	pub dice_pool: DicePool,
+	pub dice_pool: Option<DicePool>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub action: Vec<String>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -18,12 +20,13 @@ pub struct ActionFields {
 
 pub enum ItemKind {
 	Merit(Item<Merit>),
+	Facet(FacetKind),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Item<T> {
 	pub name: String,
-	pub page: usize,
+	pub reference: BookReference,
 
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub description: Vec<String>,

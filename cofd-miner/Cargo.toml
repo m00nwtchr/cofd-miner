@@ -29,7 +29,7 @@ pdf_extract = ["dep:walkdir", "dep:env_logger", "dep:serde_json"]
 
 [dependencies]
 cofd-schema.workspace = true
-cofd-meta-schema.workspace = true
+cofd-meta.workspace = true
 
 mupdf = { version = "0.4", default-features = false, optional = true, features = [
 	"sys-lib",
@@ -37,20 +37,19 @@ mupdf = { version = "0.4", default-features = false, optional = true, features =
 lopdf = { version = "0.31", optional = true }
 
 rayon = "1.7"
-log = "0.4"
 lazy_static = "1"
-strum = "0.25"
+log.workspace = true
+strum.workspace = true
 
 convert_case = "0.6"
 highway = "1.1.0"
 regex = "1.8"
 
-serde = { version = "1", features = ["derive"] }
-serde_with = "3.3"
-rmp-serde = "1"
+serde.workspace = true
+rmp-serde.workspace = true
 
-anyhow = "1"
-thiserror = "1"
+anyhow.workspace = true
+thiserror.workspace = true
 
 ###
 walkdir = { version = "2", optional = true }
@@ -65,12 +64,10 @@ eframe = { version = "0.23", optional = true, default-features = false, features
 egui_extras = { version = "0.23", optional = true }
 
 [build-dependencies]
-cofd-meta-schema.workspace = true
-
-anyhow = "1"
-
-serde_json = "1"
-rmp-serde = "1"
+cofd-meta.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+rmp-serde.workspace = true
 
 [dev-dependencies]
-serde_json = "1"
+serde_json.workspace = true

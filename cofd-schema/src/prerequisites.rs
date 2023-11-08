@@ -134,3 +134,17 @@ impl Display for Prerequisites {
 		f.write_str(&str)
 	}
 }
+
+impl FromStr for Prerequisites {
+	type Err = strum::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let ok: Result<Vec<_>, _> = s
+			.split(", ")
+			.filter(|f| !f.is_empty())
+			.map(FromStr::from_str)
+			.collect();
+
+		Ok(Prerequisites(ok?))
+	}
+}

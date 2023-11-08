@@ -10,10 +10,13 @@ use crate::{
 	parser_item::{convert_item, ItemProp, ParserItem, ParserSubItem, PropValue},
 	source::Section,
 };
-use cofd_meta_schema::PageKind;
+use cofd_meta::PageKind;
 use cofd_schema::{
-	book::{Book, BookInfo},
-	item::ItemKind,
+	book::{Book, BookInfo, BookReference},
+	item::{
+		gift::{FacetKind, GiftKind},
+		ItemKind,
+	},
 	prelude::DotRange,
 };
 
@@ -27,16 +30,10 @@ pub struct PdfExtract {
 impl PdfExtract {
 	#[must_use]
 	pub fn parse(self) -> Book {
-		let mut parse = Book {
-			info: self.info,
-			merits: Vec::default(),
-			mage_spells: Vec::default(),
-		};
-
 		let sections: Vec<(PageKind, Vec<ItemKind>)> = self
 			.sections
 			.par_iter()
-			.map(|span| (span.kind.clone(), parse_span(span)))
+			.map(|span| (span.kind.clone(), parse_span(&self.info, span)))
 			.map(|(kind, parsed)| {
 				let parsed = parsed
 					.into_par_iter()
@@ -46,16 +43,27 @@ impl PdfExtract {
 			})
 			.collect();
 
+		let mut parse = Book::from(self.info);
+
 		for (kind, vec) in sections {
 			match kind {
 				PageKind::Merit(_) => parse.merits.extend(vec.into_iter().map(|i| match i {
 					ItemKind::Merit(merit) => merit,
-					// _ => unreachable!(),
+					_ => unreachable!(),
 				})),
 				PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
-					ItemKind::Merit(_) => todo!(),
-					// _ => unreachable!(),
+					_ => unreachable!(),
 				})),
+				PageKind::Gift(kind) => match kind {
+					GiftKind::Moon => parse.moon_facets.extend(vec.into_iter().map(|i| match i {
+						ItemKind::Facet(FacetKind::Moon(item)) => item,
+						_ => unreachable!(),
+					})),
+					GiftKind::Other => parse.facets.extend(vec.into_iter().map(|i| match i {
+						ItemKind::Facet(FacetKind::Other(item)) => item,
+						_ => unreachable!(),
+					})),
+				},
 			}
 		}
 		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));
@@ -139,7 +147,7 @@ fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<Str
 
 #[allow(clippy::too_many_lines)]
 #[warn(clippy::missing_panics_doc)]
-pub fn parse_span(span: &Section) -> Vec<ParserItem> {
+pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 	let mut out = Vec::new();
 	let mut str_pos = span.extract.len();
 
@@ -148,6 +156,7 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 	let matches: Vec<_> = match span.kind {
 		PageKind::Merit(_) => MERIT_HEADER_REGEX.captures_iter(&span.extract).collect(),
 		PageKind::MageSpell => vec![],
+		PageKind::Gift(_) => todo!(),
 	};
 	for captures in matches.into_iter().rev() {
 		let mut props = BTreeMap::new();
@@ -264,10 +273,8 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 
 				desc
 			}
-
-			PageKind::MageSpell => {
-				vec![]
-			}
+			PageKind::MageSpell => todo!(),
+			PageKind::Gift(_) => todo!(),
 		};
 
 		let pos = captures.get(0).unwrap().start();
@@ -281,7 +288,7 @@ pub fn parse_span(span: &Section) -> Vec<ParserItem> {
 		children.reverse();
 		out.push(ParserItem {
 			name: name.clone(),
-			page: *page,
+			reference: BookReference(info.id.clone(), *page),
 			description: to_paragraphs(desc),
 			children,
 			properties: props,

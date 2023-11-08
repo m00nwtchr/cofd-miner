@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 pub use crate::backend::extract_pages;
 use crate::parse::PdfExtract;
-use cofd_meta_schema::{MyRangeFrom, Op, PageKind, SectionMeta, SourceMeta, Span};
+use cofd_meta::{MyRangeFrom, Op, PageKind, SectionMeta, SourceMeta, Span};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {

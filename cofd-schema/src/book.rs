@@ -1,15 +1,72 @@
+use std::str::FromStr;
+
 use serde::{Deserialize, Serialize};
+use strum::EnumString;
 
-use crate::item::{merit::Merit, Item};
+use crate::{
+	error::{self, ParseError},
+	item::{
+		gift::{Facet, Moon, Other},
+		merit::Merit,
+		Item,
+	},
+};
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[strum(ascii_case_insensitive)]
+pub enum BookId {
+	CofD,
+	HL,
+	DE,
+	DE2,
+
+	#[strum(to_string = "MtA 2e", serialize = "MtA2e")]
+	MtA2e,
+	SoS,
+
+	#[strum(to_string = "VtR 2e", serialize = "VtR2e")]
+	VtR2e,
+
+	#[strum(to_string = "WtF 2e", serialize = "WtF2e")]
+	WtF2e,
+	#[strum(to_string = "NH-SM", serialize = "NHSM")]
+	NHSM,
+
+	#[strum(to_string = "CtL 2e", serialize = "CtL2e")]
+	CtL2e,
+
+	#[strum(to_string = "MtC 2e", serialize = "MtC2e")]
+	MtC2e,
+
+	DtD,
+
+	BtP,
+
+	DtR,
+
+	Codex,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BookInfo {
 	pub name: String,
-	pub short_name: String,
+	pub id: BookId,
 	#[serde(with = "hex")]
 	pub hash: u64,
 	pub publication_date: chrono::NaiveDate,
+}
+
+impl BookInfo {
+	#[must_use]
+	pub fn new(name: String, id: BookId) -> Self {
+		BookInfo {
+			name,
+			id,
+			hash: 0,
+			publication_date: chrono::NaiveDate::default(),
+		}
+	}
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,8 +74,78 @@ pub struct Book {
 	pub info: BookInfo,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub merits: Vec<Item<Merit>>,
+
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub mage_spells: Vec<Item<Merit>>,
+
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub moon_facets: Vec<Item<Facet<Moon>>>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub facets: Vec<Item<Facet<Other>>>,
+}
+
+impl From<BookInfo> for Book {
+	fn from(info: BookInfo) -> Self {
+		Book {
+			info,
+			merits: Vec::new(),
+			mage_spells: Vec::new(),
+			moon_facets: Vec::new(),
+			facets: Vec::new(),
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BookReference(pub BookId, pub usize);
+
+impl Default for BookReference {
+	fn default() -> Self {
+		Self(BookId::CofD, Default::default())
+	}
+}
+
+impl FromStr for BookReference {
+	type Err = error::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let mut split = s
+			.split(|c: char| c.is_whitespace() || c.eq(&'p'))
+			.filter(|s| !s.is_empty());
+
+		let first = split.next();
+		let second = split.next();
+		let last = split.last();
+
+		if let (Some(first), Some(second), Some(last)) = (first, second, last) {
+			let last = last.trim();
+
+			Ok(BookReference(
+				BookId::from_str(&(first.trim().to_string() + second.trim()))
+					.map_err(ParseError::from)?,
+				usize::from_str(if let Some((l, _)) = last.rsplit_once('-') {
+					l
+				} else {
+					last
+				})
+				.map_err(ParseError::from)?,
+			))
+		} else if let (Some(first), Some(second)) = (first, second) {
+			let second = second.trim();
+
+			Ok(BookReference(
+				BookId::from_str(first.trim()).map_err(ParseError::from)?,
+				usize::from_str(if let Some((l, _)) = second.rsplit_once('-') {
+					l
+				} else {
+					second
+				})
+				.map_err(ParseError::from)?,
+			))
+		} else {
+			Err(error::ParseError::BadFormat(s.to_string()))
+		}
+	}
 }
 
 mod hex {

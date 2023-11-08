@@ -13,6 +13,13 @@ pub enum MeritTag {
 	Style,
 	#[strum(to_string = "Supernatural Merit")]
 	Supernatural,
+
+	// TODO: pdf parse
+	Mental,
+	Social,
+	Physical,
+
+	Fighting,
 }
 
 impl Display for MeritTag {
@@ -40,7 +47,7 @@ pub struct Merit {
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub prerequisites: Prerequisites,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub style_tags: Vec<MeritTag>,
+	pub tags: Vec<MeritTag>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub drawbacks: Vec<String>,
 

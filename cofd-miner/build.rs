@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::anyhow;
 
-use cofd_meta_schema::SourceMeta;
+use cofd_meta::SourceMeta;
 
 fn main() {
 	println!("cargo:rerun-if-changed=../meta");
@@ -23,5 +23,5 @@ fn main() {
 		})
 		.collect();
 
-	rmp_serde::encode::write_named(&mut File::create(&dest_path).unwrap(), &vec).unwrap();
+	rmp_serde::encode::write_named(&mut File::create(dest_path).unwrap(), &vec).unwrap();
 }
