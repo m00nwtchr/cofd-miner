@@ -17,7 +17,7 @@ required-features = ["pdf_extract"]
 [features]
 default = ["mupdf"]
 mupdf = ["dep:mupdf"]
-lopdf = ["dep:lopdf"]
+# lopdf = ["dep:lopdf"]
 
 meta_editor = [
 	"dep:eframe",
@@ -34,12 +34,11 @@ cofd-meta.workspace = true
 mupdf = { version = "0.4", default-features = false, optional = true, features = [
 	"sys-lib",
 ] }
-lopdf = { version = "0.31", optional = true }
+# lopdf = { version = "0.31", optional = true }
 
-rayon = "1.7"
-lazy_static = "1"
-log.workspace = true
 strum.workspace = true
+lazy_static = "1"
+rayon = "1.7"
 
 convert_case = "0.6"
 highway = "1.1.0"
@@ -48,6 +47,7 @@ regex = "1.8"
 serde.workspace = true
 rmp-serde.workspace = true
 
+log.workspace = true
 anyhow.workspace = true
 thiserror.workspace = true
 

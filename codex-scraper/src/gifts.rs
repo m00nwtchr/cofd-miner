@@ -11,6 +11,7 @@ use cofd_schema::{
 
 use crate::MultiMap;
 
+#[allow(clippy::type_complexity)]
 pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<Other>>)> {
 	let mut moon_gifts = Vec::new();
 	let mut gifts = Vec::new();
@@ -46,18 +47,13 @@ pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<O
 				let name = vec[0].clone();
 				let str = vec[1].clone();
 
-				let cost = vec[2].clone();
-				let pool = vec[3].clone();
-				let action = vec[4].clone();
-				let duration = vec[5].clone();
+				// let cost = vec[2].clone();
+				// let pool = vec[3].clone();
+				// let action = vec[4].clone();
+				// let duration = vec[5].clone();
 
 				let description = vec[6].clone();
 				let reference = &vec[7];
-
-				// <th>Cost</th> 2
-				// <th>Pool</th>3
-				// <th>Action</th>4
-				// <th>Duration</th> 5
 
 				if is_moon {
 					if let Some(moon_gift) = &mut moon_gift {

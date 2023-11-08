@@ -27,11 +27,11 @@ pub enum DotRange {
 	RangeFrom(MyRangeFrom),
 }
 
-#[warn(clippy::cast_possible_truncation)]
 #[must_use]
 pub fn dots_to_num(str: &str) -> Option<u8> {
-	if str.chars().all(|f| f.eq(&'•')) {
-		Some(str.chars().count() as u8)
+	let str = str.trim_end_matches('+');
+	if str.chars().all(|f| f.eq(&DOT_CHAR)) {
+		u8::try_from(str.chars().count()).ok()
 	} else {
 		None
 	}

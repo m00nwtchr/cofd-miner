@@ -288,7 +288,7 @@ pub fn parse_span(info: &BookInfo, span: &Section) -> Vec<ParserItem> {
 		children.reverse();
 		out.push(ParserItem {
 			name: name.clone(),
-			reference: BookReference(info.id.clone(), *page),
+			reference: BookReference(info.id, *page),
 			description: to_paragraphs(desc),
 			children,
 			properties: props,

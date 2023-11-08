@@ -89,7 +89,6 @@ pub fn parse(text: &str, page: PageType) -> anyhow::Result<Book> {
 			book.facets.extend(gifts.into_iter().flat_map(|f| f.facets))
 		}
 		PageType::Merits => book.merits.extend(merits::parse_merits(map)?),
-		_ => {}
 	};
 
 	Ok(book)

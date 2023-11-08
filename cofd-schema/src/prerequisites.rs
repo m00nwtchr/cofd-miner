@@ -3,9 +3,8 @@ use std::{fmt::Display, ops::Deref, str::FromStr};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	dot_range::num_to_dots,
+	dot_range::{dots_to_num, num_to_dots},
 	traits::{Template, Trait},
-	DOT_CHAR,
 };
 
 // #[derive(Debug, Serialize, Deserialize)]
@@ -35,16 +34,6 @@ impl From<Template> for Prerequisite {
 	}
 }
 
-#[warn(clippy::cast_possible_truncation)]
-fn parse_val(val: &str) -> Option<u8> {
-	let val = val.trim_end_matches('+');
-	if val.chars().all(|c| c == DOT_CHAR) {
-		Some(val.chars().count() as u8)
-	} else {
-		val.parse().ok()
-	}
-}
-
 impl FromStr for Prerequisite {
 	type Err = strum::ParseError;
 
@@ -59,13 +48,13 @@ impl FromStr for Prerequisite {
 
 					Ok(Prerequisite::TraitOr(
 						vec![l, r],
-						parse_val(dots).unwrap_or(0),
+						dots_to_num(dots).unwrap_or(0),
 					))
 				} else {
 					Trait::from_str(prereq)
-						.map(|trait_| Prerequisite::Trait(trait_, parse_val(dots).unwrap_or(0)))
+						.map(|trait_| Prerequisite::Trait(trait_, dots_to_num(dots).unwrap_or(0)))
 						.or_else(|_| {
-							Ok(parse_val(dots).map_or_else(
+							Ok(dots_to_num(dots).map_or_else(
 								|| Prerequisite::Special(s.to_owned()),
 								|d| Prerequisite::Unknown(prereq.to_owned(), d),
 							))
