@@ -7,6 +7,7 @@ use cofd_schema::{
 		gift::{Facet, Gift, Moon, Other},
 		Item,
 	},
+	splat::Renown,
 };
 
 use crate::MultiMap;
@@ -89,7 +90,9 @@ pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<O
 						description: vec![description],
 						effects: Vec::new(),
 						inner: Facet {
-							inner: Other { renown: str },
+							inner: Other {
+								renown: Renown::from_str(&str)?,
+							},
 							action: None,
 						},
 					});

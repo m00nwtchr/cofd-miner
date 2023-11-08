@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use strum::EnumDiscriminants;
 
+use crate::splat::Renown;
+
 use super::{ActionFields, Item};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -10,7 +12,7 @@ pub struct Moon {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Other {
-	pub renown: String,
+	pub renown: Renown,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -6,6 +6,7 @@ pub mod dot_range;
 pub mod error;
 pub mod item;
 pub mod prerequisites;
+pub mod splat;
 pub mod traits;
 
 pub mod prelude {
