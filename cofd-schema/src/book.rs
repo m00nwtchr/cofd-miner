@@ -6,7 +6,7 @@ use strum::EnumString;
 use crate::{
 	error::{self, ParseError},
 	item::{
-		gift::{Facet, Moon, Other},
+		gift::{Gift, Moon, Other},
 		merit::Merit,
 		Item,
 	},
@@ -79,9 +79,9 @@ pub struct Book {
 	pub mage_spells: Vec<Item<Merit>>,
 
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub moon_facets: Vec<Item<Facet<Moon>>>,
+	pub moon_gifts: Vec<Gift<Moon>>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub facets: Vec<Item<Facet<Other>>>,
+	pub gifts: Vec<Gift<Other>>,
 }
 
 impl From<BookInfo> for Book {
@@ -90,8 +90,8 @@ impl From<BookInfo> for Book {
 			info,
 			merits: Vec::new(),
 			mage_spells: Vec::new(),
-			moon_facets: Vec::new(),
-			facets: Vec::new(),
+			moon_gifts: Vec::new(),
+			gifts: Vec::new(),
 		}
 	}
 }
