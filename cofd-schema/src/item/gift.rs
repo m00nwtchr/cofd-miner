@@ -23,12 +23,10 @@ pub struct Facet<T> {
 	pub inner: T,
 }
 
-#[derive(EnumDiscriminants)]
-#[strum_discriminants(derive(Serialize, Deserialize, Hash))]
-#[strum_discriminants(name(GiftKind))]
-pub enum FacetKind {
-	Moon(Item<Facet<Moon>>),
-	Other(Item<Facet<Other>>),
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
+pub enum GiftKind {
+	Moon,
+	Other,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

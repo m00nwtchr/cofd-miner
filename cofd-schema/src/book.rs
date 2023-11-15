@@ -8,6 +8,7 @@ use crate::{
 	item::{
 		gift::{Gift, Moon, Other},
 		merit::Merit,
+		spell::Spell,
 		Item,
 	},
 };
@@ -69,19 +70,24 @@ impl BookInfo {
 	}
 }
 
+pub type MeritItem = Item<Merit>;
+pub type SpellItem = Item<Spell>;
+pub type MoonGift = Gift<Moon>;
+pub type OtherGift = Gift<Other>;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Book {
 	pub info: BookInfo,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub merits: Vec<Item<Merit>>,
+	pub merits: Vec<MeritItem>,
 
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub mage_spells: Vec<Item<Merit>>,
+	pub mage_spells: Vec<SpellItem>,
 
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub moon_gifts: Vec<Gift<Moon>>,
+	pub moon_gifts: Vec<MoonGift>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub gifts: Vec<Gift<Other>>,
+	pub gifts: Vec<OtherGift>,
 }
 
 impl From<BookInfo> for Book {

@@ -27,6 +27,12 @@ pub enum DotRange {
 	RangeFrom(MyRangeFrom),
 }
 
+impl Default for DotRange {
+	fn default() -> Self {
+		Self::Num(0)
+	}
+}
+
 #[must_use]
 pub fn dots_to_num(str: &str) -> Option<u8> {
 	let str = str.trim_end_matches('+');

@@ -8,6 +8,7 @@ use std::path::Path;
 
 use error::CofDMinerError;
 use lazy_static::lazy_static;
+use parse::PdfExtract;
 pub use source::{extract_pages, extract_text, process_section};
 
 use cofd_meta::SourceMeta;
@@ -15,7 +16,6 @@ use cofd_schema::book::Book;
 use hash::hash;
 
 mod backend;
-mod parser_item;
 
 pub mod error;
 pub mod hash;
@@ -34,7 +34,7 @@ pub fn get_meta(hash: u64) -> Option<&'static SourceMeta> {
 }
 
 pub fn parse_book_with_meta(path: impl AsRef<Path>, source: &SourceMeta) -> anyhow::Result<Book> {
-	extract_text(path, source).and_then(parse::PdfExtract::parse)
+	extract_text(path, source).and_then(PdfExtract::parse)
 }
 
 pub fn parse_book(path: impl AsRef<Path>) -> anyhow::Result<Book> {

@@ -103,6 +103,13 @@ impl From<Vec<Prerequisite>> for Prerequisites {
 	}
 }
 
+impl Prerequisites {
+	#[must_use]
+	pub fn unwrap(self) -> Vec<Prerequisite> {
+		self.0
+	}
+}
+
 impl Deref for Prerequisites {
 	type Target = Vec<Prerequisite>;
 
@@ -113,14 +120,8 @@ impl Deref for Prerequisites {
 
 impl Display for Prerequisites {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let mut str = String::new();
-		for prereq in &self.0 {
-			if !str.is_empty() {
-				str += ", ";
-			}
-			str += &prereq.to_string();
-		}
-		f.write_str(&str)
+		self.iter()
+			.try_fold((), |_result, prereq| write!(f, "{prereq}, "))
 	}
 }
 

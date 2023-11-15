@@ -3,9 +3,8 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, EnumString};
 
-use crate::{prelude::DotRange, prerequisites::Prerequisites};
-
 use super::ActionFields;
+use crate::{prelude::DotRange, prerequisites::Prerequisites};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr)]
 #[strum(ascii_case_insensitive)]
@@ -40,7 +39,7 @@ pub struct MeritSubItem {
 	pub drawbacks: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Merit {
 	pub dot_rating: DotRange,
