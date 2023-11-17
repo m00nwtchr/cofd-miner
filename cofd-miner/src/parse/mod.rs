@@ -9,18 +9,27 @@ use serde::{Deserialize, Serialize};
 use cofd_meta::PageKind;
 use cofd_schema::{
 	book::{Book, BookInfo, BookReference},
-	item::ActionFields,
+	item::{gift::GiftKind, ActionFields},
 };
 
+mod gift;
 mod item;
 mod merit;
 
 use crate::source::Section;
 
 use self::{
+	gift::parse_gifts,
 	item::{convert_dice_pool, ItemProp},
 	merit::parse_merits,
 };
+
+lazy_static! {
+	static ref PROP_REGEX: Regex = Regex::new(
+		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note)s?:\s?(.*)$"
+	)
+	.unwrap();
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PdfExtract {
@@ -34,22 +43,17 @@ impl PdfExtract {
 		let mut parse = Book::from(self.info);
 
 		for section in self.sections {
-			match section.kind {
+			match &section.kind {
 				PageKind::Merit(_) => parse.merits.extend(parse_merits(&parse.info, &section)?),
-				_ => todo!()
 				// PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
 				// 	_ => unreachable!(),
 				// })),
-				// PageKind::Gift(kind) => match kind {
-				// 	GiftKind::Moon => parse.moon_gifts.extend(vec.into_iter().map(|i| match i {
-				// 		ItemKind::MoonGift(item) => item,
-				// 		_ => unreachable!(),
-				// 	})),
-				// 	GiftKind::Other => parse.gifts.extend(vec.into_iter().map(|i| match i {
-				// 		ItemKind::OtherGift(item) => item,
-				// 		_ => unreachable!(),
-				// 	})),
-				// },
+				PageKind::Gift(kind) => match kind {
+					// GiftKind::Moon => parse.moon_gifts.extend(todo!()),
+					GiftKind::Other => parse.gifts.extend(parse_gifts(&parse.info, &section)?),
+					_ => {}
+				},
+				_ => todo!(),
 			}
 		}
 		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));
@@ -59,22 +63,13 @@ impl PdfExtract {
 	}
 }
 
-lazy_static! {
-
-	static ref PROP_REGEX: Regex = Regex::new(r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note)s?:\s?(.*)$").unwrap();
-	//
-}
-
-// pub fn parse_span(info: &BookInfo, span: &Section) -> Result<Vec<ItemKind>> {
-// 	// let mut out = Vec::new();
-// 	// let mut str_pos = span.extract.len();
-
-// 	Ok(out)
-// }
-
-fn get_book_reference(captures: &Captures<'_>, span: &Section, info: &BookInfo) -> BookReference {
+fn get_book_reference(
+	captures: &Captures<'_>,
+	section: &Section,
+	info: &BookInfo,
+) -> BookReference {
 	let page = if let Some(match_) = captures.get(0) {
-		get_page_number(&span.page_ranges, match_.start())
+		get_page_number(&section.page_ranges, match_.start())
 	} else {
 		unreachable!()
 	};

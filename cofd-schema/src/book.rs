@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{default, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
@@ -13,7 +13,7 @@ use crate::{
 	},
 };
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
 #[strum(ascii_case_insensitive)]
 pub enum BookId {
 	CofD,
@@ -45,10 +45,11 @@ pub enum BookId {
 
 	DtR,
 
+	#[default]
 	Codex,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BookInfo {
 	pub name: String,

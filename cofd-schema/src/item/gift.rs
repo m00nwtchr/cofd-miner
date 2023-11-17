@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
-use strum::EnumDiscriminants;
 
-use crate::splat::Renown;
+use crate::splat::werewolf::{Auspice, Renown};
 
 use super::{ActionFields, Item};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Moon {
+	pub auspice: Auspice,
 	pub level: u8,
 }
 
@@ -20,6 +20,7 @@ pub struct Facet<T> {
 	#[serde(flatten)]
 	pub action: Option<ActionFields>,
 
+	#[serde(flatten)]
 	pub inner: T,
 }
 

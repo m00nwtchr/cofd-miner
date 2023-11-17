@@ -277,9 +277,9 @@ impl eframe::App for MetaEditorApp {
 							ui.fonts(|f| f.layout_job(layout_job))
 						};
 						let section =
-							process_section(&self.pages, section_def, self.show_full_text);
+							process_section(&self.pages, section_def, self.show_full_text).unwrap();
 
-						let mut text: &str = section.extract.as_str();
+						let mut text = section.extract.as_str();
 						use egui::TextBuffer as _;
 
 						let output = egui::TextEdit::multiline(&mut text)

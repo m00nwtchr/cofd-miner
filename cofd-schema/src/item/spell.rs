@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
 use crate::{
-	splat::{Arcanum, Practice},
+	splat::mage::{Arcanum, Practice},
 	traits::skill::Skill,
 };
 

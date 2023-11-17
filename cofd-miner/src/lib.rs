@@ -9,7 +9,6 @@ use std::path::Path;
 use error::CofDMinerError;
 use lazy_static::lazy_static;
 use parse::PdfExtract;
-pub use source::{extract_pages, extract_text, process_section};
 
 use cofd_meta::SourceMeta;
 use cofd_schema::book::Book;
@@ -21,6 +20,8 @@ pub mod error;
 pub mod hash;
 pub mod parse;
 pub mod source;
+
+pub use source::{extract_pages, extract_text, process_section};
 
 const META_JSON: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/meta.bin"));
 
