@@ -106,6 +106,48 @@
 			]
 		},
 		{
+			"name": "Moon Gifts",
+			"pages": {
+				"start": 115,
+				"end": 121
+			},
+			"range": {
+				"start": 4509,
+				"end": 29340
+			},
+			"kind": {
+				"Gift": "Moon"
+			}
+		},
+		{
+			"name": "Shadow Gifts",
+			"pages": {
+				"start": 121,
+				"end": 136
+			},
+			"range": {
+				"start": 2088,
+				"end": 71880
+			},
+			"kind": {
+				"Gift": "Other"
+			}
+		},
+		{
+			"name": "Wolf Gifts",
+			"pages": {
+				"start": 136,
+				"end": 138
+			},
+			"range": {
+				"start": 3142,
+				"end": 14251
+			},
+			"kind": {
+				"Gift": "Other"
+			}
+		},
+		{
 			"name": "Tribal Affiliate Merits",
 			"pages": {
 				"start": 304,
