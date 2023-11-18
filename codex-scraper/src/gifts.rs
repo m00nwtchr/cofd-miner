@@ -7,7 +7,7 @@ use cofd_schema::{
 		gift::{Facet, Gift, Moon, Other},
 		Item,
 	},
-	splat::Renown,
+	splat::werewolf::Renown,
 };
 
 use crate::MultiMap;
@@ -65,6 +65,7 @@ pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<O
 							inner: Facet {
 								inner: Moon {
 									level: dots_to_num(&str).unwrap_or(0),
+            						auspice: cofd_schema::splat::werewolf::Auspice::Cahalith,
 								},
 								action: /*if !(cost.is_empty()
 									&& pool.is_empty() && action.is_empty()

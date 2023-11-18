@@ -12,7 +12,7 @@ use eframe::{
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
-use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta, Span};
+use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta};
 use cofd_miner::{hash, process_section};
 use cofd_schema::prelude::BookInfo;
 
@@ -101,10 +101,7 @@ impl MetaEditorApp {
 			if let Some(range) = &section.range {
 				layout_job.sections.clear();
 
-				let byte_range = match range {
-					Span::Range(range) => 0..range.start,
-					Span::From(from) => 0..from.start,
-				};
+				let byte_range = 0..range.start;
 
 				layout_job.sections.push(epaint::text::LayoutSection {
 					leading_space: 0.0,
@@ -112,10 +109,7 @@ impl MetaEditorApp {
 					format: TextFormat::default(),
 				});
 
-				let byte_range = match range {
-					Span::Range(range) => range.clone(),
-					Span::From(from) => from.start..text.len(),
-				};
+				let byte_range = range.clone();
 				let format = TextFormat {
 					color: Color32::BLACK,
 					background: Color32::GRAY,
@@ -128,19 +122,13 @@ impl MetaEditorApp {
 					format,
 				});
 
-				#[allow(clippy::single_match)]
-				match range {
-					Span::Range(range) => {
-						let byte_range = range.end..text.len();
+				let byte_range = range.end..text.len();
 
-						layout_job.sections.push(epaint::text::LayoutSection {
-							leading_space: 0.0,
-							byte_range,
-							format: TextFormat::default(),
-						});
-					}
-					_ => {}
-				}
+				layout_job.sections.push(epaint::text::LayoutSection {
+					leading_space: 0.0,
+					byte_range,
+					format: TextFormat::default(),
+				});
 			}
 		}
 
@@ -300,7 +288,7 @@ impl eframe::App for MetaEditorApp {
 						output.response.context_menu(|ui| {
 							if ui.button("Set range").clicked() {
 								if let Some(range) = &self.last_range {
-									section_def.range = Some(Span::Range(range.clone()));
+									section_def.range = Some(range.clone());
 								}
 
 								ui.close_menu();

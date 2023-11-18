@@ -9,22 +9,12 @@ use serde::{Deserialize, Serialize};
 use crate::DOT_CHAR;
 
 #[derive(Serialize, Clone, Debug, Deserialize)]
-pub struct MyRangeFrom {
-	pub start: u8,
-}
-impl From<MyRangeFrom> for RangeFrom<u8> {
-	fn from(val: MyRangeFrom) -> Self {
-		val.start..
-	}
-}
-
-#[derive(Serialize, Clone, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum DotRange {
 	Num(u8),
 	Set(Vec<u8>),
 	Range(RangeInclusive<u8>),
-	RangeFrom(MyRangeFrom),
+	RangeFrom(RangeFrom<u8>),
 }
 
 impl Default for DotRange {
@@ -64,10 +54,10 @@ impl FromStr for DotRange {
 		Ok(if value.len() == 1 {
 			let value = value[0];
 			if value.contains('+') {
-				DotRange::RangeFrom(MyRangeFrom {
-					start: dots_to_num(value.trim_end_matches('+'))
-						.ok_or(strum::ParseError::VariantNotFound)?, // TODO: custom error types
-				})
+				DotRange::RangeFrom(
+					(dots_to_num(value.trim_end_matches('+'))
+						.ok_or(strum::ParseError::VariantNotFound)?)..,
+				)
 			} else {
 				DotRange::Num(dots_to_num(value).unwrap_or(0))
 			}

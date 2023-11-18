@@ -74,13 +74,13 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 					if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
 						let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
 
-						match prop_key {
-							ItemProp::Cost => todo!(),
-							ItemProp::DicePool => todo!(),
-							ItemProp::Action => todo!(),
-							ItemProp::Duration => todo!(),
-							_ => {}
-						}
+						// match prop_key {
+						// 	ItemProp::Cost => todo!(),
+						// 	ItemProp::DicePool => todo!(),
+						// 	ItemProp::Action => todo!(),
+						// 	ItemProp::Duration => todo!(),
+						// 	_ => {}
+						// }
 					}
 				} else if flag {
 					effects.push(line.to_string());

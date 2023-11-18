@@ -1,6 +1,6 @@
 use std::{
 	collections::{BTreeMap, HashMap},
-	ops::{Range, RangeFrom},
+	ops::Range,
 	path::Path,
 };
 
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 pub use crate::backend::extract_pages;
 use crate::parse::PdfExtract;
-use cofd_meta::{MyRangeFrom, Op, PageKind, SectionMeta, SourceMeta, Span};
+use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {
@@ -54,12 +54,7 @@ pub fn process_section(
 	let mut extract = if flag {
 		extract
 	} else if let Some(range) = &section.range {
-		match range {
-			Span::Range(range) => extract[range.clone()].to_owned(),
-			Span::From(range) => {
-				extract[<MyRangeFrom as Into<RangeFrom<usize>>>::into(range.clone())].to_owned()
-			}
-		}
+		extract[range.clone()].to_owned()
 	} else {
 		extract
 	};

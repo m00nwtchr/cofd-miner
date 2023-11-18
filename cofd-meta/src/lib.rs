@@ -1,4 +1,4 @@
-use std::ops::{Range, RangeFrom, RangeInclusive};
+use std::ops::{Range, RangeInclusive};
 
 use serde::{Deserialize, Serialize};
 
@@ -9,23 +9,6 @@ mod page_kind;
 
 fn unnamed() -> String {
 	"Unnamed".to_string()
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MyRangeFrom {
-	pub start: usize,
-}
-impl From<MyRangeFrom> for RangeFrom<usize> {
-	fn from(val: MyRangeFrom) -> Self {
-		val.start..
-	}
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Span {
-	Range(Range<usize>),
-	From(MyRangeFrom),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -58,7 +41,7 @@ pub struct SectionMeta {
 	pub name: String,
 	pub pages: RangeInclusive<usize>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub range: Option<Span>,
+	pub range: Option<Range<usize>>,
 	pub kind: PageKind,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub ops: Vec<Op>,

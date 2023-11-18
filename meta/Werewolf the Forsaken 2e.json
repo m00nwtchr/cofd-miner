@@ -76,7 +76,8 @@
 				"end": 113
 			},
 			"range": {
-				"start": 3499
+				"start": 3499,
+				"end": 25159
 			},
 			"kind": {
 				"Merit": null
@@ -154,7 +155,8 @@
 				"end": 304
 			},
 			"range": {
-				"start": 2527
+				"start": 2527,
+				"end": 5307
 			},
 			"kind": {
 				"Merit": null
