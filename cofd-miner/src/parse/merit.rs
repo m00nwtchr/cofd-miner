@@ -141,8 +141,7 @@ fn process_body(
 	let mut notes = Vec::new();
 	let mut drawbacks = Vec::new();
 
-	let mut action = ActionFields::default();
-	let mut action_flag = false;
+	let mut action = None;
 
 	for el in body.iter().rev() {
 		if let Some(prop) = PROP_REGEX.captures(el) {
@@ -163,11 +162,7 @@ fn process_body(
 					ItemProp::Effects => effects = to_paragraphs(lines),
 					ItemProp::Notes => notes = to_paragraphs(lines),
 					ItemProp::Drawbacks => drawbacks = to_paragraphs(lines),
-					_ => {
-						if process_action(&mut action, prop_key, lines) {
-							action_flag = true;
-						}
-					}
+					_ => process_action(&mut action, prop_key, lines),
 				}
 				lines = Vec::new();
 			}
@@ -183,7 +178,7 @@ fn process_body(
 		effects,
 		notes,
 		drawbacks,
-		if action_flag { Some(action) } else { None },
+		action,
 	)
 }
 

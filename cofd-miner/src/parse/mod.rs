@@ -76,17 +76,16 @@ fn get_book_reference(
 	BookReference(info.id, *page)
 }
 
-fn process_action(action: &mut ActionFields, prop_key: ItemProp, lines: Vec<String>) -> bool {
-	let mut flag = true;
+fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: Vec<String>) {
 	match prop_key {
-		ItemProp::Action => action.action = lines,
-		ItemProp::Cost => action.cost = lines,
-		ItemProp::DicePool => action.dice_pool = convert_dice_pool(&lines),
-		ItemProp::Duration => action.duration = lines,
-		_ => flag = false,
+		ItemProp::Action => action.get_or_insert_with(ActionFields::default).action = lines,
+		ItemProp::Cost => action.get_or_insert_with(ActionFields::default).cost = lines,
+		ItemProp::DicePool => {
+			action.get_or_insert_with(ActionFields::default).dice_pool = convert_dice_pool(&lines);
+		}
+		ItemProp::Duration => action.get_or_insert_with(ActionFields::default).duration = lines,
+		_ => {}
 	}
-
-	flag
 }
 
 // TODO: Some edge cases don't get merged properly but works ok overall.

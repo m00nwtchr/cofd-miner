@@ -6,7 +6,7 @@ use cofd_schema::{
 	dice_pool,
 	item::{
 		gift::{Facet, Gift, Other},
-		Item,
+		ActionFields, Item,
 	},
 	prelude::BookInfo,
 	splat::werewolf::Renown,
@@ -17,7 +17,7 @@ use regex::Regex;
 
 use crate::{parse::to_paragraphs, source::Section};
 
-use super::{get_book_reference, item::ItemProp, PROP_REGEX};
+use super::{get_book_reference, item::ItemProp, process_action, PROP_REGEX};
 
 lazy_static! {
 	static ref GIFT_HEADER_REGEX: Regex = Regex::new(
@@ -59,10 +59,7 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			let renown = Renown::from_str(captures.name("renown").unwrap().as_str().trim())?;
 			let reference = get_book_reference(&captures, section, info);
 
-			// let cost = Vec::new();
-			// let dice_pool = None;
-			// let action = Vec::new();
-			// let duration = Vec::new();
+			let mut action = None;
 
 			let mut effects = Vec::new();
 			let mut description = Vec::new();
@@ -74,13 +71,10 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 					if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
 						let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
 
-						// match prop_key {
-						// 	ItemProp::Cost => todo!(),
-						// 	ItemProp::DicePool => todo!(),
-						// 	ItemProp::Action => todo!(),
-						// 	ItemProp::Duration => todo!(),
-						// 	_ => {}
-						// }
+						description.push(prop_val.as_str().to_owned());
+						description.reverse();
+						process_action(&mut action, prop_key, description);
+						description = Vec::new();
 					}
 				} else if flag {
 					effects.push(line.to_string());
@@ -97,7 +91,7 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 				description: to_paragraphs(description),
 				effects: to_paragraphs(effects),
 				inner: Facet {
-					action: None,
+					action,
 					inner: Other { renown },
 				},
 			});
