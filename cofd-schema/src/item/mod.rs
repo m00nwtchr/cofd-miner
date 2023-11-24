@@ -12,6 +12,19 @@ pub mod spell;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct RollResults {
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub exceptional_success: Vec<String>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub success: Vec<String>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub failure: Vec<String>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub dramatic_failure: Vec<String>,
+}
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ActionFields {
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub cost: Vec<String>,
@@ -21,6 +34,8 @@ pub struct ActionFields {
 	pub action: Vec<String>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub duration: Vec<String>,
+
+	pub roll_results: RollResults,
 }
 
 pub enum ItemKind {

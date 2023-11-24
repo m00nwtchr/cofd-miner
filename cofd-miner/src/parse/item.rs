@@ -8,7 +8,7 @@ use cofd_schema::{
 	prerequisites::{Prerequisite, Prerequisites},
 };
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 #[strum(ascii_case_insensitive)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemProp {
@@ -22,6 +22,12 @@ pub enum ItemProp {
 	DicePool,
 	Action,
 	Duration,
+	#[strum(to_string = "Exceptional Success")]
+	ExceptionalSuccess,
+	Success,
+	Failure,
+	#[strum(to_string = "Dramatic Failure")]
+	DramaticFailure,
 
 	#[strum(serialize = "Effects", serialize = "Effect")]
 	Effects,

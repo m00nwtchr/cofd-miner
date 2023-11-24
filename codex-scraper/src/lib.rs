@@ -85,7 +85,7 @@ pub fn parse(text: &str, page: PageType) -> anyhow::Result<Book> {
 			let (moon_gifts, gifts) = gifts::parse_gifts(map)?;
 
 			book.moon_gifts.extend(moon_gifts);
-			book.gifts.extend(gifts)
+			book.gifts.extend(gifts);
 		}
 		PageType::Merits => book.merits.extend(merits::parse_merits(map)?),
 	};

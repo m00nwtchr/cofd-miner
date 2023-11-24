@@ -26,7 +26,7 @@ use self::{
 
 lazy_static! {
 	static ref PROP_REGEX: Regex = Regex::new(
-		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note)s?:\s?(.*)$"
+		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note|Exceptional Success|Success|Failure|Dramatic Failure)s?:\s?(.*)$"
 	)
 	.unwrap();
 }
@@ -50,7 +50,9 @@ impl PdfExtract {
 				// })),
 				PageKind::Gift(kind) => match kind {
 					// GiftKind::Moon => parse.moon_gifts.extend(todo!()),
-					GiftKind::Other => parse.gifts.extend(parse_gifts(&parse.info, &section)?),
+					GiftKind::Shadow | GiftKind::Wolf => {
+						parse.gifts.extend(parse_gifts(&parse.info, &section)?);
+					}
 					_ => {}
 				},
 				_ => todo!(),
@@ -84,6 +86,30 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 			action.get_or_insert_with(ActionFields::default).dice_pool = convert_dice_pool(&lines);
 		}
 		ItemProp::Duration => action.get_or_insert_with(ActionFields::default).duration = lines,
+		ItemProp::DramaticFailure => {
+			action
+				.get_or_insert_with(ActionFields::default)
+				.roll_results
+				.dramatic_failure = to_paragraphs(lines);
+		}
+		ItemProp::Failure => {
+			action
+				.get_or_insert_with(ActionFields::default)
+				.roll_results
+				.failure = to_paragraphs(lines);
+		}
+		ItemProp::Success => {
+			action
+				.get_or_insert_with(ActionFields::default)
+				.roll_results
+				.success = to_paragraphs(lines);
+		}
+		ItemProp::ExceptionalSuccess => {
+			action
+				.get_or_insert_with(ActionFields::default)
+				.roll_results
+				.exceptional_success = to_paragraphs(lines);
+		}
 		_ => {}
 	}
 }

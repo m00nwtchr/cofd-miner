@@ -59,6 +59,11 @@ impl FromStr for DicePool {
 			let p2 = DicePool::from_str(r.trim_matches(&['.', ' '][..]))?;
 
 			Ok(DicePool::Vs(Box::new(p1), Box::new(p2)))
+		} else if let Some((l, r)) = str.split_once("versus") {
+			let p1 = DicePool::from_str(l.trim())?;
+			let p2 = DicePool::from_str(r.trim_matches(&['.', ' '][..]))?;
+
+			Ok(DicePool::Vs(Box::new(p1), Box::new(p2)))
 		} else if let Some((l, r)) = str.rsplit_once(|c: char| {
 			let f = c.eq(&'+') || c.eq(&'-');
 			if f {

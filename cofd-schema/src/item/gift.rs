@@ -24,14 +24,16 @@ pub struct Facet<T> {
 	pub inner: T,
 }
 
-#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum GiftKind {
 	Moon,
-	Other,
+	Shadow,
+	Wolf,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Gift<T> {
 	pub name: String,
 	pub facets: Vec<Item<Facet<T>>>,
+	pub kind: GiftKind,
 }
