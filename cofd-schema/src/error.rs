@@ -1,4 +1,4 @@
-use std::num::ParseIntError;
+use std::num::{ParseIntError, TryFromIntError};
 
 use thiserror::Error;
 
@@ -8,6 +8,8 @@ pub enum ParseError {
 	StrumError(#[from] strum::ParseError),
 	#[error(transparent)]
 	IntError(#[from] ParseIntError),
+	#[error(transparent)]
+	TryFromIntError(#[from] TryFromIntError),
 	#[error("The provided data was in a wrong format: {0}")]
 	BadFormat(String),
 }

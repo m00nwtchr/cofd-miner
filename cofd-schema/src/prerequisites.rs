@@ -4,95 +4,149 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	dot_range::{dots_to_num, num_to_dots},
+	error,
 	traits::{Template, Trait},
 };
 
-// #[derive(Debug, Serialize, Deserialize)]
-// pub enum NumberPrereq {
-// 	Equal(u8),
-// 	Greater(u8),
-// }
+/**
+ * Level-rated prerequisite types
+ */
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum RatedPrerequisiteKey {
+	Trait(Trait),
+	Unknown(String),
+}
 
+impl Display for RatedPrerequisiteKey {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Trait(trait_) => trait_.fmt(f),
+			Self::Unknown(str) => str.fmt(f),
+		}
+	}
+}
+
+impl FromStr for RatedPrerequisiteKey {
+	type Err = error::ParseError;
+
+	fn from_str(prereq: &str) -> Result<Self, Self::Err> {
+		Trait::from_str(prereq)
+			.map(Self::Trait)
+			.or_else(|_| Ok(Self::Unknown(prereq.to_string())))
+	}
+}
+
+/**
+ * Prerequisites with level ratings
+ */
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RatedPrerequisite(RatedPrerequisiteKey, u8);
+
+impl Display for RatedPrerequisite {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{} {}", self.0, num_to_dots(self.1))
+	}
+}
+
+impl FromStr for RatedPrerequisite {
+	type Err = error::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		if let Some((prereq, dots)) = s.find(" •").map(|p| s.split_at(p)) {
+			dots_to_num(dots).and_then(|dots| {
+				RatedPrerequisiteKey::from_str(prereq).map(|prereq| RatedPrerequisite(prereq, dots))
+			})
+		} else {
+			Err(error::ParseError::BadFormat(
+				"String is not in the format: {key} {dots}".to_string(),
+			))
+		}
+	}
+}
+
+/**
+ * All prerequisite types
+ */
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PrerequisiteKey {
+	Template(Template),
+	Rated(RatedPrerequisite),
+}
+
+impl Display for PrerequisiteKey {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			PrerequisiteKey::Template(t) => t.fmt(f),
+			PrerequisiteKey::Rated(r) => r.fmt(f),
+			// PrerequisiteKey::Unknown(s) => s.fmt(f),
+		}
+	}
+}
+
+impl FromStr for PrerequisiteKey {
+	type Err = error::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Template::from_str(s)
+			.map(Self::Template)
+			.or_else(|_| RatedPrerequisite::from_str(s).map(Self::Rated))
+		// .or_else(|_| Ok(Self::Unknown(s.to_owned())))
+	}
+}
+
+/**
+ * A single prerequisite, or a set of OR prerequisites
+ */
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Prerequisite {
-	Template(Template),
-
-	Trait(Trait, u8),
-	TraitOr(Vec<Trait>, u8),
-
-	// Or(Vec<Prerequisite>),
-	// Not(Box<Prerequisite>),
-	Unknown(String, u8),
-	#[serde(untagged)]
-	Special(String),
-}
-
-impl From<Template> for Prerequisite {
-	fn from(value: Template) -> Self {
-		Prerequisite::Template(value)
-	}
-}
-
-impl FromStr for Prerequisite {
-	type Err = strum::ParseError;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Template::from_str(s).map(Into::into).or_else(|_| {
-			if let Some((prereq, dots)) = s.find('•').map(|f| s.split_at(f - 1)) {
-				let prereq = prereq.trim();
-				let dots = dots.trim();
-				if let Some((l, r)) = prereq.split_once(" or ") {
-					let l = Trait::from_str(l.trim())?;
-					let r = Trait::from_str(r.trim())?;
-
-					Ok(Prerequisite::TraitOr(
-						vec![l, r],
-						dots_to_num(dots).unwrap_or(0),
-					))
-				} else {
-					Trait::from_str(prereq)
-						.map(|trait_| Prerequisite::Trait(trait_, dots_to_num(dots).unwrap_or(0)))
-						.or_else(|_| {
-							Ok(dots_to_num(dots).map_or_else(
-								|| Prerequisite::Special(s.to_owned()),
-								|d| Prerequisite::Unknown(prereq.to_owned(), d),
-							))
-						})
-				}
-			} else {
-				Ok(Prerequisite::Special(s.to_owned()))
-			}
-		})
-	}
+	Key(PrerequisiteKey),
+	Or(Vec<PrerequisiteKey>),
+	Unknown(String),
 }
 
 impl Display for Prerequisite {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Prerequisite::Template(template) => template.fmt(f),
-			Prerequisite::Trait(trait_, num) => {
-				f.write_fmt(format_args!("{trait_} {}", num_to_dots(*num)))
-			}
-			Prerequisite::TraitOr(traits, num) => {
-				let mut str = String::new();
-				for trait_ in traits {
-					if !str.is_empty() {
-						str += " or ";
-					}
-					str += trait_.as_ref();
+			Prerequisite::Key(k) => k.fmt(f),
+			Prerequisite::Or(prereqs) => {
+				let mut out = String::new();
+				for prereq in &prereqs[0..prereqs.len() - 1] {
+					out.push_str(&prereq.to_string());
+					out.push_str(" or ");
 				}
-				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
+				out.push_str(&prereqs[prereqs.len() - 1].to_string());
+				write!(f, "{out}")
 			}
-			// Prerequisite::Not(_) => todo!(),
-			Prerequisite::Unknown(str, num) => {
-				f.write_fmt(format_args!("{str} {}", num_to_dots(*num)))
-			}
-			Prerequisite::Special(special) => f.write_str(special),
+			Prerequisite::Unknown(s) => s.fmt(f),
 		}
 	}
 }
 
+impl FromStr for Prerequisite {
+	type Err = error::ParseError;
+
+	fn from_str(prereq: &str) -> Result<Self, Self::Err> {
+		PrerequisiteKey::from_str(prereq)
+			.map(Self::Key)
+			.or_else(|_| {
+				if let Some((l, r)) = prereq.split_once(" or ") {
+					let l = PrerequisiteKey::from_str(l.trim())?;
+					let r = PrerequisiteKey::from_str(r.trim())?;
+
+					Ok(Self::Or(vec![l, r]))
+				} else {
+					Ok(Self::Unknown(prereq.to_owned()))
+				}
+			})
+	}
+}
+
+/**
+ * A set of prerequisites (AND)
+ */
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Prerequisites(Vec<Prerequisite>);
@@ -126,7 +180,7 @@ impl Display for Prerequisites {
 }
 
 impl FromStr for Prerequisites {
-	type Err = strum::ParseError;
+	type Err = error::ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let ok: Result<Vec<_>, _> = s

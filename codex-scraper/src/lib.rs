@@ -71,7 +71,13 @@ pub fn parse(text: &str, page: PageType) -> anyhow::Result<Book> {
 		{
 			let mut vec = Vec::new();
 			for td in tr.children().filter_map(ElementRef::wrap) {
-				vec.push(td.inner_html().trim().to_string());
+				vec.push(
+					td.inner_html()
+						.trim()
+						.to_string()
+						.replace("<i>", "")
+						.replace("</i>", ""),
+				);
 			}
 
 			map.entry(title.to_string()).or_insert(Vec::new()).push(vec);

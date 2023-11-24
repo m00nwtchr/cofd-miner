@@ -6,7 +6,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::DOT_CHAR;
+use crate::{error, DOT_CHAR};
 
 #[derive(Serialize, Clone, Debug, Deserialize)]
 #[serde(untagged)]
@@ -23,13 +23,22 @@ impl Default for DotRange {
 	}
 }
 
-#[must_use]
-pub fn dots_to_num(str: &str) -> Option<u8> {
-	let str = str.trim_end_matches('+');
-	if str.chars().all(|f| f.eq(&DOT_CHAR)) {
-		u8::try_from(str.chars().count()).ok()
+/**
+ * Function to convert a string of '•' characters to a number
+ * # Errors
+ * If the length of the string exceeds [`u8::MAX`], or the string contains non-'•' or whitespace characters
+ */
+pub fn dots_to_num(str: &str) -> Result<u8, error::ParseError> {
+	let str = str.trim().trim_end_matches('+');
+
+	if str.is_empty() {
+		Ok(0)
+	} else if str.chars().all(|f| f.eq(&DOT_CHAR)) {
+		u8::try_from(str.chars().count()).map_err(Into::into)
 	} else {
-		None
+		Err(error::ParseError::BadFormat(
+			"String contains non dot characters".to_owned(),
+		))
 	}
 }
 
@@ -38,9 +47,9 @@ pub fn num_to_dots(n: impl Into<usize>) -> String {
 }
 
 impl FromStr for DotRange {
-	type Err = strum::ParseError;
+	type Err = error::ParseError;
 
-	fn from_str(arg: &str) -> std::result::Result<Self, strum::ParseError> {
+	fn from_str(arg: &str) -> std::result::Result<Self, Self::Err> {
 		let binding = arg
 			.to_lowercase()
 			.replace(' ', "")
@@ -54,17 +63,19 @@ impl FromStr for DotRange {
 		Ok(if value.len() == 1 {
 			let value = value[0];
 			if value.contains('+') {
-				DotRange::RangeFrom(
-					(dots_to_num(value.trim_end_matches('+'))
-						.ok_or(strum::ParseError::VariantNotFound)?)..,
-				)
+				DotRange::RangeFrom((dots_to_num(value.trim_end_matches('+'))?)..)
 			} else {
 				DotRange::Num(dots_to_num(value).unwrap_or(0))
 			}
 		} else if value.len() == 2 && binding.contains('-') {
 			DotRange::Range(dots_to_num(value[0]).unwrap()..=dots_to_num(value[1]).unwrap())
 		} else {
-			DotRange::Set(value.iter().filter_map(|str| dots_to_num(str)).collect())
+			DotRange::Set(
+				value
+					.iter()
+					.filter_map(|str| dots_to_num(str).ok())
+					.collect(),
+			)
 		})
 	}
 }
@@ -75,22 +86,20 @@ impl Display for DotRange {
 			DotRange::Num(num) => f.write_str(&num_to_dots(*num)),
 			DotRange::Set(set) => {
 				let mut out = String::new();
-				for num in set {
-					if !out.is_empty() {
-						out += ", ";
-					}
-					out += &num_to_dots(*num);
+				for num in &set[0..set.len() - 1] {
+					out.push_str(&num.to_string());
+					out.push_str(", ");
 				}
-				f.write_str(&out)
+				out.push_str(&set[set.len() - 1].to_string());
+				write!(f, "{out}")
 			}
-			DotRange::Range(range) => f.write_fmt(format_args!(
+			DotRange::Range(range) => write!(
+				f,
 				"{} to {}",
-				&num_to_dots(*range.start()),
-				&num_to_dots(*range.end())
-			)),
-			DotRange::RangeFrom(range) => {
-				f.write_fmt(format_args!("{}+", &num_to_dots(range.start)))
-			}
+				num_to_dots(*range.start()),
+				num_to_dots(*range.end())
+			),
+			DotRange::RangeFrom(range) => write!(f, "{}", num_to_dots(range.start)),
 		}
 	}
 }
