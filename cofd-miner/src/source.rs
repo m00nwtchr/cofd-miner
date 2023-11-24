@@ -86,7 +86,7 @@ pub fn process_section(
 				Op::RegexReplace { regex, replace } => {
 					let regex = Regex::new(regex)?;
 
-					extract = regex.replace_all(&extract, replace).to_string();
+					extract = regex.replace_all(&extract, replace).into_owned();
 				} // Op::Swap { a, b } => {
 				  // 	let a = a.clone();
 				  // 	let astr = extract[a.clone()].to_owned();

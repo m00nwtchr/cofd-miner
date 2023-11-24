@@ -82,7 +82,7 @@ impl FromStr for DicePool {
 		} else {
 			Trait::from_str(str)
 				.map(DicePool::Trait)
-				.or_else(|_| Ok(DicePool::Key(str.to_string())))
+				.or_else(|_| Ok(DicePool::Key(str.to_owned())))
 		}
 	}
 }

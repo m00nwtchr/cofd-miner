@@ -8,7 +8,7 @@ use cofd_schema::book::BookInfo;
 mod page_kind;
 
 fn unnamed() -> String {
-	"Unnamed".to_string()
+	"Unnamed".to_owned()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

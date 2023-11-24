@@ -26,7 +26,7 @@ pub async fn download<P: AsRef<Path>>(url: String, cache_path: P) -> anyhow::Res
 		.expect("Path segments")
 		.last()
 		.expect("Last path segment")
-		.to_string();
+		.to_owned();
 
 	let cache_path = cache_path.as_ref();
 	if !cache_path.exists() {
@@ -74,13 +74,13 @@ pub fn parse(text: &str, page: PageType) -> anyhow::Result<Book> {
 				vec.push(
 					td.inner_html()
 						.trim()
-						.to_string()
+						.to_owned()
 						.replace("<i>", "")
 						.replace("</i>", ""),
 				);
 			}
 
-			map.entry(title.to_string()).or_insert(Vec::new()).push(vec);
+			map.entry(title.to_owned()).or_insert(Vec::new()).push(vec);
 		}
 	}
 

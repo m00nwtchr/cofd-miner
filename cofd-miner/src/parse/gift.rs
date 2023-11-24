@@ -129,7 +129,7 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			effects.reverse();
 
 			facets.push(Item {
-				name: name.to_string(),
+				name: name.to_owned(),
 				reference,
 				description: to_paragraphs(description),
 				effects: to_paragraphs(effects),

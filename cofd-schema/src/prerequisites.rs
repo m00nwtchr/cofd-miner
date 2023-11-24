@@ -33,7 +33,7 @@ impl FromStr for RatedPrerequisiteKey {
 	fn from_str(prereq: &str) -> Result<Self, Self::Err> {
 		Trait::from_str(prereq)
 			.map(Self::Trait)
-			.or_else(|_| Ok(Self::Unknown(prereq.to_string())))
+			.or_else(|_| Ok(Self::Unknown(prereq.to_owned())))
 	}
 }
 
@@ -59,7 +59,7 @@ impl FromStr for RatedPrerequisite {
 			})
 		} else {
 			Err(error::ParseError::BadFormat(
-				"String is not in the format: {key} {dots}".to_string(),
+				"String is not in the format: {key} {dots}".to_owned(),
 			))
 		}
 	}

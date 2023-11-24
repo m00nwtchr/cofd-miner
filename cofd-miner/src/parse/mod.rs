@@ -187,7 +187,7 @@ fn parse_name(captures: &Captures<'_>) -> String {
 			name
 		}
 	} else {
-		name.to_string()
+		name.to_owned()
 	}
 }
 

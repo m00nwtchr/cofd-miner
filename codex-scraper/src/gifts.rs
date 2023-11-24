@@ -42,14 +42,14 @@ pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<O
 						match kind {
 							GiftKind::Moon => {
 								moon_gift = Some(Gift {
-									name: name.to_string(),
+									name: name.to_owned(),
 									facets: Vec::new(),
 									kind: GiftKind::Moon,
 								});
 							}
 							GiftKind::Shadow | GiftKind::Wolf => {
 								gift = Some(Gift {
-									name: name.to_string(),
+									name: name.to_owned(),
 									facets: Vec::new(),
 									kind,
 								});

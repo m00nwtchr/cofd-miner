@@ -81,8 +81,8 @@ impl MetaEditorApp {
 			selected_op: None,
 			show_full_text: true,
 			last_range: None,
-			pages_end: "".to_string(),
-			pages_start: "".to_string(),
+			pages_end: String::new(),
+			pages_start: String::new(),
 		}
 	}
 
@@ -95,7 +95,7 @@ impl MetaEditorApp {
 		section: &SectionMeta,
 	) -> epaint::text::LayoutJob {
 		let mut layout_job =
-			epaint::text::LayoutJob::simple(text.to_string(), font_id, Color32::GRAY, wrap_width);
+			epaint::text::LayoutJob::simple(text.to_owned(), font_id, Color32::GRAY, wrap_width);
 
 		if show_full_text {
 			if let Some(range) = &section.range {
@@ -151,8 +151,8 @@ impl eframe::App for MetaEditorApp {
 							.selected_section
 							.and_then(|selected_section| self.meta.sections.get(selected_section))
 						{
-							self.pages_start = selection.pages.start().to_string();
-							self.pages_end = selection.pages.end().to_string();
+							self.pages_start = selection.pages.start().to_owned();
+							self.pages_end = selection.pages.end().to_owned();
 						}
 					}
 				}

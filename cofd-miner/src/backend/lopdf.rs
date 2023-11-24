@@ -18,7 +18,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<BTreeMap<usize, S
 				Ok((
 					page_num,
 					text.split('\n')
-						.map(|s| s.trim_end().to_string())
+						.map(|s| s.trim_end().to_owned())
 						.collect::<Vec<String>>(),
 				))
 			},

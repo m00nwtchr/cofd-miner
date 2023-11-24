@@ -26,7 +26,7 @@ async fn main() -> anyhow::Result<()> {
 			tokio::spawn({
 				let cache_path = cache_path.clone();
 				async move {
-					let text = download(url.to_string(), cache_path).await.unwrap();
+					let text = download(url.to_owned(), cache_path).await.unwrap();
 					parse(&text, page)
 				}
 			})

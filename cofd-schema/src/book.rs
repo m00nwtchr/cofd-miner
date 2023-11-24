@@ -128,7 +128,7 @@ impl FromStr for BookReference {
 			let last = last.trim();
 
 			Ok(BookReference(
-				BookId::from_str(&(first.trim().to_string() + second.trim()))
+				BookId::from_str(&(first.trim().to_owned() + second.trim()))
 					.map_err(ParseError::from)?,
 				usize::from_str(if let Some((l, _)) = last.rsplit_once('-') {
 					l
@@ -150,7 +150,7 @@ impl FromStr for BookReference {
 				.map_err(ParseError::from)?,
 			))
 		} else {
-			Err(error::ParseError::BadFormat(s.to_string()))
+			Err(error::ParseError::BadFormat(s.to_owned()))
 		}
 	}
 }
