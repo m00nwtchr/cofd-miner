@@ -1,7 +1,7 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Serialize};
-use strum::EnumString;
+use strum::{Display, EnumString};
 
 use crate::{
 	error::{self, ParseError},
@@ -13,7 +13,7 @@ use crate::{
 	},
 };
 
-#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display)]
 #[strum(ascii_case_insensitive)]
 pub enum BookId {
 	CofD,
@@ -105,6 +105,12 @@ impl From<BookInfo> for Book {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BookReference(pub BookId, pub usize);
+
+impl Display for BookReference {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{} pg.{}", self.0, self.1)
+	}
+}
 
 impl Default for BookReference {
 	fn default() -> Self {
