@@ -151,8 +151,8 @@ impl eframe::App for MetaEditorApp {
 							.selected_section
 							.and_then(|selected_section| self.meta.sections.get(selected_section))
 						{
-							self.pages_start = selection.pages.start().to_owned();
-							self.pages_end = selection.pages.end().to_owned();
+							self.pages_start = selection.pages.start().to_string();
+							self.pages_end = selection.pages.end().to_string();
 						}
 					}
 				}

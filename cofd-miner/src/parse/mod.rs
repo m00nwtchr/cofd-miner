@@ -39,6 +39,7 @@ pub struct PdfExtract {
 }
 
 impl PdfExtract {
+	#[warn(clippy::match_wildcard_for_single_variants)]
 	pub fn parse(self) -> Result<Book> {
 		let mut parse = Book::from(self.info);
 
@@ -187,7 +188,7 @@ fn parse_name(captures: &Captures<'_>) -> String {
 			name
 		}
 	} else {
-		name.to_owned()
+		name.clone()
 	}
 }
 
