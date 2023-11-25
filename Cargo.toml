@@ -9,7 +9,7 @@ cofd-meta = { path = "./cofd-meta" }
 log = "0.4"
 strum = "0.25"
 
-anyhow = "1"
+anyhow = { version = "1", features = ["backtrace"] }
 thiserror = "1"
 
 serde = { version = "1", features = ["derive"] }

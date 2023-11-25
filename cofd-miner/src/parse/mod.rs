@@ -55,7 +55,7 @@ impl PdfExtract {
 					}
 					_ => {}
 				},
-				_ => todo!(),
+				_ => {}
 			}
 		}
 		parse.merits.sort_by(|a, b| a.name.cmp(&b.name));

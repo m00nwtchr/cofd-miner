@@ -13,6 +13,8 @@ pub enum MeritTag {
 	#[strum(to_string = "Supernatural Merit")]
 	Supernatural,
 
+	Special,
+
 	// TODO: pdf parse
 	Mental,
 	Social,

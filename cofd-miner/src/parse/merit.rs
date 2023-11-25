@@ -194,7 +194,7 @@ fn process_tags(captures: &Captures<'_>) -> Result<Vec<MeritTag>> {
 		let res: anyhow::Result<Vec<MeritTag>> = tags
 			.split(", ")
 			.map(String::from)
-			.map(|s| MeritTag::from_str(&s).map_err(|err| anyhow!(err)))
+			.map(|s| MeritTag::from_str(&s).map_err(|err| anyhow!("{err}: {s}")))
 			.collect();
 		res
 	} else {
