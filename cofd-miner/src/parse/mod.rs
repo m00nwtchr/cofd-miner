@@ -116,38 +116,42 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 }
 
 // TODO: Some edge cases don't get merged properly but works ok overall.
+// fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
+// 	let mut out = Vec::new();
+// 	let mut paragraph = String::new();
+//
+// 	let mut flag = false;
+// 	for line in vec {
+// 		if !paragraph.is_empty() && !flag {
+// 			paragraph.push(' ');
+// 		} else if flag {
+// 			flag = false;
+// 		}
+//
+// 		paragraph.push_str(if line.ends_with("God-") {
+// 			flag = true;
+// 			&line
+// 		} else if line.ends_with('-') {
+// 			flag = true;
+// 			line.trim_end_matches('-')
+// 		} else {
+// 			&line
+// 		});
+//
+// 		if line.ends_with('.') {
+// 			out.push(paragraph);
+// 			paragraph = String::new();
+// 		}
+// 	}
+// 	if !paragraph.is_empty() {
+// 		out.push(paragraph);
+// 	}
+//
+// 	out
+// }
+
 fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
-	let mut out = Vec::new();
-	let mut paragraph = String::new();
-
-	let mut flag = false;
-	for line in vec {
-		if !paragraph.is_empty() && !flag {
-			paragraph.push(' ');
-		} else if flag {
-			flag = false;
-		}
-
-		paragraph.push_str(if line.ends_with("God-") {
-			flag = true;
-			&line
-		} else if line.ends_with('-') {
-			flag = true;
-			line.trim_end_matches('-')
-		} else {
-			&line
-		});
-
-		if line.ends_with('.') {
-			out.push(paragraph);
-			paragraph = String::new();
-		}
-	}
-	if !paragraph.is_empty() {
-		out.push(paragraph);
-	}
-
-	out
+	vec
 }
 
 fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {
@@ -168,7 +172,7 @@ fn get_page_number(page_ranges: &HashMap<usize, Range<usize>>, pos: usize) -> &u
 }
 
 fn parse_name(captures: &Captures<'_>) -> String {
-	let name = normalize(captures.name("name").map_or("", |f| f.as_str()));
+	let name = normalize(captures.name("name").map_or("", |f| f.as_str().trim()));
 
 	if name.chars().all(|f| f.is_uppercase() || !f.is_alphabetic()) {
 		let is: Vec<_> = name
@@ -193,8 +197,9 @@ fn parse_name(captures: &Captures<'_>) -> String {
 }
 
 fn normalize(str: &str) -> String {
-	str.trim()
-		.replace('\n', " ")
+	str
+		// .trim_end()
+		.replace('\n', "")
 		.replace("  ", " ")
 		.replace(['‘', '’'], "'")
 }

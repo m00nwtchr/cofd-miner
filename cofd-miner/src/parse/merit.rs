@@ -18,14 +18,13 @@ use regex::{Captures, Regex};
 use crate::source::Section;
 
 use super::{
-	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action,
-	to_paragraphs, PROP_REGEX,
+	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action, PROP_REGEX,
 };
 
 lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
-		^
+		^\t*
 		(?P<name>[^\s.][^\n.]+)               # Name
 		\s?
 		\(
@@ -78,7 +77,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 
 		let body = get_body(&mut str_pos, &section.extract, &captures);
 		let (mut description, mut prerequisites, effects, notes, drawbacks, action) =
-			process_body(&body);
+			parse_body(&body);
 		if let Some(prereqs) = additional_prerequisites.clone() {
 			if !sub {
 				prerequisites.extend(prereqs.unwrap());
@@ -92,7 +91,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 				name: name.clone(),
 				description: if let Some(sub_begin) = sub_begin {
 					description.insert(0, normalize(sub_begin.as_str()));
-					to_paragraphs(description)
+					description
 				} else {
 					description
 				}, // TODO: ?
@@ -124,7 +123,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 	Ok(out)
 }
 
-fn process_body(
+fn parse_body(
 	body: &[String],
 ) -> (
 	Vec<String>,
@@ -134,7 +133,8 @@ fn process_body(
 	Vec<String>,
 	Option<ActionFields>,
 ) {
-	let mut lines: Vec<String> = Vec::new();
+	let mut paragraphs = Vec::new();
+	let mut lines = Vec::new();
 
 	let mut prerequisites = Vec::new();
 	let mut effects = Vec::new();
@@ -143,43 +143,63 @@ fn process_body(
 
 	let mut action = None;
 
-	for el in body.iter().rev() {
-		if let Some(prop) = PROP_REGEX.captures(el) {
-			if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
-				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
+	let mut flag = false;
 
-				lines.push(prop_val.as_str().to_owned());
-				lines.reverse();
-				match prop_key {
-					ItemProp::Prerequisites => {
-						prerequisites.extend(
-							to_paragraphs(lines)
-								.join(" ")
-								.split(", ")
-								.filter_map(|str| Prerequisite::from_str(str).ok()),
-						);
-					}
-					ItemProp::Effects => effects = to_paragraphs(lines),
-					ItemProp::Notes => notes = to_paragraphs(lines),
-					ItemProp::Drawbacks => drawbacks = to_paragraphs(lines),
-					_ => process_action(&mut action, prop_key, lines),
-				}
-				lines = Vec::new();
+	for line in body.iter().rev() {
+		lines.push(
+			if line.ends_with("God-") {
+				line
+			} else {
+				line.trim_end_matches('-')
 			}
-		} else {
-			lines.push(el.clone());
+				.trim_start()
+				.to_owned(),
+		);
+
+		if line.starts_with('\t') {
+			lines.reverse();
+			let paragraph = lines.concat();
+			lines.clear();
+
+			if let Some(prop) = PROP_REGEX.captures(&paragraph) {
+				if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
+					let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
+					let prop_val = prop_val.as_str().trim();
+
+					if !flag {
+						flag = true;
+
+						if !matches!(prop_key, ItemProp::Effects) {
+							effects = paragraphs;
+							paragraphs = Vec::new();
+						}
+					}
+
+					match prop_key {
+						ItemProp::Prerequisites => {
+							prerequisites.extend(
+								prop_val
+									.split(", ")
+									.filter_map(|str| Prerequisite::from_str(str).ok()),
+							);
+						}
+						ItemProp::Effects => {
+							effects = paragraphs;
+							effects.insert(0, prop_val.to_string());
+							paragraphs = Vec::new();
+						}
+						ItemProp::Notes => notes = vec![prop_val.to_owned()],
+						ItemProp::Drawbacks => drawbacks = vec![prop_val.to_owned()],
+						_ => process_action(&mut action, prop_key, vec![prop_val.to_owned()]),
+					}
+				}
+			} else {
+				paragraphs.push(paragraph.trim().to_owned());
+			}
 		}
 	}
 
-	lines.reverse();
-	(
-		to_paragraphs(lines),
-		prerequisites,
-		effects,
-		notes,
-		drawbacks,
-		action,
-	)
+	(paragraphs, prerequisites, effects, notes, drawbacks, action)
 }
 
 fn process_tags(captures: &Captures<'_>) -> Result<Vec<MeritTag>> {

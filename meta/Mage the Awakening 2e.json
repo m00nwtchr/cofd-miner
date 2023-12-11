@@ -13,8 +13,8 @@
 				"end": 104
 			},
 			"range": {
-				"start": 4349,
-				"end": 30939
+				"start": 89,
+				"end": 564
 			},
 			"kind": {
 				"Merit": "Awakened"
@@ -27,8 +27,8 @@
 				"end": 107
 			},
 			"range": {
-				"start": 2644,
-				"end": 20536
+				"start": 48,
+				"end": 362
 			},
 			"kind": {
 				"Merit": null
@@ -41,8 +41,8 @@
 				"end": 303
 			},
 			"range": {
-				"start": 2904,
-				"end": 5960
+				"start": 49,
+				"end": 108
 			},
 			"kind": {
 				"Merit": "Sleeper"
@@ -55,8 +55,8 @@
 				"end": 306
 			},
 			"range": {
-				"start": 1790,
-				"end": 7811
+				"start": 32,
+				"end": 148
 			},
 			"kind": {
 				"Merit": null
@@ -69,8 +69,8 @@
 				"end": 134
 			},
 			"range": {
-				"start": 908,
-				"end": 28038
+				"start": 17,
+				"end": 564
 			},
 			"kind": "MageSpell"
 		}

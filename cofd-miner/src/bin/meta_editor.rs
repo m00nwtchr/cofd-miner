@@ -9,6 +9,7 @@ use eframe::{
 	egui::{self, FontSelection, TextEdit, TextFormat},
 	epaint::{self, Color32, FontId},
 };
+use eframe::egui::text::{LayoutSection, TextWrapping};
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
@@ -28,7 +29,7 @@ fn main() -> eframe::Result<()> {
 struct MetaEditorApp {
 	meta: SourceMeta,
 	meta_path: PathBuf,
-	pages: BTreeMap<usize, String>,
+	pages: BTreeMap<usize, Vec<String>>,
 	path: PathBuf,
 
 	selected_section: Option<usize>,
@@ -95,40 +96,58 @@ impl MetaEditorApp {
 		section: &SectionMeta,
 	) -> epaint::text::LayoutJob {
 		let mut layout_job =
-			epaint::text::LayoutJob::simple(text.to_owned(), font_id, Color32::GRAY, wrap_width);
+			epaint::text::LayoutJob {
+				sections: vec![LayoutSection {
+					leading_space: 0.0,
+					byte_range: 0..text.len(),
+					format: TextFormat {
+						background: Color32::TRANSPARENT,
+						color: Color32::GRAY,
+						..Default::default()
+					},
+				}],
+				text: text.to_string(),
+				wrap: TextWrapping {
+					max_width: wrap_width,
+					..Default::default()
+				},
+				break_on_newline: true,
+				..Default::default()
+			};
 
 		if show_full_text {
 			if let Some(range) = &section.range {
 				layout_job.sections.clear();
+				layout_job.text = String::new();
 
-				let byte_range = 0..range.start;
-
-				layout_job.sections.push(epaint::text::LayoutSection {
-					leading_space: 0.0,
-					byte_range,
-					format: TextFormat::default(),
-				});
-
-				let byte_range = range.clone();
-				let format = TextFormat {
-					color: Color32::BLACK,
-					background: Color32::GRAY,
-					..Default::default()
-				};
-
-				layout_job.sections.push(epaint::text::LayoutSection {
-					leading_space: 0.0,
-					byte_range,
-					format,
-				});
-
-				let byte_range = range.end..text.len();
-
-				layout_job.sections.push(epaint::text::LayoutSection {
-					leading_space: 0.0,
-					byte_range,
-					format: TextFormat::default(),
-				});
+				for (i, line) in text.split("\n").enumerate() {
+					layout_job.append(
+						line,
+						0.0,
+						if range.contains(&i) {
+							TextFormat {
+								background: Color32::GRAY,
+								color: Color32::BLACK,
+								..Default::default()
+							}
+						} else {
+							TextFormat::default()
+						},
+					);
+					layout_job.append(
+						"\n",
+						0.0,
+						if range.contains(&i) {
+							TextFormat {
+								background: Color32::GRAY,
+								color: Color32::BLACK,
+								..Default::default()
+							}
+						} else {
+							TextFormat::default()
+						},
+					);
+				}
 			}
 		}
 
@@ -288,7 +307,17 @@ impl eframe::App for MetaEditorApp {
 						output.response.context_menu(|ui| {
 							if ui.button("Set range").clicked() {
 								if let Some(range) = &self.last_range {
-									section_def.range = Some(range.clone());
+									let start = text[0..range.start]
+										.chars()
+										.filter(|c| c.eq(&'\n'))
+										.count();
+
+									let text = &text[range.clone()];
+									let end = text.chars().filter(|c| c.eq(&'\n')).count()
+										+ if text.ends_with('\n') { 0 } else { 1 };
+
+									println!("{start}");
+									section_def.range = Some(start..(start + end));
 								}
 
 								ui.close_menu();

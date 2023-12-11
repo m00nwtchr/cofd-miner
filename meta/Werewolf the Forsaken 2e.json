@@ -87,22 +87,6 @@
 					"type": "RegexReplace",
 					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
 					"replace": ""
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 10449,
-						"end": 10449
-					},
-					"replace": "Effect: Y"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 7085,
-						"end": 7085
-					},
-					"replace": "Effect: Y"
 				}
 			]
 		},
