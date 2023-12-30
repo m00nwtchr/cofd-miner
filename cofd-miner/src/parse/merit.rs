@@ -25,11 +25,11 @@ lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
 		^\t*
-		(?P<name>[^\s.][^\n.]+)               # Name
+		(?<name>(?:\t?[a-zA-Z]\s*)+)              # Name
 		\s?
 		\(
-			(?: (?P<ltags> [^•\n]+ ) [,;] \s)?       # Tags
-			(?P<cost>                         # Cost
+			(?: (?<ltags> [^•\n]+ ) [,;] \s)?       # Tags
+			(?<cost>                         # Cost
 				(?:          
 					•{1,5}
 					[,\s\+]*
@@ -38,9 +38,9 @@ lazy_static! {
 					\s*
 				)+
 			)
-			(?: [,;] \s (?P<rtags> [^•\n]+ ) )? # Tags
+			(?: [,;] \s (?<rtags> [^•\n]+ ) )? # Tags
 		\)
-		( (?P<sub>:) \s (?P<subbegin> .* ) )?
+		(?: : \s (?<sub> .* ) )?
 		\s?
 		$
 	"
@@ -67,8 +67,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		.into_iter()
 		.rev()
 	{
-		let sub = captures.name("sub").is_some();
-		let sub_begin = captures.name("subbegin");
+		let sub = captures.name("sub");
 		let cost = captures.name("cost").unwrap();
 
 		let name = parse_name(&captures);
@@ -79,22 +78,18 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		let (mut description, mut prerequisites, effects, notes, drawbacks, action) =
 			parse_body(&body);
 		if let Some(prereqs) = additional_prerequisites.clone() {
-			if !sub {
+			if sub.is_none() {
 				prerequisites.extend(prereqs.unwrap());
 			}
 		}
 		let prerequisites = Prerequisites::from(prerequisites);
 		let dot_rating = DotRange::from_str(cost.as_str())?;
 
-		if sub {
+		if let Some(sub) = sub {
+			description.insert(0, normalize(sub.as_str()));
 			children.push(MeritSubItem {
 				name: name.clone(),
-				description: if let Some(sub_begin) = sub_begin {
-					description.insert(0, normalize(sub_begin.as_str()));
-					description
-				} else {
-					description
-				}, // TODO: ?
+				description,
 				prerequisites,
 				dot_rating,
 				drawbacks,
@@ -185,7 +180,8 @@ fn parse_body(
 						}
 						ItemProp::Effects => {
 							effects = paragraphs;
-							effects.insert(0, prop_val.to_string());
+							effects.push(prop_val.to_string());
+							effects.reverse();
 							paragraphs = Vec::new();
 						}
 						ItemProp::Notes => notes = vec![prop_val.to_owned()],
@@ -198,6 +194,7 @@ fn parse_body(
 			}
 		}
 	}
+	paragraphs.reverse();
 
 	(paragraphs, prerequisites, effects, notes, drawbacks, action)
 }

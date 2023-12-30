@@ -48,25 +48,46 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 
 		let mut lines = Vec::new();
 		// let mut last_y = 0.0;
+
+		let mut last_x = 0.0;
+		let mut last_indent = false;
+
 		for block in text_page.blocks() {
 			let block: Vec<_> = block
 				.lines()
 				.map(|l| {
 					let x = l.bounds().x0;
-					let min_x = if x < THRESHOLD { l_indent.0 } else { r_indent.0 };
+					let min_x = if x < THRESHOLD {
+						l_indent.0
+					} else {
+						r_indent.0
+					};
 					let indent = f32::floor(x - min_x);
-
-					// let y = f32::floor(l.bounds().y0);
 					//
-					// let c = f32::abs(y - last_y);
-					// last_y = y;
+					let x = f32::floor(l.bounds().x0);
+					let y = f32::floor(l.bounds().y0);
+					// //
+					// // let c = f32::abs(y - last_y);
+					// // last_y = y;
+
+					let indent = if x > last_x {
+						if indent == 0.0 { // Jump to other column
+							false
+						} else {
+							true
+						}
+					} else if x < last_x {
+						false
+					} else {
+						last_indent
+					};
+
+					last_x = x;
+					last_indent = indent;
+
 					format!(
 						"{}{}",
-						if indent > 0.0 {
-							"\t"
-						} else {
-							""
-						},
+						if indent { "\t" } else { "" },
 						l.chars().filter_map(|c| c.char()).collect::<String>()
 					)
 				})

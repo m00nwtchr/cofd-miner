@@ -172,7 +172,7 @@ fn get_page_number(page_ranges: &HashMap<usize, Range<usize>>, pos: usize) -> &u
 }
 
 fn parse_name(captures: &Captures<'_>) -> String {
-	let name = normalize(captures.name("name").map_or("", |f| f.as_str().trim()));
+	let name = normalize(captures.name("name").map_or("", |f| f.as_str().trim())).replace('\t', "");
 
 	if name.chars().all(|f| f.is_uppercase() || !f.is_alphabetic()) {
 		let is: Vec<_> = name

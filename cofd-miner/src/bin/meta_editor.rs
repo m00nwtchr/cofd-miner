@@ -120,7 +120,7 @@ impl MetaEditorApp {
 				layout_job.sections.clear();
 				layout_job.text = String::new();
 
-				for (i, line) in text.split("\n").enumerate() {
+				for (i, line) in text.split('\n').enumerate() {
 					layout_job.append(
 						line,
 						0.0,

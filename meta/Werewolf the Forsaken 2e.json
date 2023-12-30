@@ -13,8 +13,8 @@
 				"end": 108
 			},
 			"range": {
-				"start": 2428,
-				"end": 20723
+				"start": 90,
+				"end": 430
 			},
 			"kind": {
 				"Merit": "Werewolf"
@@ -41,8 +41,8 @@
 				"end": 110
 			},
 			"range": {
-				"start": 4069,
-				"end": 12427
+				"start": 75,
+				"end": 230
 			},
 			"kind": {
 				"Merit": "Werewolf"
@@ -76,8 +76,8 @@
 				"end": 113
 			},
 			"range": {
-				"start": 3499,
-				"end": 25159
+				"start": 63,
+				"end": 442
 			},
 			"kind": {
 				"Merit": null
@@ -97,8 +97,8 @@
 				"end": 121
 			},
 			"range": {
-				"start": 4509,
-				"end": 29340
+				"start": 78,
+				"end": 627
 			},
 			"kind": {
 				"Gift": "Moon"
@@ -111,8 +111,8 @@
 				"end": 136
 			},
 			"range": {
-				"start": 2088,
-				"end": 71880
+				"start": 48,
+				"end": 1573
 			},
 			"kind": {
 				"Gift": "Shadow"
@@ -125,8 +125,8 @@
 				"end": 138
 			},
 			"range": {
-				"start": 3142,
-				"end": 14251
+				"start": 68,
+				"end": 306
 			},
 			"kind": {
 				"Gift": "Wolf"
@@ -139,8 +139,8 @@
 				"end": 304
 			},
 			"range": {
-				"start": 2527,
-				"end": 5307
+				"start": 49,
+				"end": 101
 			},
 			"kind": {
 				"Merit": null
@@ -153,8 +153,8 @@
 				"end": 305
 			},
 			"range": {
-				"start": 24,
-				"end": 2268
+				"start": 2,
+				"end": 46
 			},
 			"kind": {
 				"Merit": null
@@ -167,8 +167,8 @@
 				"end": 305
 			},
 			"range": {
-				"start": 2429,
-				"end": 4262
+				"start": 50,
+				"end": 86
 			},
 			"kind": {
 				"Merit": null

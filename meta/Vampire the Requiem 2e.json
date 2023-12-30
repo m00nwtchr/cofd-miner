@@ -13,8 +13,8 @@
 				"end": 115
 			},
 			"range": {
-				"start": 0,
-				"end": 33771
+				"start": 62,
+				"end": 635
 			},
 			"kind": {
 				"Merit": "Kindred"
@@ -39,8 +39,8 @@
 				"end": 116
 			},
 			"range": {
-				"start": 0,
-				"end": 4282
+				"start": 2,
+				"end": 75
 			},
 			"kind": {
 				"Merit": null
@@ -53,8 +53,8 @@
 				"end": 117
 			},
 			"range": {
-				"start": 5488,
-				"end": 9231
+				"start": 95,
+				"end": 161
 			},
 			"kind": {
 				"Merit": null
@@ -67,8 +67,8 @@
 				"end": 118
 			},
 			"range": {
-				"start": 3944,
-				"end": 7850
+				"start": 69,
+				"end": 135
 			},
 			"kind": {
 				"Merit": "Kindred"
@@ -81,8 +81,8 @@
 				"end": 124
 			},
 			"range": {
-				"start": 2364,
-				"end": 33730
+				"start": 42,
+				"end": 602
 			},
 			"kind": {
 				"Merit": null
@@ -93,10 +93,6 @@
 			"pages": {
 				"start": 298,
 				"end": 300
-			},
-			"range": {
-				"start": 2242,
-				"end": 12072
 			},
 			"kind": {
 				"Merit": null

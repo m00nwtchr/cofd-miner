@@ -13,8 +13,8 @@
 				"end": 43
 			},
 			"range": {
-				"start": 1240,
-				"end": 12782
+				"start": 18,
+				"end": 242
 			},
 			"kind": {
 				"Merit": null
@@ -51,8 +51,8 @@
 				"end": 56
 			},
 			"range": {
-				"start": 1537,
-				"end": 54785
+				"start": 27,
+				"end": 994
 			},
 			"kind": {
 				"Merit": null
@@ -79,8 +79,8 @@
 				"end": 77
 			},
 			"range": {
-				"start": 33,
-				"end": 30373
+				"start": 2,
+				"end": 559
 			},
 			"kind": {
 				"Merit": "Mortal"
@@ -100,8 +100,8 @@
 				"end": 78
 			},
 			"range": {
-				"start": 1706,
-				"end": 2141
+				"start": 29,
+				"end": 37
 			},
 			"kind": {
 				"Merit": null
@@ -114,8 +114,8 @@
 				"end": 81
 			},
 			"range": {
-				"start": 2759,
-				"end": 12232
+				"start": 53,
+				"end": 224
 			},
 			"kind": {
 				"Merit": null
@@ -135,8 +135,8 @@
 				"end": 86
 			},
 			"range": {
-				"start": 4932,
-				"end": 15903
+				"start": 89,
+				"end": 286
 			},
 			"kind": {
 				"Merit": null
@@ -156,8 +156,8 @@
 				"end": 90
 			},
 			"range": {
-				"start": 655,
-				"end": 7022
+				"start": 21,
+				"end": 140
 			},
 			"kind": {
 				"Merit": null
@@ -192,8 +192,8 @@
 				"end": 95
 			},
 			"range": {
-				"start": 2442,
-				"end": 11787
+				"start": 46,
+				"end": 223
 			},
 			"kind": {
 				"Merit": null
@@ -213,8 +213,8 @@
 				"end": 100
 			},
 			"range": {
-				"start": 4341,
-				"end": 18986
+				"start": 82,
+				"end": 376
 			},
 			"kind": {
 				"Merit": null
@@ -234,8 +234,8 @@
 				"end": 104
 			},
 			"range": {
-				"start": 3452,
-				"end": 16341
+				"start": 65,
+				"end": 306
 			},
 			"kind": {
 				"Merit": null

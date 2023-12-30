@@ -1,76 +1,76 @@
 {
-  "info": {
-    "name": "Chronicles of Darkness",
-    "id": "CofD",
-    "hash": "2FF31F5BA518C6B7",
-    "publicationDate": "2015-12-12"
-  },
-  "sections": [
-    {
-      "name": "Mental Merits",
-      "pages": {
-        "start": 44,
-        "end": 47
-      },
-      "kind": {
-        "Merit": null
-      }
-    },
-    {
-      "name": "Physical Merits",
-      "pages": {
-        "start": 47,
-        "end": 50
-      },
-      "range": {
-        "start": 61,
-        "end": 233
-      },
-      "kind": {
-        "Merit": null
-      }
-    },
-    {
-      "name": "Social Merits",
-      "pages": {
-        "start": 49,
-        "end": 56
-      },
-      "range": {
-        "start": 74,
-        "end": 677
-      },
-      "kind": {
-        "Merit": null
-      }
-    },
-    {
-      "name": "Supernatural Merits",
-      "pages": {
-        "start": 56,
-        "end": 60
-      },
-      "range": {
-        "start": 2625,
-        "end": 23005
-      },
-      "kind": {
-        "Merit": null
-      }
-    },
-    {
-      "name": "Fighting Merits",
-      "pages": {
-        "start": 60,
-        "end": 66
-      },
-      "range": {
-        "start": 3646,
-        "end": 31220
-      },
-      "kind": {
-        "Merit": null
-      }
-    }
-  ]
+	"info": {
+		"name": "Chronicles of Darkness",
+		"id": "CofD",
+		"hash": "2FF31F5BA518C6B7",
+		"publicationDate": "2015-12-12"
+	},
+	"sections": [
+		{
+			"name": "Mental Merits",
+			"pages": {
+				"start": 44,
+				"end": 47
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Physical Merits",
+			"pages": {
+				"start": 47,
+				"end": 50
+			},
+			"range": {
+				"start": 61,
+				"end": 233
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Social Merits",
+			"pages": {
+				"start": 49,
+				"end": 56
+			},
+			"range": {
+				"start": 74,
+				"end": 677
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Supernatural Merits",
+			"pages": {
+				"start": 56,
+				"end": 60
+			},
+			"range": {
+				"start": 50,
+				"end": 422
+			},
+			"kind": {
+				"Merit": null
+			}
+		},
+		{
+			"name": "Fighting Merits",
+			"pages": {
+				"start": 60,
+				"end": 66
+			},
+			"range": {
+				"start": 69,
+				"end": 590
+			},
+			"kind": {
+				"Merit": null
+			}
+		}
+	]
 }
