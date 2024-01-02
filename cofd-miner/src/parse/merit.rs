@@ -18,7 +18,8 @@ use regex::{Captures, Regex};
 use crate::source::Section;
 
 use super::{
-	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action, PROP_REGEX,
+	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action,
+	to_paragraphs, PROP_REGEX,
 };
 
 lazy_static! {
@@ -128,8 +129,8 @@ fn parse_body(
 	Vec<String>,
 	Option<ActionFields>,
 ) {
-	let mut paragraphs = Vec::new();
-	let mut lines = Vec::new();
+	// let mut paragraphs = Vec::new();
+	let mut lines: Vec<String> = Vec::new();
 
 	let mut prerequisites = Vec::new();
 	let mut effects = Vec::new();
@@ -141,62 +142,107 @@ fn parse_body(
 	let mut flag = false;
 
 	for line in body.iter().rev() {
-		lines.push(
-			if line.ends_with("God-") {
-				line
-			} else {
-				line.trim_end_matches('-')
-			}
-				.trim_start()
-				.to_owned(),
-		);
+		if let Some(prop) = PROP_REGEX.captures(line.trim_start()) {
+			if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
+				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
 
-		if line.starts_with('\t') {
-			lines.reverse();
-			let paragraph = lines.concat();
-			lines.clear();
-
-			if let Some(prop) = PROP_REGEX.captures(&paragraph) {
-				if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
-					let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
-					let prop_val = prop_val.as_str().trim();
-
-					if !flag {
-						flag = true;
-
-						if !matches!(prop_key, ItemProp::Effects) {
-							effects = paragraphs;
-							paragraphs = Vec::new();
-						}
-					}
-
-					match prop_key {
-						ItemProp::Prerequisites => {
-							prerequisites.extend(
-								prop_val
-									.split(", ")
-									.filter_map(|str| Prerequisite::from_str(str).ok()),
-							);
-						}
-						ItemProp::Effects => {
-							effects = paragraphs;
-							effects.push(prop_val.to_string());
-							effects.reverse();
-							paragraphs = Vec::new();
-						}
-						ItemProp::Notes => notes = vec![prop_val.to_owned()],
-						ItemProp::Drawbacks => drawbacks = vec![prop_val.to_owned()],
-						_ => process_action(&mut action, prop_key, vec![prop_val.to_owned()]),
-					}
+				if !matches!(prop_key, ItemProp::Effects)
+					&& !flag && lines.last().is_some_and(|l| l.starts_with('\t'))
+					&& effects.is_empty()
+				{
+					lines.reverse();
+					effects = to_paragraphs(lines);
+					lines = Vec::new();
 				}
-			} else {
-				paragraphs.push(paragraph.trim().to_owned());
+
+				lines.push(prop_val.as_str().to_owned());
+				lines.reverse();
+				match prop_key {
+					ItemProp::Prerequisites => {
+						prerequisites.extend(
+							to_paragraphs(lines)
+								.join(" ")
+								.split(", ")
+								.filter_map(|str| Prerequisite::from_str(str).ok()),
+						);
+					}
+					ItemProp::Effects => effects = to_paragraphs(lines),
+					ItemProp::Notes => notes = to_paragraphs(lines),
+					ItemProp::Drawbacks => drawbacks = to_paragraphs(lines),
+					_ => process_action(&mut action, prop_key, lines),
+				}
+				lines = Vec::new();
 			}
+			flag = true;
+		} else {
+			lines.push(line.clone());
 		}
 	}
-	paragraphs.reverse();
 
-	(paragraphs, prerequisites, effects, notes, drawbacks, action)
+	// for line in body.iter().rev() {
+	// 	lines.push(
+	// 		if line.ends_with("God-") {
+	// 			line
+	// 		} else {
+	// 			line.trim_end_matches('-')
+	// 		}
+	// 			.trim_start()
+	// 			.to_owned(),
+	// 	);
+	//
+	// 	if line.starts_with('\t') {
+	// 		lines.reverse();
+	// 		let paragraph = lines.concat();
+	// 		lines.clear();
+	//
+	// 		if let Some(prop) = PROP_REGEX.captures(&paragraph) {
+	// 			if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
+	// 				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
+	// 				let prop_val = prop_val.as_str().trim();
+	//
+	// 				if !flag {
+	// 					flag = true;
+	//
+	// 					if !matches!(prop_key, ItemProp::Effects) {
+	// 						effects = paragraphs;
+	// 						paragraphs = Vec::new();
+	// 					}
+	// 				}
+	//
+	// 				match prop_key {
+	// 					ItemProp::Prerequisites => {
+	// 						prerequisites.extend(
+	// 							prop_val
+	// 								.split(", ")
+	// 								.filter_map(|str| Prerequisite::from_str(str).ok()),
+	// 						);
+	// 					}
+	// 					ItemProp::Effects => {
+	// 						effects = paragraphs;
+	// 						effects.push(prop_val.to_string());
+	// 						effects.reverse();
+	// 						paragraphs = Vec::new();
+	// 					}
+	// 					ItemProp::Notes => notes = vec![prop_val.to_owned()],
+	// 					ItemProp::Drawbacks => drawbacks = vec![prop_val.to_owned()],
+	// 					_ => process_action(&mut action, prop_key, vec![prop_val.to_owned()]),
+	// 				}
+	// 			}
+	// 		} else {
+	// 			paragraphs.push(paragraph.trim().to_owned());
+	// 		}
+	// 	}
+	// }
+	lines.reverse();
+
+	(
+		to_paragraphs(lines),
+		prerequisites,
+		effects,
+		notes,
+		drawbacks,
+		action,
+	)
 }
 
 fn process_tags(captures: &Captures<'_>) -> Result<Vec<MeritTag>> {

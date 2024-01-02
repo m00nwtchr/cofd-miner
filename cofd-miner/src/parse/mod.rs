@@ -150,8 +150,39 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 // 	out
 // }
 
-fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
-	vec
+fn to_paragraphs(lines: Vec<String>) -> Vec<String> {
+	let mut paragraphs = Vec::new();
+	let mut paragraph = Vec::new();
+
+	for line in lines.into_iter().rev() {
+		let f = line.starts_with('\t');
+		paragraph.push({
+			let line = line.trim_start();
+
+			if line.ends_with("God-") {
+				line
+			} else if line.ends_with('-') {
+				line.trim_end_matches('-')
+			} else {
+				line
+			}
+			.to_owned()
+		});
+
+		if f {
+			paragraph.reverse();
+			paragraphs.push(paragraph.concat().trim().to_owned());
+			paragraph = Vec::new();
+		}
+	}
+
+	if !paragraph.is_empty() {
+		paragraph.reverse();
+		paragraphs.push(paragraph.concat().trim().to_owned());
+	}
+
+	paragraphs.reverse();
+	paragraphs
 }
 
 fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {
