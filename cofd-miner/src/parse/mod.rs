@@ -11,6 +11,7 @@ use cofd_schema::{
 	book::{Book, BookInfo, BookReference},
 	item::{gift::GiftKind, ActionFields},
 };
+use crate::parse::paragraph::to_paragraphs;
 
 mod gift;
 mod item;
@@ -115,91 +116,93 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 	}
 }
 
-// TODO: Some edge cases don't get merged properly but works ok overall.
-fn to_paragraphs_old(vec: Vec<String>) -> Vec<String> {
-	let mut out = Vec::new();
-	let mut paragraph = String::new();
+mod paragraph {
+	// TODO: Some edge cases don't get merged properly but works ok overall.
+	fn to_paragraphs_old(vec: Vec<String>) -> Vec<String> {
+		let mut out = Vec::new();
+		let mut paragraph = String::new();
 
-	let mut flag = false;
-	for line in vec {
-		if !paragraph.is_empty() && !flag {
-			paragraph.push(' ');
-		} else if flag {
-			flag = false;
+		let mut flag = false;
+		for line in vec {
+			if !paragraph.is_empty() && !flag {
+				paragraph.push(' ');
+			} else if flag {
+				flag = false;
+			}
+
+			let line = line.trim_start();
+			let line = if line.ends_with("God-") {
+				flag = true;
+				line
+			} else if line.ends_with('-') {
+				flag = true;
+				line.trim_end_matches('-')
+			} else {
+				line
+			};
+
+			paragraph.push_str(line);
+
+			if line.ends_with('.') {
+				out.push(paragraph);
+				paragraph = String::new();
+			}
 		}
-
-		let line = line.trim_start();
-		let line = if line.ends_with("God-") {
-			flag = true;
-			line
-		} else if line.ends_with('-') {
-			flag = true;
-			line.trim_end_matches('-')
-		} else {
-			line
-		};
-
-		paragraph.push_str(line);
-
-		if line.ends_with('.') {
+		if !paragraph.is_empty() {
 			out.push(paragraph);
-			paragraph = String::new();
 		}
-	}
-	if !paragraph.is_empty() {
-		out.push(paragraph);
+
+		out
 	}
 
-	out
-}
+	fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
+		let mut paragraphs = Vec::new();
+		let mut paragraph = Vec::new();
 
-fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
-	let mut paragraphs = Vec::new();
-	let mut paragraph = Vec::new();
+		for line in lines.into_iter().rev() {
+			let f = line.starts_with('\t');
 
-	for line in lines.into_iter().rev() {
-		let f = line.starts_with('\t');
+			let line = line.trim_start();
+			let line = if line.ends_with("God-") {
+				line
+			} else if line.ends_with('-') {
+				line.trim_end_matches('-')
+			} else {
+				line
+			}
+			.to_owned();
+			paragraph.push(line);
 
-		let line = line.trim_start();
-		let line = if line.ends_with("God-") {
-			line
-		} else if line.ends_with('-') {
-			line.trim_end_matches('-')
-		} else {
-			line
+			if f {
+				paragraph.reverse();
+				paragraphs.push(paragraph.concat().trim().to_owned());
+				paragraph = Vec::new();
+			}
 		}
-		.to_owned();
-		paragraph.push(line);
 
-		if f {
+		if !paragraph.is_empty() {
 			paragraph.reverse();
 			paragraphs.push(paragraph.concat().trim().to_owned());
-			paragraph = Vec::new();
 		}
+
+		paragraphs.reverse();
+		paragraphs
 	}
 
-	if !paragraph.is_empty() {
-		paragraph.reverse();
-		paragraphs.push(paragraph.concat().trim().to_owned());
-	}
+	pub fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {
+		if lines.len() == 1 {
+			let line = lines.pop().unwrap();
+			let line = line.trim();
 
-	paragraphs.reverse();
-	paragraphs
-}
-
-fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {
-	if lines.len() == 1 {
-		let line = lines.pop().unwrap();
-		let line = line.trim();
-
-		vec![line.to_owned()]
-	} else {
-		let count = lines.iter().filter(|l| l.starts_with('\t')).count();
-
-		if count > (lines.len() / 2) {
-			to_paragraphs_old(lines)
+			vec![line.to_owned()]
 		} else {
-			to_paragraphs_tab(lines)
+			let count = lines.iter().filter(|l| l.starts_with('\t')).count();
+
+			if count > (lines.len() / 2) {
+				to_paragraphs_old(lines)
+			} else {
+				to_paragraphs_tab(lines)
+			}
 		}
 	}
 }
@@ -261,5 +264,46 @@ fn filter_normalize(str: &str) -> Option<String> {
 		None
 	} else {
 		Some(str)
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use crate::parse::paragraph::to_paragraphs;
+
+	#[test]
+	fn paragraph_test() {
+		let text = vec![
+			"STRINGS OF THE HEART (••)",
+			"\tPrerequisites: Storm Lord",
+			"\tEffect: The first trick to making someone do what you want ",
+			"is finding out what they want, and promising it, threatening ",
+			"it, or offering it. Your Storm Lord has a knack for finding that ",
+			"very thing. After a turn scrutinizing her prey, ask his player, ",
+			"“What does your character want most?” Your Storm Lord ",
+			"instinctively knows the answer, even if she doesn’t understand ",
+			"the context. “I want Davis’s hand in marriage” is more useful ",
+			"if she knows who Davis is, but she doesn’t have to know him ",
+			"to know that answer.",
+			"\tWhen leveraging that bit of information, she’s considered",
+			"one stage of impression better in Social maneuvers against",
+			"the prey (see p. 163), and ignores one Door. As well, the prey",
+			"cannot defy the Storm Lord’s threats, offers, or temptations",
+			"without spending a point of Willpower.",
+			"\tDrawback: That degree of intimacy creates a lasting",
+			"relationship between the Storm Lord and her prey, whether",
+			"she wants it or not. That sympathy leaves her open to later",
+			"influence. The Storm Lord always has one fewer Door when",
+			"the prey initiates a Social maneuver against her.",
+		];
+		let para = to_paragraphs(
+			text.into_iter()
+				.map(std::borrow::ToOwned::to_owned)
+				.collect(),
+		);
+
+		for para in para {
+			println!("Paragraph: {para}");
+		}
 	}
 }

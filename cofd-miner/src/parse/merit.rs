@@ -15,11 +15,11 @@ use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
+use crate::parse::paragraph::to_paragraphs;
 use crate::source::Section;
 
 use super::{
-	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action,
-	to_paragraphs, PROP_REGEX,
+	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action, PROP_REGEX,
 };
 
 lazy_static! {

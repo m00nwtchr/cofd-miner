@@ -18,6 +18,7 @@ use regex::Regex;
 use super::{get_book_reference, item::ItemProp, process_action, PROP_REGEX};
 use crate::{parse::to_paragraphs, source::Section};
 
+
 lazy_static! {
 	static ref GIFT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
