@@ -116,7 +116,7 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 }
 
 // TODO: Some edge cases don't get merged properly but works ok overall.
-fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
+fn to_paragraphs_old(vec: Vec<String>) -> Vec<String> {
 	let mut out = Vec::new();
 	let mut paragraph = String::new();
 
@@ -128,15 +128,18 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 			flag = false;
 		}
 
-		paragraph.push_str(if line.ends_with("God-") {
+		let line = line.trim_start();
+		let line = if line.ends_with("God-") {
 			flag = true;
-			&line
+			line
 		} else if line.ends_with('-') {
 			flag = true;
 			line.trim_end_matches('-')
 		} else {
-			&line
-		});
+			line
+		};
+
+		paragraph.push_str(line);
 
 		if line.ends_with('.') {
 			out.push(paragraph);
@@ -148,6 +151,57 @@ fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
 	}
 
 	out
+}
+
+fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
+	let mut paragraphs = Vec::new();
+	let mut paragraph = Vec::new();
+
+	for line in lines.into_iter().rev() {
+		let f = line.starts_with('\t');
+
+		let line = line.trim_start();
+		let line = if line.ends_with("God-") {
+			line
+		} else if line.ends_with('-') {
+			line.trim_end_matches('-')
+		} else {
+			line
+		}
+		.to_owned();
+		paragraph.push(line);
+
+		if f {
+			paragraph.reverse();
+			paragraphs.push(paragraph.concat().trim().to_owned());
+			paragraph = Vec::new();
+		}
+	}
+
+	if !paragraph.is_empty() {
+		paragraph.reverse();
+		paragraphs.push(paragraph.concat().trim().to_owned());
+	}
+
+	paragraphs.reverse();
+	paragraphs
+}
+
+fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {
+	if lines.len() == 1 {
+		let line = lines.pop().unwrap();
+		let line = line.trim();
+
+		vec![line.to_owned()]
+	} else {
+		let count = lines.iter().filter(|l| l.starts_with('\t')).count();
+
+		if count > (lines.len() / 2) {
+			to_paragraphs_old(lines)
+		} else {
+			to_paragraphs_tab(lines)
+		}
+	}
 }
 
 fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {
@@ -168,7 +222,7 @@ fn get_page_number(page_ranges: &HashMap<usize, Range<usize>>, pos: usize) -> &u
 }
 
 fn parse_name(captures: &Captures<'_>) -> String {
-	let name = normalize(captures.name("name").map_or("", |f| f.as_str()));
+	let name = normalize(captures.name("name").map_or("", |f| f.as_str().trim())).replace('\t', "");
 
 	if name.chars().all(|f| f.is_uppercase() || !f.is_alphabetic()) {
 		let is: Vec<_> = name
@@ -193,8 +247,9 @@ fn parse_name(captures: &Captures<'_>) -> String {
 }
 
 fn normalize(str: &str) -> String {
-	str.trim()
-		.replace('\n', " ")
+	str
+		// .trim_end()
+		.replace('\n', "")
 		.replace("  ", " ")
 		.replace(['‘', '’'], "'")
 }

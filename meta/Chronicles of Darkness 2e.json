@@ -10,21 +10,11 @@
 			"name": "Mental Merits",
 			"pages": {
 				"start": 44,
-				"end": 46
+				"end": 47
 			},
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "Replace",
-					"range": {
-						"start": 5217,
-						"end": 5217
-					},
-					"replace": "Effect: Y"
-				}
-			]
+			}
 		},
 		{
 			"name": "Physical Merits",
@@ -33,22 +23,12 @@
 				"end": 50
 			},
 			"range": {
-				"start": 1099,
-				"end": 9993
+				"start": 61,
+				"end": 233
 			},
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "Replace",
-					"range": {
-						"start": 3649,
-						"end": 3649
-					},
-					"replace": "Effect: Y"
-				}
-			]
+			}
 		},
 		{
 			"name": "Social Merits",
@@ -57,36 +37,12 @@
 				"end": 56
 			},
 			"range": {
-				"start": 3746,
-				"end": 34224
+				"start": 74,
+				"end": 677
 			},
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "Replace",
-					"range": {
-						"start": 7401,
-						"end": 7401
-					},
-					"replace": "Effect: Y"
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 13200,
-						"end": 16508
-					}
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 22382,
-						"end": 23655
-					}
-				}
-			]
+			}
 		},
 		{
 			"name": "Supernatural Merits",
@@ -95,8 +51,8 @@
 				"end": 60
 			},
 			"range": {
-				"start": 2625,
-				"end": 23005
+				"start": 50,
+				"end": 422
 			},
 			"kind": {
 				"Merit": null
@@ -109,62 +65,12 @@
 				"end": 66
 			},
 			"range": {
-				"start": 3646,
-				"end": 31220
+				"start": 69,
+				"end": 590
 			},
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "Replace",
-					"range": {
-						"start": 11792,
-						"end": 11792
-					},
-					"replace": "Effect: M"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 14998,
-						"end": 14998
-					},
-					"replace": "Effect: T"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 25533,
-						"end": 25533
-					},
-					"replace": "Effect: Y"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 3325,
-						"end": 3325
-					},
-					"replace": "Effect: Y"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 2800,
-						"end": 2800
-					},
-					"replace": "Effect: I"
-				},
-				{
-					"type": "Replace",
-					"range": {
-						"start": 127,
-						"end": 127
-					},
-					"replace": "Effect: Y"
-				}
-			]
+			}
 		}
 	]
 }

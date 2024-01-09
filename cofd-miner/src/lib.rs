@@ -23,10 +23,10 @@ pub mod source;
 
 pub use source::{extract_pages, extract_text, process_section};
 
-const META_JSON: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/meta.bin"));
+const META_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/meta.bin"));
 
 lazy_static! {
-	static ref META: Vec<SourceMeta> = rmp_serde::decode::from_slice(META_JSON).unwrap();
+	static ref META: Vec<SourceMeta> = rmp_serde::decode::from_slice(META_BYTES).unwrap();
 }
 
 #[must_use]

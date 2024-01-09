@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use lopdf::Document;
 use rayon::prelude::*;
 
-pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<BTreeMap<usize, String>> {
+pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PageText> {
 	let document = Document::load(path)?;
 
 	let pages = document
