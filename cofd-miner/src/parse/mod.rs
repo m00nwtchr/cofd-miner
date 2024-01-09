@@ -6,12 +6,12 @@ use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
+use crate::parse::paragraph::to_paragraphs;
 use cofd_meta::PageKind;
 use cofd_schema::{
 	book::{Book, BookInfo, BookReference},
 	item::{gift::GiftKind, ActionFields},
 };
-use crate::parse::paragraph::to_paragraphs;
 
 mod gift;
 mod item;
@@ -117,76 +117,58 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 }
 
 mod paragraph {
+
 	// TODO: Some edge cases don't get merged properly but works ok overall.
-	fn to_paragraphs_old(vec: Vec<String>) -> Vec<String> {
-		let mut out = Vec::new();
+	fn to_paragraphs_old(lines: Vec<String>) -> Vec<String> {
+		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
-		let mut flag = false;
-		for line in vec {
-			if !paragraph.is_empty() && !flag {
-				paragraph.push(' ');
-			} else if flag {
-				flag = false;
-			}
-
-			let line = line.trim_start();
-			let line = if line.ends_with("God-") {
-				flag = true;
-				line
-			} else if line.ends_with('-') {
-				flag = true;
-				line.trim_end_matches('-')
-			} else {
-				line
-			};
-
-			paragraph.push_str(line);
+		for line in lines {
+			paragraph.push_str(trim_line(line.as_str()));
 
 			if line.ends_with('.') {
-				out.push(paragraph);
+				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
 		}
+
 		if !paragraph.is_empty() {
-			out.push(paragraph);
+			paragraphs.push(paragraph.trim().to_owned());
 		}
 
-		out
+		paragraphs
 	}
 
 	fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
-		let mut paragraph = Vec::new();
+		let mut paragraph = String::new();
 
-		for line in lines.into_iter().rev() {
-			let f = line.starts_with('\t');
-
-			let line = line.trim_start();
-			let line = if line.ends_with("God-") {
-				line
-			} else if line.ends_with('-') {
-				line.trim_end_matches('-')
-			} else {
-				line
+		for line in lines {
+			if line.starts_with('\t') && !paragraph.is_empty() {
+				paragraphs.push(paragraph.trim().to_owned());
+				paragraph = String::new();
 			}
-			.to_owned();
-			paragraph.push(line);
 
-			if f {
-				paragraph.reverse();
-				paragraphs.push(paragraph.concat().trim().to_owned());
-				paragraph = Vec::new();
-			}
+			paragraph.push_str(trim_line(line.as_str()));
 		}
 
 		if !paragraph.is_empty() {
-			paragraph.reverse();
-			paragraphs.push(paragraph.concat().trim().to_owned());
+			paragraphs.push(paragraph.trim().to_owned());
 		}
 
-		paragraphs.reverse();
 		paragraphs
+	}
+
+	fn trim_line(line: &str) -> &str {
+		let line = line.trim_start();
+		let line = if line.ends_with("God-") {
+			line
+		} else if line.ends_with('-') {
+			line.trim_end_matches('-')
+		} else {
+			line
+		};
+		line
 	}
 
 	pub fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {

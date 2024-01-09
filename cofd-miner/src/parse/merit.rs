@@ -88,7 +88,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 
 		if let Some(sub) = sub {
 			description.insert(0, {
-				let mut desc = sub.as_str().to_owned();
+				let mut desc = normalize(sub.as_str());
 				desc.insert(0, '\t');
 				desc
 			});
