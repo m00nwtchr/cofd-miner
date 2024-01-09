@@ -116,58 +116,60 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 }
 
 // TODO: Some edge cases don't get merged properly but works ok overall.
-// fn to_paragraphs(vec: Vec<String>) -> Vec<String> {
-// 	let mut out = Vec::new();
-// 	let mut paragraph = String::new();
-//
-// 	let mut flag = false;
-// 	for line in vec {
-// 		if !paragraph.is_empty() && !flag {
-// 			paragraph.push(' ');
-// 		} else if flag {
-// 			flag = false;
-// 		}
-//
-// 		paragraph.push_str(if line.ends_with("God-") {
-// 			flag = true;
-// 			&line
-// 		} else if line.ends_with('-') {
-// 			flag = true;
-// 			line.trim_end_matches('-')
-// 		} else {
-// 			&line
-// 		});
-//
-// 		if line.ends_with('.') {
-// 			out.push(paragraph);
-// 			paragraph = String::new();
-// 		}
-// 	}
-// 	if !paragraph.is_empty() {
-// 		out.push(paragraph);
-// 	}
-//
-// 	out
-// }
+fn to_paragraphs_old(vec: Vec<String>) -> Vec<String> {
+	let mut out = Vec::new();
+	let mut paragraph = String::new();
 
-fn to_paragraphs(lines: Vec<String>) -> Vec<String> {
+	let mut flag = false;
+	for line in vec {
+		if !paragraph.is_empty() && !flag {
+			paragraph.push(' ');
+		} else if flag {
+			flag = false;
+		}
+
+		let line = line.trim_start();
+		let line = if line.ends_with("God-") {
+			flag = true;
+			line
+		} else if line.ends_with('-') {
+			flag = true;
+			line.trim_end_matches('-')
+		} else {
+			line
+		};
+
+		paragraph.push_str(line);
+
+		if line.ends_with('.') {
+			out.push(paragraph);
+			paragraph = String::new();
+		}
+	}
+	if !paragraph.is_empty() {
+		out.push(paragraph);
+	}
+
+	out
+}
+
+fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
 	let mut paragraphs = Vec::new();
 	let mut paragraph = Vec::new();
 
 	for line in lines.into_iter().rev() {
 		let f = line.starts_with('\t');
-		paragraph.push({
-			let line = line.trim_start();
 
-			if line.ends_with("God-") {
-				line
-			} else if line.ends_with('-') {
-				line.trim_end_matches('-')
-			} else {
-				line
-			}
-			.to_owned()
-		});
+		let line = line.trim_start();
+		let line = if line.ends_with("God-") {
+			line
+		} else if line.ends_with('-') {
+			line.trim_end_matches('-')
+		} else {
+			line
+		}
+		.to_owned();
+		paragraph.push(line);
 
 		if f {
 			paragraph.reverse();
@@ -183,6 +185,23 @@ fn to_paragraphs(lines: Vec<String>) -> Vec<String> {
 
 	paragraphs.reverse();
 	paragraphs
+}
+
+fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {
+	if lines.len() == 1 {
+		let line = lines.pop().unwrap();
+		let line = line.trim();
+
+		vec![line.to_owned()]
+	} else {
+		let count = lines.iter().filter(|l| l.starts_with('\t')).count();
+
+		if count > (lines.len() / 2) {
+			to_paragraphs_old(lines)
+		} else {
+			to_paragraphs_tab(lines)
+		}
+	}
 }
 
 fn get_body(str_pos: &mut usize, span: &str, captures: &Captures<'_>) -> Vec<String> {

@@ -87,10 +87,14 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		let dot_rating = DotRange::from_str(cost.as_str())?;
 
 		if let Some(sub) = sub {
-			description.insert(0, normalize(sub.as_str()));
+			description.insert(0, {
+				let mut desc = sub.as_str().to_owned();
+				desc.insert(0, '\t');
+				desc
+			});
 			children.push(MeritSubItem {
 				name: name.clone(),
-				description,
+				description: to_paragraphs(description),
 				prerequisites,
 				dot_rating,
 				drawbacks,
@@ -100,7 +104,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 			out.push(MeritItem {
 				name,
 				reference,
-				description,
+				description: to_paragraphs(description),
 				effects,
 				inner: Merit {
 					dot_rating,
@@ -155,7 +159,9 @@ fn parse_body(
 					lines = Vec::new();
 				}
 
-				lines.push(prop_val.as_str().to_owned());
+				let mut str = prop_val.as_str().to_owned();
+				str.insert(0, '\t');
+				lines.push(str);
 				lines.reverse();
 				match prop_key {
 					ItemProp::Prerequisites => {
@@ -234,15 +240,7 @@ fn parse_body(
 	// 	}
 	// }
 	lines.reverse();
-
-	(
-		to_paragraphs(lines),
-		prerequisites,
-		effects,
-		notes,
-		drawbacks,
-		action,
-	)
+	(lines, prerequisites, effects, notes, drawbacks, action)
 }
 
 fn process_tags(captures: &Captures<'_>) -> Result<Vec<MeritTag>> {
