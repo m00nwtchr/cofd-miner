@@ -12,6 +12,7 @@ use cofd_schema::{
 	prerequisites::{Prerequisite, Prerequisites},
 };
 use convert_case::{Case, Casing};
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
@@ -26,7 +27,7 @@ lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
 		^\t*
-		(?<name>(?:\t?[a-zA-Z]\s*)+)              # Name
+		(?<name>(?:\t?[\w\-\']\s*)+)              # Name
 		\s?
 		\(
 			(?: (?<ltags> [^•\n]+ ) [,;] \s)?       # Tags
@@ -76,44 +77,44 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		let tags = process_tags(&captures)?;
 
 		let body = get_body(&mut str_pos, &section.extract, &captures);
-		let (mut description, mut prerequisites, effects, notes, drawbacks, action) =
-			parse_body(&body);
+		let mut body = parse_body(&body);
+
 		if let Some(prereqs) = additional_prerequisites.clone() {
 			if sub.is_none() {
-				prerequisites.extend(prereqs.unwrap());
+				body.prerequisites.extend(prereqs.unwrap());
 			}
 		}
-		let prerequisites = Prerequisites::from(prerequisites);
+		let prerequisites = Prerequisites::from(body.prerequisites);
 		let dot_rating = DotRange::from_str(cost.as_str())?;
 
 		if let Some(sub) = sub {
-			description.insert(0, {
+			body.description.insert(0, {
 				let mut desc = normalize(sub.as_str());
 				desc.insert(0, '\t');
 				desc
 			});
 			children.push(MeritSubItem {
 				name: name.clone(),
-				description: to_paragraphs(description),
+				description: to_paragraphs(body.description),
 				prerequisites,
 				dot_rating,
-				drawbacks,
+				drawbacks: body.drawbacks,
 			});
 		} else {
 			children.reverse();
 			out.push(MeritItem {
 				name,
 				reference,
-				description: to_paragraphs(description),
-				effects,
+				description: to_paragraphs(body.description),
+				effects: body.effects,
 				inner: Merit {
 					dot_rating,
 					prerequisites,
 					tags,
-					drawbacks,
+					drawbacks: body.drawbacks,
 					children,
-					action,
-					notes,
+					action: body.action,
+					notes: body.notes,
 				},
 			});
 			children = Vec::new();
@@ -123,124 +124,91 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 	Ok(out)
 }
 
-fn parse_body(
-	body: &[String],
-) -> (
-	Vec<String>,
-	Vec<Prerequisite>,
-	Vec<String>,
-	Vec<String>,
-	Vec<String>,
-	Option<ActionFields>,
-) {
-	// let mut paragraphs = Vec::new();
+/**
+ * Structure which holds the results of [`parse_body`]
+ */
+pub struct MeritBody {
+	pub description: Vec<String>,
+	pub prerequisites: Vec<Prerequisite>,
+	pub effects: Vec<String>,
+	pub notes: Vec<String>,
+	pub drawbacks: Vec<String>,
+	pub action: Option<ActionFields>,
+}
+
+fn parse_body(body: &[String]) -> MeritBody {
 	let mut lines: Vec<String> = Vec::new();
 
+	let mut description = Vec::new();
 	let mut prerequisites = Vec::new();
 	let mut effects = Vec::new();
 	let mut notes = Vec::new();
 	let mut drawbacks = Vec::new();
-
 	let mut action = None;
 
-	let mut flag = false;
+	let mut first_prop = true;
 
 	for line in body.iter().rev() {
 		if let Some(prop) = PROP_REGEX.captures(line.trim_start()) {
 			if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
 				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
+				let line = prop_val.as_str();
 
-				if !matches!(prop_key, ItemProp::Effects)
-					&& !flag && lines.last().is_some_and(|l| l.starts_with('\t'))
-					&& effects.is_empty()
-				{
+				first_prop = false;
+
+				lines.push(line.to_owned());
+				// Effects get reversed later
+				if prop_key != ItemProp::Effects {
 					lines.reverse();
-					effects = to_paragraphs(lines);
-					lines = Vec::new();
 				}
-
-				let mut str = prop_val.as_str().to_owned();
-				str.insert(0, '\t');
-				lines.push(str);
-				lines.reverse();
 				match prop_key {
 					ItemProp::Prerequisites => {
 						prerequisites.extend(
-							to_paragraphs(lines)
+							lines
+								.iter()
+								.map(|l| l.trim())
 								.join(" ")
 								.split(", ")
 								.filter_map(|str| Prerequisite::from_str(str).ok()),
 						);
 					}
-					ItemProp::Effects => effects = to_paragraphs(lines),
-					ItemProp::Notes => notes = to_paragraphs(lines),
-					ItemProp::Drawbacks => drawbacks = to_paragraphs(lines),
+					ItemProp::Effects => effects.extend(lines), // Effects are rolled into paragraphs later
+					ItemProp::Notes => notes.extend(to_paragraphs(lines)),
+					ItemProp::Drawbacks => drawbacks.extend(to_paragraphs(lines)),
 					_ => process_action(&mut action, prop_key, lines),
 				}
 				lines = Vec::new();
 			}
-			flag = true;
+		} else if line.starts_with('\t') {
+			lines.push(line.to_owned());
+			if first_prop {
+				description.extend(lines);
+			} else {
+				effects.extend(lines);
+			}
+			lines = Vec::new();
 		} else {
-			lines.push(line.clone());
+			lines.push(line.to_owned());
 		}
 	}
 
-	// for line in body.iter().rev() {
-	// 	lines.push(
-	// 		if line.ends_with("God-") {
-	// 			line
-	// 		} else {
-	// 			line.trim_end_matches('-')
-	// 		}
-	// 			.trim_start()
-	// 			.to_owned(),
-	// 	);
-	//
-	// 	if line.starts_with('\t') {
-	// 		lines.reverse();
-	// 		let paragraph = lines.concat();
-	// 		lines.clear();
-	//
-	// 		if let Some(prop) = PROP_REGEX.captures(&paragraph) {
-	// 			if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
-	// 				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
-	// 				let prop_val = prop_val.as_str().trim();
-	//
-	// 				if !flag {
-	// 					flag = true;
-	//
-	// 					if !matches!(prop_key, ItemProp::Effects) {
-	// 						effects = paragraphs;
-	// 						paragraphs = Vec::new();
-	// 					}
-	// 				}
-	//
-	// 				match prop_key {
-	// 					ItemProp::Prerequisites => {
-	// 						prerequisites.extend(
-	// 							prop_val
-	// 								.split(", ")
-	// 								.filter_map(|str| Prerequisite::from_str(str).ok()),
-	// 						);
-	// 					}
-	// 					ItemProp::Effects => {
-	// 						effects = paragraphs;
-	// 						effects.push(prop_val.to_string());
-	// 						effects.reverse();
-	// 						paragraphs = Vec::new();
-	// 					}
-	// 					ItemProp::Notes => notes = vec![prop_val.to_owned()],
-	// 					ItemProp::Drawbacks => drawbacks = vec![prop_val.to_owned()],
-	// 					_ => process_action(&mut action, prop_key, vec![prop_val.to_owned()]),
-	// 				}
-	// 			}
-	// 		} else {
-	// 			paragraphs.push(paragraph.trim().to_owned());
-	// 		}
-	// 	}
-	// }
-	lines.reverse();
-	(lines, prerequisites, effects, notes, drawbacks, action)
+	if !lines.is_empty() {
+		description.extend(lines);
+	}
+
+	description.reverse();
+	effects.reverse();
+	// description = to_paragraphs(description); // Allow descriptions to be rolled into paragraphs later
+	effects = to_paragraphs(effects);
+
+	MeritBody {
+		description,
+		prerequisites,
+		effects,
+		notes,
+		drawbacks,
+		action,
+	}
 }
 
 fn process_tags(captures: &Captures<'_>) -> Result<Vec<MeritTag>> {

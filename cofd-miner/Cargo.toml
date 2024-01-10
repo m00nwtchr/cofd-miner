@@ -43,6 +43,7 @@ rayon = "1.7"
 convert_case = "0.6"
 highway = "1.1.0"
 regex = "1.8"
+itertools.workspace = true
 
 serde.workspace = true
 rmp-serde.workspace = true

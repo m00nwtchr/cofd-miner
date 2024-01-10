@@ -44,7 +44,9 @@ impl PdfExtract {
 	pub fn parse(self) -> Result<Book> {
 		let mut parse = Book::from(self.info);
 
-		for section in self.sections {
+		for mut section in self.sections {
+			section.extract = section.extract.replace(['‘', '’'], "'");
+
 			match &section.kind {
 				PageKind::Merit(_) => parse.merits.extend(parse_merits(&parse.info, &section)?),
 				// PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
@@ -232,11 +234,7 @@ fn parse_name(captures: &Captures<'_>) -> String {
 }
 
 fn normalize(str: &str) -> String {
-	str
-		// .trim_end()
-		.replace('\n', "")
-		.replace("  ", " ")
-		.replace(['‘', '’'], "'")
+	str.trim_end_matches('\n').replace("  ", " ")
 }
 
 fn filter_normalize(str: &str) -> Option<String> {

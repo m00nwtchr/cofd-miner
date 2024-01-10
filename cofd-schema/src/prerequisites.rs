@@ -129,6 +129,7 @@ impl FromStr for Prerequisite {
 	type Err = error::ParseError;
 
 	fn from_str(prereq: &str) -> Result<Self, Self::Err> {
+		let prereq = prereq.trim();
 		PrerequisiteKey::from_str(prereq)
 			.map(Self::Key)
 			.or_else(|_| {

@@ -413,6 +413,7 @@ dependencies = [
  "egui_extras",
  "env_logger",
  "highway",
+ "itertools",
  "lazy_static",
  "log",
  "mupdf",
