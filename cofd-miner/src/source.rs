@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 pub use crate::backend::extract_pages;
 use crate::{backend::PdfText, parse::PdfExtract};
-use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta};
+use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {
@@ -53,10 +53,19 @@ pub fn process_section(
 	let extract = if flag {
 		extract
 	} else if let Some(range) = &section.range {
-		if let Some(extract) = extract.get(range.clone()) {
-			extract.to_owned()
-		} else {
-			extract
+		match range {
+			SectionRange::Range(range) => extract
+				.get(range.clone())
+				.map(ToOwned::to_owned)
+				.unwrap_or(extract),
+			SectionRange::Regex(regex) => {
+				let extract_str = extract.join("\n");
+				regex
+					.captures(&extract_str)
+					.and_then(|c| c.get(1).or_else(|| c.get(0)))
+					.map(|m| m.as_str().split('\n').map(str::to_owned).collect())
+					.unwrap_or(extract)
+			}
 		}
 	} else {
 		extract

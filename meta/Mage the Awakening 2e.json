@@ -12,10 +12,7 @@
 				"start": 99,
 				"end": 104
 			},
-			"range": {
-				"start": 89,
-				"end": 564
-			},
+			"range": "(?sm)Merits(.*)Mundane Merits$",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -26,10 +23,7 @@
 				"start": 104,
 				"end": 107
 			},
-			"range": {
-				"start": 48,
-				"end": 362
-			},
+			"range": "(?sm)Mundane Merits(.*)",
 			"kind": {
 				"Merit": null
 			}
@@ -40,10 +34,7 @@
 				"start": 302,
 				"end": 303
 			},
-			"range": {
-				"start": 49,
-				"end": 108
-			},
+			"range": "(?sm)Sleeper Merits(.*)Sleepwalkers$",
 			"kind": {
 				"Merit": "Sleeper"
 			}
@@ -54,10 +45,7 @@
 				"start": 305,
 				"end": 306
 			},
-			"range": {
-				"start": 32,
-				"end": 148
-			},
+			"range": "(?sm)Sleepwalker Merits(.*)",
 			"kind": {
 				"Merit": null
 			}
@@ -68,10 +56,7 @@
 				"start": 128,
 				"end": 134
 			},
-			"range": {
-				"start": 17,
-				"end": 564
-			},
+			"range": "(?sm)Death$(.*)^Fate$",
 			"kind": "MageSpell"
 		}
 	]

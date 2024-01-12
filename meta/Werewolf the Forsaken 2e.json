@@ -21,11 +21,6 @@
 			},
 			"ops": [
 				{
-					"type": "RegexReplace",
-					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
-					"replace": ""
-				},
-				{
 					"type": "Delete",
 					"range": {
 						"start": 4234,
@@ -48,11 +43,6 @@
 				"Merit": "Werewolf"
 			},
 			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
-					"replace": ""
-				},
 				{
 					"type": "Delete",
 					"range": {
@@ -83,11 +73,6 @@
 				"Merit": null
 			},
 			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n(Chapter Three: Laws of the Kill|Merits)\\n\\d{3}",
-					"replace": ""
-				}
 			]
 		},
 		{

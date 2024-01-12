@@ -12,10 +12,7 @@
 				"start": 26,
 				"end": 26
 			},
-			"range": {
-				"start": 15,
-				"end": 27
-			},
+			"range": "(?sm)Merit: (.*)^High Speech$\tOne",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -26,10 +23,7 @@
 				"start": 26,
 				"end": 26
 			},
-			"range": {
-				"start": 47,
-				"end": 93
-			},
+			"range": "(?sm)High Speech(.*)^Active Mage Sight$",
 			"kind": {
 				"Merit": null
 			}
@@ -40,10 +34,7 @@
 				"start": 27,
 				"end": 27
 			},
-			"range": {
-				"start": 13,
-				"end": 27
-			},
+			"range": "(?sm)Merit: (.*)^Focused Mage Sight$",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -54,10 +45,7 @@
 				"start": 43,
 				"end": 43
 			},
-			"range": {
-				"start": 71,
-				"end": 89
-			},
+			"range": "(?sm)Merit: (.*)$",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -68,10 +56,7 @@
 				"start": 57,
 				"end": 57
 			},
-			"range": {
-				"start": 22,
-				"end": 60
-			},
+			"range": "(?sm)Merits(.*)Ritual Interruption$",
 			"kind": {
 				"Merit": "Awakened"
 			}

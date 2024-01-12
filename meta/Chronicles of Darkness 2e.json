@@ -12,10 +12,7 @@
 				"start": 44,
 				"end": 47
 			},
-			"range": {
-				"start": 16,
-				"end": 250
-			},
+			"range": "(?sm)Mental Merits(.*)Professions$",
 			"kind": {
 				"Merit": null
 			}
@@ -26,10 +23,7 @@
 				"start": 47,
 				"end": 50
 			},
-			"range": {
-				"start": 59,
-				"end": 227
-			},
+			"range": "(?sm)Physical Merits(.*)^Social Merits$",
 			"kind": {
 				"Merit": null
 			}
@@ -40,10 +34,7 @@
 				"start": 49,
 				"end": 56
 			},
-			"range": {
-				"start": 72,
-				"end": 661
-			},
+			"range": "(?sm)(Allies\\(.*)^Supernatural Merits$",
 			"kind": {
 				"Merit": null
 			}
@@ -54,10 +45,7 @@
 				"start": 56,
 				"end": 60
 			},
-			"range": {
-				"start": 48,
-				"end": 412
-			},
+			"range": "(?sm)Supernatural Merits(.*)^Fighting Merits$",
 			"kind": {
 				"Merit": null
 			}
@@ -68,10 +56,7 @@
 				"start": 60,
 				"end": 66
 			},
-			"range": {
-				"start": 67,
-				"end": 578
-			},
+			"range": "(?sm)Fighting Merits(.*)",
 			"kind": {
 				"Merit": null
 			}

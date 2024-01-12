@@ -1,5 +1,6 @@
 use std::ops::{Range, RangeInclusive};
 
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 pub use crate::page_kind::PageKind;
@@ -36,12 +37,19 @@ pub enum Op {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SectionRange {
+	Range(Range<usize>),
+	Regex(#[serde(with = "serde_regex")] Regex),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SectionMeta {
 	#[serde(default = "unnamed", skip_serializing_if = "String::is_empty")]
 	pub name: String,
 	pub pages: RangeInclusive<usize>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
-	pub range: Option<Range<usize>>,
+	pub range: Option<SectionRange>,
 	pub kind: PageKind,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub ops: Vec<Op>,

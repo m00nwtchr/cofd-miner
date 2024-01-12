@@ -12,10 +12,7 @@
 				"start": 109,
 				"end": 115
 			},
-			"range": {
-				"start": 62,
-				"end": 635
-			},
+			"range": "(?sm)General Kindred Merits(.*)^Carthian Law$",
 			"kind": {
 				"Merit": "Kindred"
 			},
@@ -38,10 +35,7 @@
 				"start": 116,
 				"end": 116
 			},
-			"range": {
-				"start": 2,
-				"end": 75
-			},
+			"range": "(?sm)(.*)^Invictus Oaths$",
 			"kind": {
 				"Merit": null
 			}
@@ -52,10 +46,7 @@
 				"start": 116,
 				"end": 117
 			},
-			"range": {
-				"start": 95,
-				"end": 161
-			},
+			"range": "(?sm)(Notary \\(.*)^Kindred Fighting Merits$",
 			"kind": {
 				"Merit": null
 			}
@@ -66,10 +57,7 @@
 				"start": 117,
 				"end": 118
 			},
-			"range": {
-				"start": 69,
-				"end": 135
-			},
+			"range": "(?sm)(Kindred Dueling.*)^Human Merits$",
 			"kind": {
 				"Merit": "Kindred"
 			}
@@ -80,10 +68,7 @@
 				"start": 118,
 				"end": 124
 			},
-			"range": {
-				"start": 42,
-				"end": 602
-			},
+			"range": "(?sm)(Allies.*)",
 			"kind": {
 				"Merit": null
 			}

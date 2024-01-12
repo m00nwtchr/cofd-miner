@@ -5,4 +5,7 @@ edition = "2021"
 
 [dependencies]
 cofd-schema.workspace = true
-serde = { version = "1", features = ["derive"] }
+regex.workspace = true
+
+serde = { workspace = true, features = ["derive"] }
+serde_regex = "1"
