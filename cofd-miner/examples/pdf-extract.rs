@@ -51,19 +51,19 @@ fn is_pdf(entry: &DirEntry) -> bool {
 fn main() -> anyhow::Result<()> {
 	env_logger::init();
 
-	let cache_path = Path::new("cache.json");
+	let cache_path = Path::new("../../cache.json");
 	let cache = RwLock::new(if cache_path.exists() {
 		serde_json::de::from_reader(File::open(cache_path)?)?
 	} else {
 		Cache::default()
 	});
 
-	let out_path = Path::new("./out");
+	let out_path = Path::new("../../out");
 	if !out_path.exists() {
 		std::fs::create_dir_all(out_path)?;
 	}
 
-	let paths: Vec<PathBuf> = WalkDir::new("pdf")
+	let paths: Vec<PathBuf> = WalkDir::new("../../pdf")
 		.into_iter()
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
 		.filter_map(|e| e.ok())

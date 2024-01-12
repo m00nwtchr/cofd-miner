@@ -398,7 +398,9 @@ name = "cofd-meta"
 version = "0.1.0"
 dependencies = [
  "cofd-schema",
+ "regex",
  "serde",
+ "serde_regex",
 ]
 
 [[package]]
@@ -409,8 +411,6 @@ dependencies = [
  "cofd-meta",
  "cofd-schema",
  "convert_case",
- "eframe",
- "egui_extras",
  "env_logger",
  "highway",
  "itertools",
@@ -1506,6 +1506,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "meta-editor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cofd-meta",
+ "cofd-miner",
+ "cofd-schema",
+ "eframe",
+ "egui_extras",
+ "env_logger",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2390,6 +2405,16 @@ checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serde_regex"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8136f1a4ea815d7eac4101cfd0b16dc0cb5e1fe1b8609dfd728058656b7badf"
+dependencies = [
+ "regex",
  "serde",
 ]
 

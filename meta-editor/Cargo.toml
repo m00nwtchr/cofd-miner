@@ -1,0 +1,24 @@
+[package]
+name = "meta-editor"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cofd-meta.workspace = true
+cofd-miner = { path = "../cofd-miner", default-features = false, features = ["mupdf"] }
+cofd-schema.workspace = true
+anyhow.workspace = true
+
+eframe = { version = "0.23", default-features = false, features = [
+    "default_fonts",
+    "glow",
+] }
+egui_extras = { version = "0.23" }
+
+env_logger = { version = "0.10" }
+
+serde.workspace = true
+serde_json.workspace = true

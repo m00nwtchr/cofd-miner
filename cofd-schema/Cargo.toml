@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde.workspace = true
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
 
 chrono = { version = "0.4", features = ["serde"] }
-strum = { version = "0.25", features = ["derive"] }
-
-thiserror = "1"
+strum = { workspace = true, features = ["derive"] }

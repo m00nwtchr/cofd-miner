@@ -2,29 +2,19 @@
 name = "cofd-miner"
 version = "0.1.0"
 edition = "2021"
-default-run = "pdf-extract"
 
-[[bin]]
-name = "meta-editor"
-path = "src/bin/meta_editor.rs"
-required-features = ["meta_editor"]
-
-[[bin]]
+[[example]]
 name = "pdf-extract"
-path = "src/bin/pdf-extract.rs"
+path = "examples/pdf-extract.rs"
 required-features = ["pdf_extract"]
 
 [features]
-default = ["mupdf"]
+default = ["mupdf", "embed_meta"]
+embed_meta = ["dep:rmp-serde", "dep:cofd-meta"]
+
 mupdf = ["dep:mupdf"]
 # lopdf = ["dep:lopdf"]
 
-meta_editor = [
-    "dep:eframe",
-    "dep:egui_extras",
-    "dep:env_logger",
-    "dep:serde_json",
-]
 pdf_extract = ["dep:walkdir", "dep:env_logger", "dep:serde_json"]
 
 [dependencies]
@@ -42,33 +32,26 @@ rayon = "1.7"
 
 convert_case = "0.6"
 highway = "1.1.0"
-regex = "1.8"
+regex.workspace = true
 itertools.workspace = true
-
-serde.workspace = true
-rmp-serde.workspace = true
 
 log.workspace = true
 anyhow.workspace = true
 thiserror.workspace = true
 
-###
+serde.workspace = true
+rmp-serde = { workspace = true, optional = true }
+
+### pdf-extract
 walkdir = { version = "2", optional = true }
 env_logger = { version = "0.10", optional = true }
-serde_json = { version = "1", optional = true }
-
-### Meta Editor Deps
-eframe = { version = "0.23", optional = true, default-features = false, features = [
-    "default_fonts",
-    "glow",
-] }
-egui_extras = { version = "0.23", optional = true }
+serde_json = { workspace = true, optional = true }
 
 [build-dependencies]
-cofd-meta.workspace = true
 anyhow.workspace = true
 serde_json.workspace = true
-rmp-serde.workspace = true
+rmp-serde = { workspace = true, optional = true }
+cofd-meta = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_json.workspace = true

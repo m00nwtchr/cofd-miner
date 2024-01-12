@@ -5,16 +5,17 @@ use std::{
 	path::{Path, PathBuf},
 };
 
+use eframe::egui::text::{LayoutSection, TextWrapping};
 use eframe::{
 	egui::{self, FontSelection, TextEdit, TextFormat},
 	epaint::{self, Color32, FontId},
 };
-use eframe::egui::text::{LayoutSection, TextWrapping};
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
-use cofd_meta::{Op, PageKind, SectionMeta, SourceMeta};
+use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
 use cofd_miner::{hash, process_section};
+use cofd_miner::source::Section;
 use cofd_schema::prelude::BookInfo;
 
 fn main() -> eframe::Result<()> {
@@ -33,6 +34,7 @@ struct MetaEditorApp {
 	path: PathBuf,
 
 	selected_section: Option<usize>,
+	section: Option<Section>,
 	selected_op: Option<usize>,
 	show_full_text: bool,
 	last_range: Option<Range<usize>>,
@@ -79,6 +81,7 @@ impl MetaEditorApp {
 			pages,
 			path,
 			selected_section: None,
+			section: None,
 			selected_op: None,
 			show_full_text: true,
 			last_range: None,
@@ -95,25 +98,24 @@ impl MetaEditorApp {
 		wrap_width: f32,
 		section: &SectionMeta,
 	) -> epaint::text::LayoutJob {
-		let mut layout_job =
-			epaint::text::LayoutJob {
-				sections: vec![LayoutSection {
-					leading_space: 0.0,
-					byte_range: 0..text.len(),
-					format: TextFormat {
-						background: Color32::TRANSPARENT,
-						color: Color32::GRAY,
-						..Default::default()
-					},
-				}],
-				text: text.to_string(),
-				wrap: TextWrapping {
-					max_width: wrap_width,
+		let mut layout_job = epaint::text::LayoutJob {
+			sections: vec![LayoutSection {
+				leading_space: 0.0,
+				byte_range: 0..text.len(),
+				format: TextFormat {
+					background: Color32::TRANSPARENT,
+					color: Color32::GRAY,
 					..Default::default()
 				},
-				break_on_newline: true,
+			}],
+			text: text.to_string(),
+			wrap: TextWrapping {
+				max_width: wrap_width,
 				..Default::default()
-			};
+			},
+			break_on_newline: true,
+			..Default::default()
+		};
 
 		if show_full_text {
 			if let Some(range) = &section.range {
@@ -121,32 +123,23 @@ impl MetaEditorApp {
 				layout_job.text = String::new();
 
 				for (i, line) in text.split('\n').enumerate() {
-					layout_job.append(
-						line,
-						0.0,
-						if range.contains(&i) {
-							TextFormat {
-								background: Color32::GRAY,
-								color: Color32::BLACK,
-								..Default::default()
+					let format = match range {
+						SectionRange::Range(range) => {
+							if range.contains(&i) {
+								TextFormat {
+									background: Color32::GRAY,
+									color: Color32::BLACK,
+									..Default::default()
+								}
+							} else {
+								TextFormat::default()
 							}
-						} else {
-							TextFormat::default()
-						},
-					);
-					layout_job.append(
-						"\n",
-						0.0,
-						if range.contains(&i) {
-							TextFormat {
-								background: Color32::GRAY,
-								color: Color32::BLACK,
-								..Default::default()
-							}
-						} else {
-							TextFormat::default()
-						},
-					);
+						}
+						SectionRange::Regex(regex) => TextFormat::default(),
+					};
+
+					layout_job.append(line, 0.0, format.clone());
+					layout_job.append("\n", 0.0, format);
 				}
 			}
 		}
@@ -166,6 +159,9 @@ impl eframe::App for MetaEditorApp {
 						.selectable_value(&mut self.selected_section, Some(i), &section.name)
 						.clicked()
 					{
+						let section_def = self.meta.sections.get(self.selected_section.unwrap()).unwrap();
+						self.section = Some(process_section(&self.pages, section_def, self.show_full_text).unwrap());
+
 						if let Some(selection) = self
 							.selected_section
 							.and_then(|selected_section| self.meta.sections.get(selected_section))
@@ -265,7 +261,7 @@ impl eframe::App for MetaEditorApp {
 			egui::ScrollArea::vertical()
 				// .id_source("source")
 				.show(ui, |ui| {
-					if let Some(selected_section) = self.selected_section {
+					if let (Some(selected_section), Some(section)) = (self.selected_section, &self.section) {
 						// let mut text: &str = self.pages.get(&2).unwrap().as_str();
 						let section_def = self.meta.sections.get_mut(selected_section).unwrap();
 						// let sec = section_def.clone();
@@ -283,8 +279,6 @@ impl eframe::App for MetaEditorApp {
 							layout_job.wrap.max_width = wrap_width;
 							ui.fonts(|f| f.layout_job(layout_job))
 						};
-						let section =
-							process_section(&self.pages, section_def, self.show_full_text).unwrap();
 
 						let mut text = section.extract.as_str();
 						use egui::TextBuffer as _;
@@ -317,7 +311,8 @@ impl eframe::App for MetaEditorApp {
 										+ if text.ends_with('\n') { 0 } else { 1 };
 
 									println!("{start}");
-									section_def.range = Some(start..(start + end));
+									section_def.range =
+										Some(SectionRange::Range(start..(start + end)));
 								}
 
 								ui.close_menu();
