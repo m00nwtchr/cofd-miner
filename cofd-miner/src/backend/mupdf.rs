@@ -47,49 +47,70 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		}
 
 		let mut lines = Vec::new();
-		// let mut last_y = 0.0;
+
+		let mut blank = false;
 
 		let mut last_x = 0.0;
-		let mut last_indent = false;
+		let mut last_y = 0.0;
+
+		let mut last_indent = 0.0;
+		let mut last_tab = false;
 
 		for block in text_page.blocks() {
 			let block: Vec<_> = block
 				.lines()
-				.map(|l| {
+				.filter_map(|l| {
 					let x = l.bounds().x0;
+					let y = l.bounds().y0;
+
 					let min_x = if x < THRESHOLD {
 						l_indent.0
 					} else {
 						r_indent.0
 					};
 					let indent = f32::floor(x - min_x);
+					let y_shift = f32::floor(y - last_y);
+
+					if y_shift > 100.0 {
+						blank = true; // End of Page Content
+					} else if y_shift < -100.0 {
+						blank = false; // New Page
+					}
+					last_y = y;
+
+					if blank {
+						return None;
+					}
+
 					//
 					let x = f32::floor(l.bounds().x0);
-					let y = f32::floor(l.bounds().y0);
-					// //
-					// // let c = f32::abs(y - last_y);
-					// // last_y = y;
+					// let y = f32::floor(l.bounds().y0);
+					//
 
-					let indent = if x > last_x {
-						if indent == 0.0 { // Jump to other column
-							false
-						} else {
-							true
-						}
-					} else if x < last_x {
+					let tab = if indent > last_indent {
+						// if indent == 0.0 {
+						// 	// Jump to other column
+						// 	false
+						// } else {
+						// 	true
+						// }
+						true
+					} else if indent < last_indent {
 						false
 					} else {
-						last_indent
+						last_tab
 					};
 
 					last_x = x;
-					last_indent = indent;
 
-					format!(
+					last_indent = indent;
+					last_tab = tab;
+
+					Some(format!(
 						"{}{}",
-						if indent { "\t" } else { "" },
+						if tab { "\t" } else { "" },
 						l.chars().filter_map(|c| c.char()).collect::<String>()
-					)
+					))
 				})
 				.collect();
 			lines.extend(block);

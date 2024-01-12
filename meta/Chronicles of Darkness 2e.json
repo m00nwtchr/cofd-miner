@@ -12,6 +12,10 @@
 				"start": 44,
 				"end": 47
 			},
+			"range": {
+				"start": 16,
+				"end": 250
+			},
 			"kind": {
 				"Merit": null
 			}
@@ -23,8 +27,8 @@
 				"end": 50
 			},
 			"range": {
-				"start": 61,
-				"end": 233
+				"start": 59,
+				"end": 227
 			},
 			"kind": {
 				"Merit": null
@@ -37,8 +41,8 @@
 				"end": 56
 			},
 			"range": {
-				"start": 74,
-				"end": 677
+				"start": 72,
+				"end": 661
 			},
 			"kind": {
 				"Merit": null
@@ -51,8 +55,8 @@
 				"end": 60
 			},
 			"range": {
-				"start": 50,
-				"end": 422
+				"start": 48,
+				"end": 412
 			},
 			"kind": {
 				"Merit": null
@@ -65,8 +69,8 @@
 				"end": 66
 			},
 			"range": {
-				"start": 69,
-				"end": 590
+				"start": 67,
+				"end": 578
 			},
 			"kind": {
 				"Merit": null
