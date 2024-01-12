@@ -2,6 +2,9 @@
 members = ["cofd-miner", "cofd-meta", "codex-scraper", "cofd-schema", "meta-editor"]
 resolver = "2"
 
+[workspace.package]
+edition = "2021"
+
 [workspace.dependencies]
 cofd-miner = { path = "./cofd-miner" }
 cofd-schema = { path = "./cofd-schema" }
