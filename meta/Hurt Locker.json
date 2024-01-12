@@ -12,35 +12,15 @@
 				"start": 41,
 				"end": 43
 			},
-			"range": {
-				"start": 18,
-				"end": 242
-			},
+			"range": "(?sm)New General Merits(.*)",
 			"kind": {
 				"Merit": null
 			},
 			"ops": [
 				{
 					"type": "RegexReplace",
-					"regex": "(?s)\\nChapter Two:\\s+Instruments\\s+of Violence(.+)chapter two\\-instruments of violence",
+					"regex": "(?s)Chapter Two:\\s+Instruments\\s+of Violence\\n",
 					"replace": ""
-				},
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2}\\s+New General Merits",
-					"replace": ""
-				},
-				{
-					"type": "Delete",
-					"range": {
-						"start": 5843,
-						"end": 5846
-					}
-				},
-				{
-					"type": "Insert",
-					"pos": 5843,
-					"char": ","
 				}
 			]
 		},
@@ -50,21 +30,11 @@
 				"start": 46,
 				"end": 56
 			},
-			"range": {
-				"start": 27,
-				"end": 994
-			},
+			"range": "(?sm)Style Merits(.*)LASTING TRAUMA$",
 			"kind": {
 				"Merit": null
 			},
 			"ops": [
-				{
-					"type": "Delete",
-					"range": {
-						"start": 1519,
-						"end": 3259
-					}
-				},
 				{
 					"type": "RegexReplace",
 					"regex": "\\n\\d{2}\\s+(chapter two-instruments of violence|Fighting Merits)",
@@ -78,20 +48,10 @@
 				"start": 72,
 				"end": 77
 			},
-			"range": {
-				"start": 2,
-				"end": 559
-			},
+			"range": "(?sm)(Animal Possession \\(.*)Supernatural\\s+Merit Templates$",
 			"kind": {
 				"Merit": "Mortal"
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2}\\s+(Supernatural Merits|Chapter three-The Other Side|Supernatural Merit Templates)",
-					"replace": ""
-				}
-			]
+			}
 		},
 		{
 			"name": "Supernatural Resistance",
@@ -99,10 +59,7 @@
 				"start": 78,
 				"end": 78
 			},
-			"range": {
-				"start": 29,
-				"end": 37
-			},
+			"range": "(?sm)New Merit: (.*)ATARIYA$",
 			"kind": {
 				"Merit": null
 			}
@@ -113,20 +70,10 @@
 				"start": 79,
 				"end": 81
 			},
-			"range": {
-				"start": 53,
-				"end": 224
-			},
+			"range": "(?sm)(Damn Lucky\\s+\\(.*)RIO MATSUMURA$",
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|Atariya)",
-					"replace": ""
-				}
-			]
+			}
 		},
 		{
 			"name": "Dreamer Merits",
@@ -134,20 +81,10 @@
 				"start": 83,
 				"end": 86
 			},
-			"range": {
-				"start": 89,
-				"end": 286
-			},
+			"range": "(?sm)(Subliminal Conditioning\\s+\\(.*)DIANE THAYER$",
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Dreamers)",
-					"replace": ""
-				}
-			]
+			}
 		},
 		{
 			"name": "Infected Merits",
@@ -155,29 +92,11 @@
 				"start": 88,
 				"end": 90
 			},
-			"range": {
-				"start": 21,
-				"end": 140
-			},
+			"range": "(?sm)(Carrier\\s+\\(.*)RICHARD \"RICK\" STARR$",
 			"kind": {
 				"Merit": null
 			},
 			"ops": [
-				{
-					"type": "Delete",
-					"range": {
-						"start": 571,
-						"end": 1765
-					}
-				},
-				{
-					"type": "Move",
-					"range": {
-						"start": 571,
-						"end": 987
-					},
-					"pos": 0
-				},
 				{
 					"type": "RegexReplace",
 					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Infected)",
@@ -191,20 +110,10 @@
 				"start": 92,
 				"end": 95
 			},
-			"range": {
-				"start": 46,
-				"end": 223
-			},
+			"range": "(?sm)(Plain Reader \\(.*)AMARR HARROLD$",
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2}\\s+(Chapter three-The Other Side|The Plain)",
-					"replace": ""
-				}
-			]
+			}
 		},
 		{
 			"name": "Lost Boy Merits",
@@ -212,20 +121,10 @@
 				"start": 96,
 				"end": 100
 			},
-			"range": {
-				"start": 82,
-				"end": 376
-			},
+			"range": "(?sm)New Merit: (The Protocol.*)STUART OLMO $",
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{2,3}\\s+(Chapter three-The Other Side|The Lost Boys)",
-					"replace": ""
-				}
-			]
+			}
 		},
 		{
 			"name": "Psychic Vampire Merits",
@@ -233,20 +132,10 @@
 				"start": 101,
 				"end": 104
 			},
-			"range": {
-				"start": 65,
-				"end": 306
-			},
+			"range": "(?sm)(Psychic Vampirism\\s+\\(.*)LUCIA",
 			"kind": {
 				"Merit": null
-			},
-			"ops": [
-				{
-					"type": "RegexReplace",
-					"regex": "\\n\\d{3}\\s+(Chapter three-The Other Side|Psychic Vampires)",
-					"replace": ""
-				}
-			]
+			}
 		}
 	]
 }

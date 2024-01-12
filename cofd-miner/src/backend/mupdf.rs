@@ -60,6 +60,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 			let block: Vec<_> = block
 				.lines()
 				.filter_map(|l| {
+					let line = l.chars().filter_map(|c| c.char()).collect::<String>();
 					let x = l.bounds().x0;
 					let y = l.bounds().y0;
 
@@ -78,7 +79,8 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					}
 					last_y = y;
 
-					if blank {
+					if blank || line.trim().chars().all(char::is_numeric) {
+						// return Some(format!("{y_shift}:BLANK:{}", l.chars().filter_map(|c| c.char()).collect::<String>()));
 						return None;
 					}
 
@@ -106,10 +108,11 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					last_indent = indent;
 					last_tab = tab;
 
+
 					Some(format!(
 						"{}{}",
 						if tab { "\t" } else { "" },
-						l.chars().filter_map(|c| c.char()).collect::<String>()
+						line
 					))
 				})
 				.collect();

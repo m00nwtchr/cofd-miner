@@ -12,7 +12,7 @@
 				"start": 26,
 				"end": 26
 			},
-			"range": "(?sm)Merit: (.*)^High Speech$\tOne",
+			"range": "(?sm)Merit: (.*)^High Speech\\n\\tOne",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -67,10 +67,7 @@
 				"start": 76,
 				"end": 77
 			},
-			"range": {
-				"start": 88,
-				"end": 105
-			},
+			"range": "(?s)New Merits(.*)",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -81,10 +78,7 @@
 				"start": 87,
 				"end": 87
 			},
-			"range": {
-				"start": 59,
-				"end": 98
-			},
+			"range": "(?s)New Merits(.*)",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -95,10 +89,7 @@
 				"start": 91,
 				"end": 92
 			},
-			"range": {
-				"start": 21,
-				"end": 134
-			},
+			"range": "(?sm)New Merits(.*)The Nimbus$",
 			"kind": {
 				"Merit": "Awakened"
 			}
@@ -109,10 +100,7 @@
 				"start": 97,
 				"end": 97
 			},
-			"range": {
-				"start": 49,
-				"end": 75
-			},
+			"range": "(?s)New Merit(.*)",
 			"kind": {
 				"Merit": "Awakened"
 			}
