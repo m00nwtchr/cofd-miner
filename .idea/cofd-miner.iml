@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/cofd-miner/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cofd-miner/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cofd-schema/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cofd-miner/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/meta-editor/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
