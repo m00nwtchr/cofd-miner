@@ -1,10 +1,3 @@
-// #[derive(Default, Serialize, Deserialize)]
-// struct Cache {
-// 	hash: HashMap<PathBuf, u64>,
-// 	#[serde(default, skip)]
-// 	dirty: bool,
-// }
-
 // fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 // 	let mut ser = serde_json::Serializer::with_formatter(
 // 		File::create(path)?,
@@ -13,6 +6,28 @@
 // 	Ok(value.serialize(&mut ser)?)
 // }
 //
+
+use std::collections::HashMap;
+use std::fs::{DirEntry, File};
+use std::ops::Deref;
+use std::path::{Path, PathBuf};
+use std::sync::RwLock;
+
+use anyhow::{anyhow, Result};
+use cofd_miner::hash;
+use cofd_schema::book::Book;
+use itertools::Itertools;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
+use walkdir::WalkDir;
+
+#[derive(Default, Serialize, Deserialize)]
+struct Cache {
+	hash: HashMap<PathBuf, u64>,
+	#[serde(default, skip)]
+	dirty: bool,
+}
+
 fn is_hidden(entry: &walkdir::DirEntry) -> bool {
 	entry
 		.file_name()
@@ -42,16 +57,6 @@ fn is_data(entry: &DirEntry) -> bool {
 			.unwrap_or(false)
 }
 
-use std::fs::{DirEntry, File};
-use std::path::Path;
-
-use anyhow::{anyhow, Result};
-use cofd_miner::hash;
-use cofd_schema::book::Book;
-use itertools::Itertools;
-use rayon::prelude::*;
-use walkdir::WalkDir;
-
 #[test]
 #[ignore]
 fn pdf_extract() -> Result<()> {
@@ -61,6 +66,12 @@ fn pdf_extract() -> Result<()> {
 	if !data_path.exists() || !pdf_path.exists() {
 		return Err(anyhow!("Test data doesn't exist, skipped."));
 	}
+	let cache_path = manifest_dir.join("../cache.json");
+	let cache = RwLock::new(if cache_path.exists() {
+		serde_json::de::from_reader(File::open(&cache_path)?)?
+	} else {
+		Cache::default()
+	});
 
 	let data: Vec<Book> = data_path
 		.read_dir()?
@@ -75,7 +86,25 @@ fn pdf_extract() -> Result<()> {
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
 		.par_bridge()
 		.filter_map(Result::ok)
-		.filter_map(|entry| hash::hash(entry.path()).ok().map(|hash| (entry, hash)))
+		// .filter_map(|entry| hash::hash(entry.path()).ok().map(|hash| (entry, hash)))
+		.filter_map(|entry| {
+			let path = std::fs::canonicalize(entry.path()).unwrap();
+
+			if let Ok(Some(hash)) = cache.read().map(|c| c.hash.get(&path).cloned()) {
+				Some((entry, hash))
+			} else {
+				hash::hash(entry.path())
+					.map(|hash| {
+						let mut cache = cache.write().unwrap();
+						cache.hash.insert(path.to_owned(), hash);
+						cache.dirty = true;
+
+						hash
+					})
+					.map(|hash| (entry, hash))
+					.ok()
+			}
+		})
 		.filter_map(|(entry, hash)| {
 			data.iter()
 				.find_position(|b| b.info.hash.eq(&hash))
@@ -93,6 +122,13 @@ fn pdf_extract() -> Result<()> {
 
 			similar_asserts::assert_eq!(l, r);
 		});
+
+	{
+		let cache = cache.read().unwrap();
+		if cache.dirty {
+			serde_json::ser::to_writer(File::create(cache_path)?, cache.deref())?;
+		}
+	}
 
 	Ok(())
 }
