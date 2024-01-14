@@ -124,7 +124,14 @@
 			"range": "(?sm)New Merit: (The Protocol.*)STUART OLMO $",
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?s)\\tStory Hooks.*is the Serum. \\n",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Psychic Vampire Merits",

@@ -119,12 +119,16 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 }
 
 mod paragraph {
-	// TODO: Some edge cases don't get merged properly but works ok overall.
 	fn to_paragraphs_old(lines: Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
 		for line in lines {
+			if line.starts_with('•') || line.trim().starts_with('•') && !paragraph.is_empty() {
+				paragraphs.push(paragraph.trim().to_owned());
+				paragraph = String::new();
+			}
+
 			paragraph.push_str(trim_line(line.as_str()));
 
 			if line.ends_with('.') {
@@ -145,7 +149,7 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if line.starts_with('\t') && !paragraph.is_empty() {
+			if line.starts_with('\t') || line.trim().starts_with('•') && !paragraph.is_empty() {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}

@@ -53,7 +53,7 @@ fn is_data(entry: &DirEntry) -> bool {
 		&& entry
 			.file_name()
 			.to_str()
-			.map(|s| !s.starts_with(".") && s.ends_with(".json"))
+			.map(|s| !s.starts_with('.') && s.ends_with(".json"))
 			.unwrap_or(false)
 }
 

@@ -89,7 +89,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					// let y = f32::floor(l.bounds().y0);
 					//
 
-					let tab = if indent > last_indent {
+					let tab = if indent > last_indent || line.starts_with('•') {
 						// if indent == 0.0 {
 						// 	// Jump to other column
 						// 	false
@@ -108,12 +108,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					last_indent = indent;
 					last_tab = tab;
 
-
-					Some(format!(
-						"{}{}",
-						if tab { "\t" } else { "" },
-						line
-					))
+					Some(format!("{}{}", if tab { "\t" } else { "" }, line))
 				})
 				.collect();
 			lines.extend(block);

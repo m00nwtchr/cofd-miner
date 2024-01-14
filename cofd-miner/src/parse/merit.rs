@@ -154,7 +154,9 @@ fn parse_body(body: &[String]) -> MeritBody {
 				let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
 				let line = prop_val.as_str();
 
-				first_prop = false;
+				if !effects.is_empty() {
+					first_prop = false;
+				}
 
 				lines.push(line.to_owned());
 				// Effects get reversed later
@@ -182,9 +184,9 @@ fn parse_body(body: &[String]) -> MeritBody {
 		} else if line.starts_with('\t') {
 			lines.push(line.to_owned());
 			if first_prop {
-				description.extend(lines);
-			} else {
 				effects.extend(lines);
+			} else {
+				description.extend(lines);
 			}
 			lines = Vec::new();
 		} else {
