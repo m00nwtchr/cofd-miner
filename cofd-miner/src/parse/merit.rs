@@ -27,11 +27,11 @@ lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
 		^\t*
-		(?<name>(?:\t?[\w\-\']\s*)+)              # Name
+		(?<name> (?:\w{2,3}\.\s)? (?:\t?[\w\-\']\s*)+)  # Name
 		\s?
 		\(
-			(?: (?<ltags> [^•\n]+ ) [,;] \s)?       # Tags
-			(?<cost>                         # Cost
+			(?: (?<ltags> [^•\n]+ ) [,;] \s)?           # Tags
+			(?<cost>                                    # Cost
 				(?:          
 					•{1,5}
 					[,\s\+]*
@@ -40,7 +40,7 @@ lazy_static! {
 					\s*
 				)+
 			)
-			(?: [,;] \s (?<rtags> [^•\n]+ ) )? # Tags
+			(?: [,;] \s (?<rtags> [^•\n]+ ) )?          # Tags
 		\)
 		(?: : \s (?<sub> .* ) )?
 		\s?
