@@ -31,7 +31,8 @@ pub enum Op {
 		pos: usize,
 	},
 	RegexReplace {
-		regex: String,
+		#[serde(with = "serde_regex")]
+		regex: Regex,
 		replace: String,
 	},
 }

@@ -20,3 +20,4 @@ env_logger = { version = "0.10" }
 
 serde.workspace = true
 serde_json.workspace = true
+regex.workspace = true

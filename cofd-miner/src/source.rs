@@ -98,8 +98,6 @@ pub fn process_section(
 					// }
 				}
 				Op::RegexReplace { regex, replace } => {
-					let regex = Regex::new(regex)?;
-
 					extract = regex.replace_all(&extract, replace).into_owned();
 				}
 			}

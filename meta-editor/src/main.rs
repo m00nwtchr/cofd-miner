@@ -14,8 +14,8 @@ use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
 
 use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
-use cofd_miner::{hash, process_section};
 use cofd_miner::source::Section;
+use cofd_miner::{hash, process_section};
 use cofd_schema::prelude::BookInfo;
 
 fn main() -> eframe::Result<()> {
@@ -159,8 +159,14 @@ impl eframe::App for MetaEditorApp {
 						.selectable_value(&mut self.selected_section, Some(i), &section.name)
 						.clicked()
 					{
-						let section_def = self.meta.sections.get(self.selected_section.unwrap()).unwrap();
-						self.section = Some(process_section(&self.pages, section_def, self.show_full_text).unwrap());
+						let section_def = self
+							.meta
+							.sections
+							.get(self.selected_section.unwrap())
+							.unwrap();
+						self.section = Some(
+							process_section(&self.pages, section_def, self.show_full_text).unwrap(),
+						);
 
 						if let Some(selection) = self
 							.selected_section
@@ -226,7 +232,17 @@ impl eframe::App for MetaEditorApp {
 								Op::Delete { range: _ } => {}
 								Op::Move { range: _, pos: _ } => {}
 								Op::RegexReplace { regex, replace: _ } => {
-									ui.text_edit_singleline(regex);
+									let mut txt = regex.as_str();
+									if ui.text_edit_singleline(&mut txt).changed() {
+										match regex::Regex::new(txt) {
+											Ok(reg) => {
+												*regex = reg;
+											}
+											Err(err) => {
+												println!("{err}");
+											}
+										}
+									}
 								}
 								Op::Replace { range: _, replace } => {
 									ui.text_edit_singleline(replace);
@@ -261,7 +277,9 @@ impl eframe::App for MetaEditorApp {
 			egui::ScrollArea::vertical()
 				// .id_source("source")
 				.show(ui, |ui| {
-					if let (Some(selected_section), Some(section)) = (self.selected_section, &self.section) {
+					if let (Some(selected_section), Some(section)) =
+						(self.selected_section, &self.section)
+					{
 						// let mut text: &str = self.pages.get(&2).unwrap().as_str();
 						let section_def = self.meta.sections.get_mut(selected_section).unwrap();
 						// let sec = section_def.clone();
