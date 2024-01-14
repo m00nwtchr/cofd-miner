@@ -124,7 +124,7 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if line.starts_with('•') || line.trim().starts_with('•') && !paragraph.is_empty() {
+			if line.trim().starts_with('•') && !paragraph.is_empty() {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
@@ -149,7 +149,7 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if line.starts_with('\t') || line.trim().starts_with('•') && !paragraph.is_empty() {
+			if (line.starts_with('\t') || line.trim().starts_with('•')) && !paragraph.is_empty() {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
