@@ -32,87 +32,92 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		let mut l_indent = (f32::MAX, f32::MIN);
 		let mut r_indent = (f32::MAX, f32::MIN);
 
-		for block in text_page.blocks() {
-			for line in block.lines() {
-				let indent = line.bounds().x0;
-
-				if indent > THRESHOLD {
-					if indent < r_indent.0 {
-						r_indent.0 = indent;
-					}
-				} else if indent < l_indent.0 {
-					l_indent.0 = indent;
-				}
-			}
-		}
+		let mut last_y = 0.0;
+		let mut blank = false;
 
 		let mut lines = Vec::new();
 
-		let mut blank = false;
+		for block in text_page.blocks() {
+			for line in block.lines() {
+				let x = line.bounds().x0;
+				let y = line.bounds().y0;
+				let line = line.chars().filter_map(|c| c.char()).collect::<String>();
+
+				let y_shift = f32::floor(y - last_y);
+
+				if y_shift > 100.0 {
+					blank = true; // End of Page Content
+				} else if y_shift < -100.0 {
+					blank = false; // New Page
+				}
+				last_y = y;
+
+				if blank || line.trim().chars().all(char::is_numeric) {
+					// Some(format!(
+					// 	"{min_x}{indent}:BLANK:{}",
+					// 	l.chars().filter_map(|c| c.char()).collect::<String>()
+					// ));
+					continue;
+				}
+
+				if x > THRESHOLD {
+					if x < r_indent.0 {
+						r_indent.0 = x;
+					}
+				} else if x < l_indent.0 {
+					l_indent.0 = x;
+				}
+
+				lines.push((x, line));
+			}
+		}
 
 		let mut last_x = 0.0;
-		let mut last_y = 0.0;
-
 		let mut last_indent = 0.0;
+
 		let mut last_tab = false;
 
-		for block in text_page.blocks() {
-			let block: Vec<_> = block
-				.lines()
-				.filter_map(|l| {
-					let line = l.chars().filter_map(|c| c.char()).collect::<String>();
-					let x = l.bounds().x0;
-					let y = l.bounds().y0;
+		let lines = lines
+			.into_iter()
+			.map(|(x, line)| {
+				let min_x = if x < THRESHOLD {
+					l_indent.0
+				} else {
+					r_indent.0
+				};
+				let indent = f32::floor(x - min_x);
 
-					let min_x = if x < THRESHOLD {
-						l_indent.0
-					} else {
-						r_indent.0
-					};
-					let indent = f32::floor(x - min_x);
-					let y_shift = f32::floor(y - last_y);
+				//
+				// let x = f32::floor(l.bounds().x0);
+				// let y = f32::floor(l.bounds().y0);
+				//
 
-					if y_shift > 100.0 {
-						blank = true; // End of Page Content
-					} else if y_shift < -100.0 {
-						blank = false; // New Page
-					}
-					last_y = y;
+				#[allow(clippy::if_same_then_else)]
+				let tab = if line.starts_with('•') {
+					true
+				} else if indent > last_indent {
+					// if indent == 0.0 {
+					// 	// Jump to other column
+					// 	false
+					// } else {
+					// 	true
+					// }
+					true
+				} else if indent < last_indent {
+					false
+				} else {
+					last_tab
+				};
 
-					if blank || line.trim().chars().all(char::is_numeric) {
-						// return Some(format!("{y_shift}:BLANK:{}", l.chars().filter_map(|c| c.char()).collect::<String>()));
-						return None;
-					}
+				last_x = x;
 
-					//
-					let x = f32::floor(l.bounds().x0);
-					// let y = f32::floor(l.bounds().y0);
-					//
+				last_indent = indent;
+				last_tab = tab;
 
-					let tab = if indent > last_indent || line.starts_with('•') {
-						// if indent == 0.0 {
-						// 	// Jump to other column
-						// 	false
-						// } else {
-						// 	true
-						// }
-						true
-					} else if indent < last_indent {
-						false
-					} else {
-						last_tab
-					};
+				format!("{}{}", if tab { "\t" } else { "" }, line)
+			})
+			.collect();
 
-					last_x = x;
-
-					last_indent = indent;
-					last_tab = tab;
-
-					Some(format!("{}{}", if tab { "\t" } else { "" }, line))
-				})
-				.collect();
-			lines.extend(block);
-		}
 		pages.insert(i, lines);
 	}
 
