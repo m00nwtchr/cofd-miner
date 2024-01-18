@@ -83,7 +83,7 @@ impl MetaEditorApp {
 			selected_section: None,
 			section: None,
 			selected_op: None,
-			show_full_text: true,
+			show_full_text: false,
 			last_range: None,
 			pages_end: String::new(),
 			pages_start: String::new(),

@@ -1,6 +1,8 @@
 use std::{collections::BTreeMap, path::Path, result::Result};
 
+use crate::parse::starts_with_one;
 use anyhow::anyhow;
+use cofd_schema::DOT_CHAR;
 use mupdf::{Document, TextPageOptions};
 
 use super::PdfText;
@@ -13,14 +15,6 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 			.to_str()
 			.ok_or(anyhow!("Path is not valid utf-8 string"))?,
 	)?;
-	//
-	// let pages: BTreeMap<_, _> = document
-	// 	.pages()?
-	// 	.enumerate()
-	// 	.filter_map(|(i, p)| p.ok().map(|p| (i, p)))
-	// 	.filter_map(|(i, page)| page.to_text().ok().map(|p| (i, p)))
-	// 	.collect();
-
 	let mut pages = BTreeMap::new();
 
 	for (i, text_page) in document
@@ -75,6 +69,10 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		let mut last_x = 0.0;
 		let mut last_indent = 0.0;
 
+		let mut last_has_dot = false;
+		let mut dot_line_indent = f32::MAX;
+		let mut dot_paragraph_indent = f32::MAX;
+
 		let mut last_tab = false;
 
 		let lines = lines
@@ -92,9 +90,22 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				// let y = f32::floor(l.bounds().y0);
 				//
 
-				#[allow(clippy::if_same_then_else)]
-				let tab = if line.starts_with('•') {
+				let dot = starts_with_one(line.trim(), DOT_CHAR);
+
+				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
+				let tab = if dot {
+					dot_line_indent = indent;
 					true
+				} else if dot_paragraph_indent != f32::MAX
+					&& dot_line_indent != f32::MAX
+					&& (last_has_dot || last_indent == dot_paragraph_indent)
+					&& indent != dot_paragraph_indent
+				{
+					dot_line_indent = f32::MAX;
+					dot_paragraph_indent = f32::MAX;
+					true
+				} else if last_has_dot {
+					false
 				} else if indent > last_indent {
 					// if indent == 0.0 {
 					// 	// Jump to other column
@@ -109,10 +120,15 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					last_tab
 				};
 
+				if last_has_dot && dot_paragraph_indent == f32::MAX {
+					dot_paragraph_indent = indent;
+				}
+
 				last_x = x;
 
 				last_indent = indent;
 				last_tab = tab;
+				last_has_dot = dot;
 
 				format!("{}{}", if tab { "\t" } else { "" }, line)
 			})

@@ -118,13 +118,23 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 	}
 }
 
+#[must_use]
+pub fn starts_with_one(str: &str, char_p: char) -> bool {
+	str.chars().next().map_or(false, |first_char| {
+		first_char == char_p && !str[first_char.len_utf8()..].starts_with(char_p)
+	})
+}
+
 mod paragraph {
+	use crate::parse::starts_with_one;
+	use cofd_schema::DOT_CHAR;
+
 	fn to_paragraphs_old(lines: Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if line.trim().starts_with('•') && !paragraph.is_empty() {
+			if starts_with_one(line.trim(), DOT_CHAR) && !paragraph.is_empty() {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
@@ -149,7 +159,9 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if (line.starts_with('\t') || line.trim().starts_with('•')) && !paragraph.is_empty() {
+			if (line.starts_with('\t') || starts_with_one(line.trim(), DOT_CHAR))
+				&& !paragraph.is_empty()
+			{
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
