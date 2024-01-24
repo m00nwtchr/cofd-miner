@@ -5,7 +5,9 @@ use strum::{AsRefStr, Display, EnumIs, EnumString};
 
 pub(crate) trait AttributeMarker {}
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalAttribute {
 	Intelligence,
@@ -13,7 +15,9 @@ pub enum MentalAttribute {
 	Resolve,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum PhysicalAttribute {
 	Strength,
@@ -21,7 +25,9 @@ pub enum PhysicalAttribute {
 	Stamina,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum SocialAttribute {
 	Presence,
@@ -29,7 +35,7 @@ pub enum SocialAttribute {
 	Composure,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum Attribute {
 	Mental(MentalAttribute),

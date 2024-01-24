@@ -10,7 +10,7 @@ pub mod gift;
 pub mod merit;
 pub mod spell;
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct RollResults {
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -23,7 +23,7 @@ pub struct RollResults {
 	pub dramatic_failure: Vec<String>,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionFields {
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -44,7 +44,7 @@ pub enum ItemKind {
 	OtherGift(OtherGift),
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Item<T> {
 	pub name: String,
 	pub reference: BookReference,

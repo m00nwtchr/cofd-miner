@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{error, DOT_CHAR};
 
-#[derive(Serialize, Clone, Debug, Deserialize)]
+#[derive(Serialize, Clone, Debug, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum DotRange {
 	Num(u8),

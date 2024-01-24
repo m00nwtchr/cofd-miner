@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 #[strum(ascii_case_insensitive)]
 pub enum Renown {
 	Purity,
@@ -11,7 +11,7 @@ pub enum Renown {
 	Cunning,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 pub enum Auspice {
 	Cahalith,
 	Elodoth,

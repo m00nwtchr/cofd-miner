@@ -8,7 +8,7 @@ use crate::{
 	traits::skill::Skill,
 };
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 pub enum PrimaryFactor {
 	Duration,
 	Potency,
@@ -41,13 +41,13 @@ impl FromStr for Factor {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ReachEffect {
 	cost: u8,
 	description: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ArcanumEffectKind {
 	Add,
 	Substitute,
@@ -55,7 +55,7 @@ pub enum ArcanumEffectKind {
 	Or(Vec<ArcanumEffectKind>),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ArcanumEffect {
 	arcanum: Arcanum,
 	rating: u8,
@@ -63,7 +63,7 @@ pub struct ArcanumEffect {
 	kind: ArcanumEffectKind,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Spell {
 	arcana: Vec<(Arcanum, u8)>,

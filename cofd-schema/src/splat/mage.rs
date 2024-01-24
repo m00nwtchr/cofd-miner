@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 pub enum Arcanum {
 	Death,
 	Fate,
@@ -15,7 +15,7 @@ pub enum Arcanum {
 	Time,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 pub enum Practice {
 	Compelling,
 	Knowing,

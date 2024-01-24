@@ -6,7 +6,7 @@ use strum::{AsRefStr, EnumString};
 use super::ActionFields;
 use crate::{prelude::DotRange, prerequisites::Prerequisites};
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr, PartialEq, Eq)]
 #[strum(ascii_case_insensitive)]
 pub enum MeritTag {
 	Style,
@@ -29,7 +29,7 @@ impl Display for MeritTag {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct MeritSubItem {
 	pub name: String,
@@ -41,7 +41,7 @@ pub struct MeritSubItem {
 	pub drawbacks: Vec<String>,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Merit {
 	pub dot_rating: DotRange,

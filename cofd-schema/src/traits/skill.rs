@@ -5,7 +5,9 @@ use strum::{AsRefStr, Display, EnumIs, EnumString};
 
 pub(crate) trait SkillMarker {}
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum MentalSkill {
 	Academics,
@@ -21,7 +23,9 @@ pub enum MentalSkill {
 	Enigmas,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum PhysicalSkill {
 	Athletics,
@@ -38,7 +42,9 @@ pub enum PhysicalSkill {
 	Riding,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, Display, AsRefStr, PartialEq, Eq,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum SocialSkill {
 	AnimalKen,
@@ -51,7 +57,7 @@ pub enum SocialSkill {
 	Subterfuge,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum Skill {
 	Mental(MentalSkill),
