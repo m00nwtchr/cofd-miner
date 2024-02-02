@@ -69,15 +69,16 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		let mut last_x = 0.0;
 		let mut last_indent = 0.0;
 
-		let mut last_has_dot = false;
-		let mut dot_line_indent = f32::MAX;
-		let mut dot_paragraph_indent = f32::MAX;
+		// let mut last_has_dot = false;
+		// let mut dot_line_indent = f32::MAX;
+		// let mut dot_paragraph_indent = f32::MAX;
+		// let mut pre_dot_indent = f32::MAX;
 
 		let mut last_tab = false;
 
 		let lines = lines
 			.into_iter()
-			.map(|(x, line)| {
+			.map(|(x, mut line)| {
 				let min_x = if x < THRESHOLD {
 					l_indent.0
 				} else {
@@ -90,23 +91,30 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				// let y = f32::floor(l.bounds().y0);
 				//
 
-				let dot = starts_with_one(line.trim(), DOT_CHAR);
+				// let dot = starts_with_one(line.trim(), DOT_CHAR);
+
+				// if dot && !last_has_dot && last_indent != dot_paragraph_indent {
+				// 	pre_dot_indent = last_indent;
+				// }
 
 				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
-				let tab = if dot {
+				let tab = /*if dot {
 					dot_line_indent = indent;
 					true
-				} else if dot_paragraph_indent != f32::MAX
-					&& dot_line_indent != f32::MAX
-					&& (last_has_dot || last_indent == dot_paragraph_indent)
-					&& indent != dot_paragraph_indent
-				{
-					dot_line_indent = f32::MAX;
+				} else if last_indent == dot_paragraph_indent && indent < dot_paragraph_indent {
+					// line.insert_str(0, &format!("COND:{dot_paragraph_indent}:"));
 					dot_paragraph_indent = f32::MAX;
+					// pre_dot_indent = f32::MAX;
 					true
 				} else if last_has_dot {
-					false
-				} else if indent > last_indent {
+					// line.insert_str(0, "ELSE:");
+
+					if indent == dot_paragraph_indent {
+						false
+					} else {
+						dot_paragraph_indent != f32::MAX && indent < dot_paragraph_indent
+					}
+				} else */if indent > last_indent {
 					// if indent == 0.0 {
 					// 	// Jump to other column
 					// 	false
@@ -115,20 +123,22 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					// }
 					true
 				} else if indent < last_indent {
+					// line.insert_str(0, "LESS:");
 					false
 				} else {
+					// line.insert_str(0, "LAST:");
 					last_tab
 				};
 
-				if last_has_dot && dot_paragraph_indent == f32::MAX {
-					dot_paragraph_indent = indent;
-				}
+				// if last_has_dot && !dot && dot_paragraph_indent == f32::MAX {
+				// 	dot_paragraph_indent = indent;
+				// }
 
 				last_x = x;
 
 				last_indent = indent;
 				last_tab = tab;
-				last_has_dot = dot;
+				// last_has_dot = dot;
 
 				format!("{}{}", if tab { "\t" } else { "" }, line)
 			})
