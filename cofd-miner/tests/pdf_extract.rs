@@ -81,7 +81,7 @@ fn pdf_extract() -> Result<()> {
 		.filter_map(|f| serde_json::from_reader(f).ok())
 		.collect();
 
-	WalkDir::new(pdf_path)
+	let res: Vec<_> = WalkDir::new(pdf_path)
 		.into_iter()
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
 		.par_bridge()
@@ -114,14 +114,13 @@ fn pdf_extract() -> Result<()> {
 		.flat_map(|(entry, meta, i)| {
 			cofd_miner::parse_book_with_meta(entry.path(), meta).map(|book| (book, i))
 		})
-		.for_each(|(result, data_index)| {
-			let data = &data[data_index];
+		.collect();
 
-			let l = serde_json::to_string_pretty(&result).unwrap();
-			let r = serde_json::to_string_pretty(data).unwrap();
+	for (result, i) in res {
+		let data = &data[i];
 
-			similar_asserts::assert_eq!(l, r);
-		});
+		similar_asserts::assert_serde_eq!(data, &result);
+	}
 
 	{
 		let cache = cache.read().unwrap();
