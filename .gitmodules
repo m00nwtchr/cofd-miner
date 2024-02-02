@@ -1,0 +1,3 @@
+[submodule "cofd-miner/res/tests/data"]
+	path = cofd-miner/res/tests/data
+	url = git@github.com:m00nwtchr/cofd-miner-test-data.git
