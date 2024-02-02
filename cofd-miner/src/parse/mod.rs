@@ -45,7 +45,7 @@ impl PdfExtract {
 		let mut parse = Book::from(self.info);
 
 		for mut section in self.sections {
-			section.extract = section.extract.replace(['‘', '’'], "'");
+			section.extract = section.extract.replace(['‘', '’'], "'").replace('–', "-");
 
 			match &section.kind {
 				PageKind::Merit(_) => parse.merits.extend(parse_merits(&parse.info, &section)?),
@@ -134,7 +134,11 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if starts_with_one(line.trim(), DOT_CHAR) && !paragraph.is_empty() {
+			let l = line.trim();
+			if (starts_with_one(line.trim(), DOT_CHAR)
+				|| line.trim().chars().all(|c| c.eq(&DOT_CHAR)))
+				&& !paragraph.is_empty()
+			{
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
@@ -147,7 +151,7 @@ mod paragraph {
 			}
 		}
 
-		if !paragraph.is_empty() {
+		if !paragraph.is_empty() && !paragraph.eq_ignore_ascii_case("roll results") {
 			paragraphs.push(paragraph.trim().to_owned());
 		}
 
@@ -159,9 +163,7 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if (line.starts_with('\t') || starts_with_one(line.trim(), DOT_CHAR))
-				&& !paragraph.is_empty()
-			{
+			if line.starts_with('\t') && !paragraph.is_empty() {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
@@ -169,7 +171,7 @@ mod paragraph {
 			paragraph.push_str(trim_line(line.as_str()));
 		}
 
-		if !paragraph.is_empty() {
+		if !paragraph.is_empty() && !paragraph.eq_ignore_ascii_case("roll results") {
 			paragraphs.push(paragraph.trim().to_owned());
 		}
 
@@ -197,7 +199,9 @@ mod paragraph {
 		} else {
 			let count = lines.iter().filter(|l| l.starts_with('\t')).count();
 
-			if count > (lines.len() / 2) {
+			if count > (lines.len() / 2)
+				|| lines.iter().any(|l| l.trim_start().starts_with(DOT_CHAR))
+			{
 				to_paragraphs_old(lines)
 			} else {
 				to_paragraphs_tab(lines)

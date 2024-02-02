@@ -102,7 +102,18 @@ impl<T: Into<DicePool>> Add<T> for DicePool {
 	type Output = DicePool;
 
 	fn add(self, rhs: T) -> Self::Output {
-		Self::Add(Box::new(self), Box::new(rhs.into()))
+		let rhs = rhs.into();
+		let mut vec = match self {
+			DicePool::Add(v) => v,
+			_ => vec![self],
+		};
+
+		match rhs {
+			DicePool::Add(v) => vec.extend(v),
+			_ => vec.push(rhs),
+		}
+
+		Self::Add(vec)
 	}
 }
 
@@ -142,20 +153,14 @@ impl<T: Into<DicePool>> Add<T> for Skill {
 	}
 }
 
-impl Display for DicePool {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			DicePool::Mod(val) => val.fmt(f),
-
-			DicePool::Trait(trait_) => f.write_str(trait_.as_ref()),
-
-			DicePool::Key(key) => f.write_str(key),
-
-			DicePool::Min(p1, p2) => f.write_fmt(format_args!("Lower of {p1} and {p2}")),
-			DicePool::Max(p1, p2) => f.write_fmt(format_args!("Higher of {p1} and {p2}")),
-			DicePool::Add(p1, p2) => f.write_fmt(format_args!("{p1} + {p2}")),
-			DicePool::Sub(p1, p2) => f.write_fmt(format_args!("{p1} - {p2}")),
-			DicePool::Vs(p1, p2) => f.write_fmt(format_args!("{p1} vs {p2}")),
+impl From<Vec<DicePool>> for DicePool {
+	fn from(mut value: Vec<DicePool>) -> Self {
+		if value.len() > 1 {
+			Self::Add(value)
+		} else if let Some(value) = value.pop() {
+			value
+		} else {
+			Self::Mod(0)
 		}
 	}
 }

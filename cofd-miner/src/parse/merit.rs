@@ -166,10 +166,7 @@ fn parse_body(body: &[String]) -> MeritBody {
 				match prop_key {
 					ItemProp::Prerequisites => {
 						prerequisites.extend(
-							lines
-								.iter()
-								.map(|l| l.trim())
-								.join(" ")
+							to_paragraphs(lines)[0]
 								.split(", ")
 								.filter_map(|str| Prerequisite::from_str(str).ok()),
 						);
@@ -177,7 +174,7 @@ fn parse_body(body: &[String]) -> MeritBody {
 					ItemProp::Effects => effects.extend(lines), // Effects are rolled into paragraphs later
 					ItemProp::Notes => notes.extend(to_paragraphs(lines)),
 					ItemProp::Drawbacks => drawbacks.extend(to_paragraphs(lines)),
-					_ => process_action(&mut action, prop_key, lines),
+					_ => process_action(&mut action, prop_key, to_paragraphs(lines)),
 				}
 				lines = Vec::new();
 			}
