@@ -1,25 +1,30 @@
 use std::{
-	convert::AsRef,
-	fmt::Display,
 	ops::{Add, Sub},
 	str::FromStr,
 };
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::traits::{attribute::Attribute, skill::Skill, Trait};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, derive_more::Display)]
+#[serde(tag = "kind", content = "value")]
 pub enum DicePool {
 	Mod(i8),
 
 	Trait(Trait),
 
+	#[display(fmt = "Lower of {_0} and {_1}")]
 	Min(Box<DicePool>, Box<DicePool>),
+	#[display(fmt = "Higher of {_0} and {_1}")]
 	Max(Box<DicePool>, Box<DicePool>),
 
-	Add(Box<DicePool>, Box<DicePool>),
+	#[display(fmt = "{}", "_0.iter().join(\" + \")")]
+	Add(Vec<DicePool>),
+	#[display(fmt = "{_0} - {_1}")]
 	Sub(Box<DicePool>, Box<DicePool>),
+	#[display(fmt = "{_0} vs {_1}")]
 	Vs(Box<DicePool>, Box<DicePool>),
 
 	Key(String),

@@ -35,7 +35,9 @@ pub enum SocialAttribute {
 	Composure,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq, derive_more::Display,
+)]
 #[serde(untagged)]
 pub enum Attribute {
 	Mental(MentalAttribute),
@@ -47,12 +49,6 @@ impl AttributeMarker for MentalAttribute {}
 impl AttributeMarker for PhysicalAttribute {}
 impl AttributeMarker for SocialAttribute {}
 impl AttributeMarker for Attribute {}
-
-impl std::fmt::Display for Attribute {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.as_ref())
-	}
-}
 
 impl AsRef<str> for Attribute {
 	fn as_ref(&self) -> &str {

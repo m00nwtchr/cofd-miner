@@ -1,5 +1,7 @@
-use std::{fmt::Display, ops::Deref, str::FromStr};
+use std::{ops::Deref, str::FromStr};
 
+use derive_more::Display;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -11,20 +13,11 @@ use crate::{
 /**
  * Level-rated prerequisite types
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum RatedPrerequisiteKey {
 	Trait(Trait),
 	Unknown(String),
-}
-
-impl Display for RatedPrerequisiteKey {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Self::Trait(trait_) => trait_.fmt(f),
-			Self::Unknown(str) => str.fmt(f),
-		}
-	}
 }
 
 impl FromStr for RatedPrerequisiteKey {
@@ -40,14 +33,9 @@ impl FromStr for RatedPrerequisiteKey {
 /**
  * Prerequisites with level ratings
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Display)]
+#[display(fmt = "{_0} {}", "num_to_dots(*_1)")]
 pub struct RatedPrerequisite(RatedPrerequisiteKey, u8);
-
-impl Display for RatedPrerequisite {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{} {}", self.0, num_to_dots(self.1))
-	}
-}
 
 impl FromStr for RatedPrerequisite {
 	type Err = error::ParseError;
@@ -68,21 +56,11 @@ impl FromStr for RatedPrerequisite {
 /**
  * All prerequisite types
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum PrerequisiteKey {
 	Template(Template),
 	Rated(RatedPrerequisite),
-}
-
-impl Display for PrerequisiteKey {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			PrerequisiteKey::Template(t) => t.fmt(f),
-			PrerequisiteKey::Rated(r) => r.fmt(f),
-			// PrerequisiteKey::Unknown(s) => s.fmt(f),
-		}
-	}
 }
 
 impl FromStr for PrerequisiteKey {
@@ -99,30 +77,13 @@ impl FromStr for PrerequisiteKey {
 /**
  * A single prerequisite, or a set of OR prerequisites
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum Prerequisite {
 	Key(PrerequisiteKey),
+	#[display(fmt = "{}", "_0.iter().join(\" or \")")]
 	Or(Vec<PrerequisiteKey>),
 	Unknown(String),
-}
-
-impl Display for Prerequisite {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			Prerequisite::Key(k) => k.fmt(f),
-			Prerequisite::Or(prereqs) => {
-				let mut out = String::new();
-				for prereq in &prereqs[0..prereqs.len() - 1] {
-					out.push_str(&prereq.to_string());
-					out.push_str(" or ");
-				}
-				out.push_str(&prereqs[prereqs.len() - 1].to_string());
-				write!(f, "{out}")
-			}
-			Prerequisite::Unknown(s) => s.fmt(f),
-		}
-	}
 }
 
 impl FromStr for Prerequisite {
@@ -148,8 +109,9 @@ impl FromStr for Prerequisite {
 /**
  * A set of prerequisites (AND)
  */
-#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Display)]
 #[serde(transparent)]
+#[display(fmt = "{}", "_0.iter().join(\", \")")]
 pub struct Prerequisites(Vec<Prerequisite>);
 
 impl From<Vec<Prerequisite>> for Prerequisites {
@@ -170,13 +132,6 @@ impl Deref for Prerequisites {
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
-	}
-}
-
-impl Display for Prerequisites {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		self.iter()
-			.try_fold((), |_result, prereq| write!(f, "{prereq}, "))
 	}
 }
 

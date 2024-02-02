@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -105,14 +105,9 @@ impl From<BookInfo> for Book {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, derive_more::Display)]
+#[display(fmt = "{_0} pg.{_1}")]
 pub struct BookReference(pub BookId, pub usize);
-
-impl Display for BookReference {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{} pg.{}", self.0, self.1)
-	}
-}
 
 impl Default for BookReference {
 	fn default() -> Self {

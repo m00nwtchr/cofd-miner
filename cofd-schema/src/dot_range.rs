@@ -4,16 +4,22 @@ use std::{
 	str::FromStr,
 };
 
+use derive_more::Display;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::{error, DOT_CHAR};
 
-#[derive(Serialize, Clone, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Clone, Debug, Deserialize, PartialEq, Eq, Display)]
 #[serde(untagged)]
 pub enum DotRange {
+	#[display(fmt = "{}", "num_to_dots(*_0)")]
 	Num(u8),
+	#[display(fmt = "{}", "_0.iter().map(|n| num_to_dots(*n)).join(\", \")")]
 	Set(Vec<u8>),
+	#[display(fmt = "{} to {}", "num_to_dots(*_0.start())", "num_to_dots(*_0.end())")]
 	Range(RangeInclusive<u8>),
+	#[display(fmt = "{}+", "num_to_dots(_0.start)")]
 	RangeFrom(RangeFrom<u8>),
 }
 
@@ -77,29 +83,5 @@ impl FromStr for DotRange {
 					.collect(),
 			)
 		})
-	}
-}
-
-impl Display for DotRange {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			DotRange::Num(num) => f.write_str(&num_to_dots(*num)),
-			DotRange::Set(set) => {
-				let mut out = String::new();
-				for num in &set[0..set.len() - 1] {
-					out.push_str(&num.to_string());
-					out.push_str(", ");
-				}
-				out.push_str(&set[set.len() - 1].to_string());
-				write!(f, "{out}")
-			}
-			DotRange::Range(range) => write!(
-				f,
-				"{} to {}",
-				num_to_dots(*range.start()),
-				num_to_dots(*range.end())
-			),
-			DotRange::RangeFrom(range) => write!(f, "{}", num_to_dots(range.start)),
-		}
 	}
 }

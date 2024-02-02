@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIs, EnumString};
@@ -57,7 +57,9 @@ pub enum SocialSkill {
 	Subterfuge,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumIs, PartialEq, Eq, derive_more::Display,
+)]
 #[serde(untagged)]
 pub enum Skill {
 	Mental(MentalSkill),
@@ -78,12 +80,6 @@ impl FromStr for Skill {
 			.map(Into::into)
 			.or_else(|_| PhysicalSkill::from_str(s).map(Into::into))
 			.or_else(|_| SocialSkill::from_str(s).map(Into::into))
-	}
-}
-
-impl Display for Skill {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.as_ref())
 	}
 }
 

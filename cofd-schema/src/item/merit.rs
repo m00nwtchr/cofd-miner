@@ -1,12 +1,12 @@
-use std::fmt::Display;
-
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, EnumString};
+use strum::{AsRefStr, Display, EnumString};
 
 use super::ActionFields;
 use crate::{prelude::DotRange, prerequisites::Prerequisites};
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr, PartialEq, Eq)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr, PartialEq, Eq, Display,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum MeritTag {
 	Style,
@@ -21,12 +21,6 @@ pub enum MeritTag {
 	Physical,
 
 	Fighting,
-}
-
-impl Display for MeritTag {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.as_ref())
-	}
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

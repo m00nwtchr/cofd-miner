@@ -49,7 +49,9 @@ pub enum Template {
 	Stigmatic,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr, PartialEq, Eq)]
+#[derive(
+	Debug, Clone, Copy, Serialize, Deserialize, EnumString, AsRefStr, PartialEq, Eq, Display,
+)]
 #[strum(ascii_case_insensitive)]
 pub enum SupernaturalTolerance {
 	Gnosis,
@@ -111,7 +113,7 @@ pub enum DerivedTrait {
 	Size,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, derive_more::Display)]
 #[serde(untagged)]
 pub enum Trait {
 	Attribute(Attribute),
@@ -182,11 +184,5 @@ impl AsRef<str> for Trait {
 			Trait::DerivedTrait(dt) => dt.as_ref(),
 			Trait::SupernaturalTolerance(st) => st.as_ref(),
 		}
-	}
-}
-
-impl Display for Trait {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.write_str(self.as_ref())
 	}
 }

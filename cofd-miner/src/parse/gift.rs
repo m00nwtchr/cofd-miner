@@ -18,7 +18,6 @@ use regex::Regex;
 use super::{get_book_reference, item::ItemProp, process_action, PROP_REGEX};
 use crate::{parse::to_paragraphs, source::Section};
 
-
 lazy_static! {
 	static ref GIFT_HEADER_REGEX: Regex = Regex::new(
 		r"(?xmi)
@@ -73,56 +72,43 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			let renown = Renown::from_str(captures.name("renown").unwrap().as_str().trim())?;
 			let reference = get_book_reference(&captures, section, info);
 
-			let mut action = None;
-
 			let mut lines = Vec::new();
-			let mut effects = Vec::new();
-			let mut description = Vec::new();
 
-			// let mut flag = true;
+			let mut action = None;
+			let mut description = Vec::new();
+			let mut effects = Vec::new();
+
+			let mut first_prop = true;
+
 			for line in body {
-				if let Some(prop) = PROP_REGEX.captures(line) {
+				if let Some(prop) = PROP_REGEX.captures(line.trim_start()) {
 					if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
 						let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
+						let line = prop_val.as_str();
 
-						match prop_key {
-							// ItemProp::ExceptionalSuccess
-							// | ItemProp::Success
-							// | ItemProp::Failure
-							// | ItemProp::DramaticFailure => {}
-							ItemProp::Action | ItemProp::Duration => {
-								if !lines.is_empty() {
-									effects = lines;
-									lines = Vec::new();
-								}
-							}
-							_ => {}
+						if !effects.is_empty() {
+							first_prop = false;
 						}
 
-						match prop_key {
-							ItemProp::DicePool
-							| ItemProp::ExceptionalSuccess
-							| ItemProp::Success
-							| ItemProp::Failure
-							| ItemProp::DramaticFailure => {
-								lines.push(prop_val.as_str().to_owned());
-								lines.reverse();
-								process_action(&mut action, prop_key, lines);
-								lines = Vec::new();
-							}
-							_ => {
-								process_action(
-									&mut action,
-									prop_key,
-									vec![prop_val.as_str().to_owned()],
-								);
-							}
-						}
+						lines.push(line.to_owned());
+						lines.reverse();
+						process_action(&mut action, prop_key, to_paragraphs(lines));
+
+						lines = Vec::new();
 					}
+				} else if line.starts_with('\t') {
+					lines.push(line.to_owned());
+					if first_prop {
+						effects.extend(lines);
+					} else {
+						description.extend(lines);
+					}
+					lines = Vec::new();
 				} else {
 					lines.push(line.to_owned());
 				}
 			}
+
 			if !lines.is_empty() {
 				description.extend(lines);
 			}

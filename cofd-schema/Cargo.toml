@@ -9,3 +9,6 @@ thiserror.workspace = true
 
 chrono = { version = "0.4", features = ["serde"] }
 strum = { workspace = true, features = ["derive"] }
+derive_more = { version = "0.99", default-features = false, features = ["display"] }
+
+itertools.workspace = true
