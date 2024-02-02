@@ -12,7 +12,6 @@ use cofd_schema::{
 	prerequisites::{Prerequisite, Prerequisites},
 };
 use convert_case::{Case, Casing};
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 

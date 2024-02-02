@@ -1,5 +1,4 @@
 use std::{
-	fmt::Display,
 	ops::{RangeFrom, RangeInclusive},
 	str::FromStr,
 };

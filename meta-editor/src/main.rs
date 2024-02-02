@@ -43,7 +43,7 @@ struct MetaEditorApp {
 }
 
 impl MetaEditorApp {
-	fn new(cc: &eframe::CreationContext<'_>) -> Self {
+	fn new(_cc: &eframe::CreationContext<'_>) -> Self {
 		let args: Vec<_> = std::env::args().collect();
 		let path = PathBuf::from(args.get(1).unwrap());
 
@@ -57,7 +57,7 @@ impl MetaEditorApp {
 				Ok((serde_json::de::from_reader(File::open(&path)?)?, path))
 			})
 			.filter_map(|r| r.ok())
-			.find(|(meta, path)| meta.info.hash.eq(&hash))
+			.find(|(meta, _path)| meta.info.hash.eq(&hash))
 			.unwrap_or_else(|| {
 				(
 					SourceMeta {
@@ -92,9 +92,9 @@ impl MetaEditorApp {
 
 	fn highlight(
 		show_full_text: bool,
-		ui: &egui::Ui,
+		_ui: &egui::Ui,
 		text: &str,
-		font_id: FontId,
+		_font_id: FontId,
 		wrap_width: f32,
 		section: &SectionMeta,
 	) -> epaint::text::LayoutJob {
@@ -135,7 +135,7 @@ impl MetaEditorApp {
 								TextFormat::default()
 							}
 						}
-						SectionRange::Regex(regex) => TextFormat::default(),
+						SectionRange::Regex(_regex) => TextFormat::default(),
 					};
 
 					layout_job.append(line, 0.0, format.clone());

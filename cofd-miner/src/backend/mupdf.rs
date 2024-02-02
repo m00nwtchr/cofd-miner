@@ -1,8 +1,6 @@
 use std::{collections::BTreeMap, path::Path, result::Result};
 
-use crate::parse::starts_with_one;
 use anyhow::anyhow;
-use cofd_schema::DOT_CHAR;
 use mupdf::{Document, TextPageOptions};
 
 use super::PdfText;
@@ -78,7 +76,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 
 		let lines = lines
 			.into_iter()
-			.map(|(x, mut line)| {
+			.map(|(x, line)| {
 				let min_x = if x < THRESHOLD {
 					l_indent.0
 				} else {

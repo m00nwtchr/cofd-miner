@@ -134,7 +134,6 @@ mod paragraph {
 		let mut paragraph = String::new();
 
 		for line in lines {
-			let l = line.trim();
 			if (starts_with_one(line.trim(), DOT_CHAR)
 				|| line.trim().chars().all(|c| c.eq(&DOT_CHAR)))
 				&& !paragraph.is_empty()

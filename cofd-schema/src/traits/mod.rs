@@ -1,4 +1,4 @@
-use std::{convert::Into, fmt::Display, str::FromStr};
+use std::{convert::Into, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, ParseError};
