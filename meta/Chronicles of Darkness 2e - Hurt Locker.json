@@ -73,7 +73,14 @@
 			"range": "(?sm)(Damn Lucky\\s+\\(.*)RIO MATSUMURA$",
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?s)\\tStory Hooks.*stay unremarkable\\?\\n",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Dreamer Merits",
@@ -84,7 +91,14 @@
 			"range": "(?sm)(Subliminal Conditioning\\s+\\(.*)DIANE THAYER$",
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?s)\\tStory Hooks.*of his head. \\n",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Infected Merits",
@@ -113,7 +127,14 @@
 			"range": "(?sm)(Plain Reader \\(.*)AMARR HARROLD$",
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?s)\\tStory Hooks.*and consensual.\\n",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "Lost Boy Merits",
@@ -142,7 +163,14 @@
 			"range": "(?sm)(Psychic Vampirism\\s+\\(.*)LUCIA",
 			"kind": {
 				"Merit": null
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?s)\\tStory Hooks.*to activate the power. \\n",
+					"replace": ""
+				}
+			]
 		}
 	]
 }

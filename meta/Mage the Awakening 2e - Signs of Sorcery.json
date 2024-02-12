@@ -15,7 +15,14 @@
 			"range": "(?sm)Merit: (.*)^High Speech\\n\\tOne",
 			"kind": {
 				"Merit": "Awakened"
-			}
+			},
+			"ops": [
+				{
+					"type": "RegexReplace",
+					"regex": "(?sm)^Merit: ",
+					"replace": ""
+				}
+			]
 		},
 		{
 			"name": "High Speech Merits",
