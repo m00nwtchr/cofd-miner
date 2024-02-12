@@ -61,7 +61,7 @@ fn main() -> anyhow::Result<()> {
 		Cache::default()
 	});
 
-	let out_path = &manifest_dir.join("../out/");
+	let out_path = &manifest_dir.join("res/tests/data/");
 	if !out_path.exists() {
 		std::fs::create_dir_all(out_path)?;
 	}

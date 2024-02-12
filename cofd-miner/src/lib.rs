@@ -1,8 +1,8 @@
-#![deny(clippy::pedantic)]
+#![warn(clippy::pedantic)]
 #![allow(
-clippy::missing_errors_doc,
-clippy::module_name_repetitions,
-clippy::similar_names
+	clippy::missing_errors_doc,
+	clippy::module_name_repetitions,
+	clippy::similar_names
 )]
 
 use std::path::Path;
@@ -10,9 +10,11 @@ use std::path::Path;
 use error::CofDMinerError;
 use lazy_static::lazy_static;
 use parse::PdfExtract;
+use regex::Regex;
 
 use cofd_meta::SourceMeta;
 use cofd_schema::book::Book;
+use cofd_schema::DOT_CHAR;
 use hash::hash;
 
 mod backend;
@@ -30,6 +32,10 @@ const META_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/meta.bin"));
 #[cfg(feature = "embed_meta")]
 lazy_static! {
 	static ref META: Vec<SourceMeta> = rmp_serde::decode::from_slice(META_BYTES).unwrap();
+}
+
+lazy_static! {
+	static ref DOT_REGEX: Regex = Regex::new(&format!("^{DOT_CHAR}+ ")).unwrap();
 }
 
 pub fn parse_book_with_meta(path: impl AsRef<Path>, source: &SourceMeta) -> anyhow::Result<Book> {
