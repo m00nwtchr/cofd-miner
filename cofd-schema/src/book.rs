@@ -51,7 +51,7 @@ pub enum BookId {
 	Codex,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct BookInfo {
 	pub name: String,
@@ -78,7 +78,7 @@ pub type SpellItem = Item<Spell>;
 pub type MoonGift = Gift<Moon>;
 pub type OtherGift = Gift<Other>;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Book {
 	pub info: BookInfo,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]

@@ -1,12 +1,3 @@
-// fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
-// 	let mut ser = serde_json::Serializer::with_formatter(
-// 		File::create(path)?,
-// 		PrettyFormatter::with_indent(b"\t"),
-// 	);
-// 	Ok(value.serialize(&mut ser)?)
-// }
-//
-
 use std::collections::HashMap;
 use std::fs::{DirEntry, File};
 use std::ops::Deref;
@@ -81,7 +72,7 @@ fn pdf_extract() -> Result<()> {
 		.filter_map(|f| serde_json::from_reader(f).ok())
 		.collect();
 
-	let res: Vec<_> = WalkDir::new(pdf_path)
+	let res: (Vec<Book>, Vec<Book>) = WalkDir::new(pdf_path)
 		.into_iter()
 		.filter_entry(|e| !is_hidden(e) && is_pdf(e))
 		.par_bridge()
@@ -107,20 +98,26 @@ fn pdf_extract() -> Result<()> {
 		})
 		.filter_map(|(entry, hash)| {
 			data.iter()
-				.find_position(|b| b.info.hash.eq(&hash))
-				.map(|b| (entry, hash, b.0))
+				.find(|b| b.info.hash.eq(&hash))
+				.map(|el| (entry, hash, el.clone()))
 		})
-		.flat_map(|(entry, hash, i)| cofd_miner::get_meta(hash).map(|meta| (entry, meta, i)))
-		.flat_map(|(entry, meta, i)| {
-			cofd_miner::parse_book_with_meta(entry.path(), meta).map(|book| (book, i))
+		.flat_map(|(entry, hash, b)| cofd_miner::get_meta(hash).map(|meta| (entry, meta, b)))
+		.flat_map(|(entry, meta, b)| {
+			cofd_miner::parse_book_with_meta(entry.path(), meta).map(|book| (book, b))
 		})
 		.collect();
 
-	for (result, i) in res {
-		let data = &data[i];
+	let mut left = res.0;
+	let mut right = res.1;
 
-		similar_asserts::assert_serde_eq!(data, &result);
-	}
+	similar_asserts::assert_serde_eq!(left, right);
+
+	//
+	// for (result, i) in res {
+	// 	let data = &data[i];
+	//
+	// 	similar_asserts::assert_serde_eq!(data, &result);
+	// }
 
 	{
 		let cache = cache.read().unwrap();

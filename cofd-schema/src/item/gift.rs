@@ -4,18 +4,18 @@ use crate::splat::werewolf::{Auspice, Renown};
 
 use super::{ActionFields, Item};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Moon {
 	pub auspice: Auspice,
 	pub level: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Other {
 	pub renown: Renown,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Facet<T> {
 	#[serde(flatten)]
 	pub action: Option<ActionFields>,
@@ -24,14 +24,14 @@ pub struct Facet<T> {
 	pub inner: T,
 }
 
-#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Copy)]
 pub enum GiftKind {
 	Moon,
 	Shadow,
 	Wolf,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Gift<T> {
 	pub name: String,
 	pub facets: Vec<Item<Facet<T>>>,
