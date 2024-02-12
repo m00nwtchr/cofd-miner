@@ -44,9 +44,7 @@ impl PdfExtract {
 	pub fn parse(self) -> Result<Book> {
 		let mut parse = Book::from(self.info);
 
-		for mut section in self.sections {
-			section.extract = section.extract.replace(['‘', '’'], "'").replace('–', "-");
-
+		for section in self.sections {
 			match &section.kind {
 				PageKind::Merit(_) => parse.merits.extend(parse_merits(&parse.info, &section)?),
 				// PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
@@ -75,7 +73,8 @@ fn get_book_reference(
 	info: &BookInfo,
 ) -> BookReference {
 	let page = if let Some(match_) = captures.get(0) {
-		get_page_number(&section.page_ranges, match_.start())
+		let orig_pos = section.original.find(match_.as_str()).unwrap();
+		get_page_number(&section.page_ranges, orig_pos)
 	} else {
 		unreachable!()
 	};
@@ -126,25 +125,19 @@ pub fn starts_with_one(str: &str, char_p: char) -> bool {
 }
 
 mod paragraph {
-	use crate::parse::starts_with_one;
+	use crate::DOT_REGEX;
 	use cofd_schema::DOT_CHAR;
+
+	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 
 	fn to_paragraphs_old(lines: Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
 		for line in lines {
-			if (starts_with_one(line.trim(), DOT_CHAR)
-				|| line.trim().chars().all(|c| c.eq(&DOT_CHAR)))
-				&& !paragraph.is_empty()
-			{
-				paragraphs.push(paragraph.trim().to_owned());
-				paragraph = String::new();
-			}
-
 			paragraph.push_str(trim_line(line.as_str()));
 
-			if line.ends_with('.') {
+			if line.trim().ends_with(|c| PUNCTUATION.contains(&c)) {
 				paragraphs.push(paragraph.trim().to_owned());
 				paragraph = String::new();
 			}
@@ -199,7 +192,7 @@ mod paragraph {
 			let count = lines.iter().filter(|l| l.starts_with('\t')).count();
 
 			if count > (lines.len() / 2)
-				|| lines.iter().any(|l| l.trim_start().starts_with(DOT_CHAR))
+			// || lines.iter().any(|l| l.trim_start().starts_with(DOT_CHAR))
 			{
 				to_paragraphs_old(lines)
 			} else {

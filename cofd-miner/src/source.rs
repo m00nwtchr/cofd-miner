@@ -13,6 +13,7 @@ use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
 pub struct Section {
 	pub kind: PageKind,
 	pub extract: String,
+	pub original: String,
 	pub page_ranges: HashMap<usize, Range<usize>>,
 }
 
@@ -71,7 +72,11 @@ pub fn process_section(
 		extract
 	};
 
-	let mut extract = extract.join("\n");
+	let original = extract
+		.join("\n")
+		.replace(['‘', '’'], "'")
+		.replace('–', "-");
+	let mut extract = original.clone();
 
 	if !flag {
 		for op in &section.ops {
@@ -105,6 +110,7 @@ pub fn process_section(
 	}
 
 	Ok(Section {
+		original,
 		extract,
 		kind: section.kind.clone(),
 		page_ranges,
