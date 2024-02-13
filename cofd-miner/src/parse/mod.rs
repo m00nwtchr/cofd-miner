@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::{collections::HashMap, ops::Range};
 
 use anyhow::Result;
@@ -8,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::parse::paragraph::to_paragraphs;
 use cofd_meta::PageKind;
+use cofd_schema::modifiers::SuggestedModifiers;
 use cofd_schema::{
 	book::{Book, BookInfo, BookReference},
 	item::{gift::GiftKind, ActionFields},
@@ -27,7 +29,7 @@ use self::{
 
 lazy_static! {
 	static ref PROP_REGEX: Regex = Regex::new(
-		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note|Exceptional Success|Success|Failure|Dramatic Failure)s?:\s?(.*)$"
+		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note|Exceptional Success|Success|Failure|Dramatic Failure|Suggested Modifiers)s?:\s?(.*)$"
 	)
 	.unwrap();
 }
@@ -112,6 +114,12 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 				.get_or_insert_with(ActionFields::default)
 				.roll_results
 				.exceptional_success = to_paragraphs(lines);
+		}
+		ItemProp::SuggestedModifiers => {
+			action
+				.get_or_insert_with(ActionFields::default)
+				.suggested_modifiers =
+				SuggestedModifiers::from_str(&to_paragraphs(lines).concat()).unwrap_or_default();
 		}
 		_ => {}
 	}

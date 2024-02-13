@@ -28,6 +28,8 @@ pub enum ItemProp {
 	Failure,
 	#[strum(to_string = "Dramatic Failure")]
 	DramaticFailure,
+	#[strum(to_string = "Suggested Modifiers")]
+	SuggestedModifiers,
 
 	#[strum(serialize = "Effects", serialize = "Effect")]
 	Effects,

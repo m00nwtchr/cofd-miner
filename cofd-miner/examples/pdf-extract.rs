@@ -48,7 +48,7 @@ fn is_pdf(entry: &DirEntry) -> bool {
 	}
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
 	// env_logger::init();
 
 	let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));

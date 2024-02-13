@@ -60,7 +60,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 	};
 	let additional_prerequisites = additional_prerequisites
 		.as_ref()
-		.and_then(|prerqs| Prerequisites::from_str(prerqs).ok());
+		.and_then(|prereqs| Prerequisites::from_str(prereqs).ok());
 
 	for captures in MERIT_HEADER_REGEX
 		.captures_iter(&section.extract)

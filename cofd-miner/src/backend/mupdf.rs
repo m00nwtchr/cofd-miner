@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, path::Path, result::Result};
 
+use crate::DOT_REGEX;
 use anyhow::anyhow;
 use mupdf::{Document, TextPageOptions};
 
@@ -67,7 +68,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		let mut last_x = 0.0;
 		let mut last_indent = 0.0;
 
-		// let mut last_has_dot = false;
+		let mut last_has_dot = false;
 		// let mut dot_line_indent = f32::MAX;
 		// let mut dot_paragraph_indent = f32::MAX;
 		// let mut pre_dot_indent = f32::MAX;
@@ -84,6 +85,8 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				};
 				let indent = f32::floor(x - min_x);
 
+				let dot = DOT_REGEX.is_match(&line);
+
 				//
 				// let x = f32::floor(l.bounds().x0);
 				// let y = f32::floor(l.bounds().y0);
@@ -97,10 +100,19 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					// } else {
 					// 	true
 					// }
-					true
+
+					if last_has_dot && !dot {
+						false
+					} else {
+						true
+					}
 				} else if indent < last_indent {
 					// line.insert_str(0, "LESS:");
-					false
+					if dot {
+						true
+					} else {
+						false
+					}
 				} else {
 					// line.insert_str(0, "LAST:");
 					last_tab
@@ -114,10 +126,18 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 
 				last_indent = indent;
 				last_tab = tab;
-				// last_has_dot = dot;
+				last_has_dot = dot;
 
 				let tab = if tab { "\t" } else { "" };
 				// let dot = if dot { "\t" } else { "" };
+
+				#[cfg(debug_assertions)]
+				if std::env::var("INDENT_DEBUG").is_ok() {
+					format!("{indent}{tab}{line}")
+				} else {
+					format!("{tab}{line}")
+				}
+				#[cfg(not(debug_assertions))]
 				format!("{tab}{line}")
 			})
 			.collect();

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use self::merit::Merit;
+use crate::modifiers::SuggestedModifiers;
 use crate::{
 	book::{BookReference, MoonGift, OtherGift},
 	dice_pool::DicePool,
@@ -47,6 +48,8 @@ pub struct ActionFields {
 
 	#[serde(default, skip_serializing_if = "RollResults::is_empty")]
 	pub roll_results: RollResults,
+	#[serde(default, skip_serializing_if = "SuggestedModifiers::is_empty")]
+	pub suggested_modifiers: SuggestedModifiers,
 }
 
 pub enum ItemKind {
