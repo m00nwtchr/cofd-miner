@@ -3,11 +3,14 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
+version = "0.1.0"
+authors = ["m00n"]
 edition = "2021"
+license = "MPL"
 
 [workspace.dependencies]
-cofd-miner = { path = "crates/cofd-miner" }
-cofd-meta = { path = "crates/cofd-meta" }
+cofd-miner = { path = "crates/miner" }
+cofd-meta = { path = "crates/meta" }
 cofd-schema = { git = "https://github.com/m00nwtchr/cofd.git", rev = "b06c28bd560eae54e77919c0ab6625fa9dcbf902" }
 
 strum = "0.26"

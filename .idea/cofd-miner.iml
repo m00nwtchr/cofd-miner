@@ -5,11 +5,11 @@
       <sourceFolder url="file://$MODULE_DIR$/cofd-schema/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/codex-scraper/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/codex-scraper/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-meta/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/examples" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/meta-editor/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/meta/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/miner/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/miner/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/miner/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
