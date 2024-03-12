@@ -2,14 +2,14 @@
 <module type="EMPTY_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/codex-scraper/examples" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/codex-scraper/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cofd-meta/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cofd-miner/examples" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cofd-miner/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/cofd-schema/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/cofd-miner/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/meta-editor/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/codex-scraper/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/codex-scraper/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-meta/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/cofd-miner/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/meta-editor/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

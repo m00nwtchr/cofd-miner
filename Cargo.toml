@@ -1,16 +1,16 @@
 [workspace]
-members = ["cofd-miner", "cofd-meta", "codex-scraper", "cofd-schema", "meta-editor"]
+members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
 edition = "2021"
 
 [workspace.dependencies]
-cofd-miner = { path = "./cofd-miner" }
-cofd-schema = { path = "./cofd-schema" }
-cofd-meta = { path = "./cofd-meta" }
+cofd-miner = { path = "crates/cofd-miner" }
+cofd-meta = { path = "crates/cofd-meta" }
+cofd-schema = { git = "https://github.com/m00nwtchr/cofd.git", rev = "b06c28bd560eae54e77919c0ab6625fa9dcbf902" }
 
-strum = "0.25"
+strum = "0.26"
 regex = "1.10"
 itertools = "0.12"
 

@@ -18,29 +18,28 @@ pub enum PageType {
 
 type MultiMap = HashMap<String, Vec<Vec<String>>>;
 
-pub async fn download<P: AsRef<Path>>(url: String, cache_path: P) -> anyhow::Result<String> {
-	let url = Url::parse(&url).expect("Invalid url");
-
-	let page_name = url
-		.path_segments()
+pub fn url_to_name(url: &Url) -> String {
+	url.path_segments()
 		.expect("Path segments")
 		.last()
 		.expect("Last path segment")
-		.to_owned();
+		.replace(',', "")
+}
 
+pub async fn download<P: AsRef<Path>>(url: &Url, cache_path: P) -> anyhow::Result<String> {
 	let cache_path = cache_path.as_ref();
 	if !cache_path.exists() {
 		std::fs::create_dir_all(cache_path)?;
 	}
 
-	let name = page_name.replace(',', "");
+	let name = url_to_name(url);
 	let html_path = cache_path.join(format!("{name}.html"));
 
 	let text;
 	if !html_path.exists() {
 		log::info!("Downloading: {url}");
 
-		let resp = reqwest::get(url).await?;
+		let resp = reqwest::get(url.clone()).await?;
 		text = resp.text().await?;
 
 		fs::write(html_path, &text)?;

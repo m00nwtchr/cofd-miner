@@ -4,7 +4,7 @@ use std::{
 	path::Path,
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 #[cfg(feature = "embed_meta")]
 use cofd_meta::SourceMeta;
