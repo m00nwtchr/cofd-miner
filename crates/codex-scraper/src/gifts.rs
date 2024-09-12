@@ -32,9 +32,11 @@ pub fn parse_gifts(map: MultiMap) -> anyhow::Result<(Vec<Gift<Moon>>, Vec<Gift<O
 
 		for vec in vec {
 			if vec.len() == 1 {
-				if let Some(g) = gift {
+				if let Some(g) = gift.take() {
 					gifts.push(g);
-					gift = None;
+				}
+				if let Some(g) = moon_gift.take() {
+					moon_gifts.push(g);
 				}
 
 				if let Some(name) = vec.first() {

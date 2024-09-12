@@ -1,7 +1,9 @@
-use std::{fs::File, path::Path};
-
 use codex_scraper::{self, download, parse, url_to_name, PageType};
+use cofd_schema::book::Book;
 use reqwest::Url;
+use ron::ser::PrettyConfig;
+use std::io::Write;
+use std::{fs::File, path::Path};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
@@ -27,20 +29,25 @@ async fn main() -> anyhow::Result<()> {
 			tokio::spawn({
 				let cache_path = cache_path.clone();
 				async move {
-					let url = Url::parse(&url).expect("Invalid url");
+					let url = Url::parse(url).expect("Invalid url");
 
 					let text = download(&url, &cache_path).await.unwrap();
 					let book = parse(&text, page).unwrap();
 
 					let ron_path = cache_path.join(format!("{}.ron", url_to_name(&url)));
-					ron::ser::to_writer(File::create(ron_path).unwrap(), &book).unwrap();
+					let str = ron::ser::to_string_pretty(&book, PrettyConfig::default()).unwrap();
+
+					File::create(ron_path)
+						.unwrap()
+						.write_all(str.as_bytes())
+						.expect("TODO: panic message");
 				}
 			})
 		})
 		.collect();
 
 	for task in tasks {
-		let book = task.await?;
+		task.await?;
 	}
 
 	Ok(())

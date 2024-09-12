@@ -11,7 +11,7 @@ license = "MPL"
 [workspace.dependencies]
 cofd-miner = { path = "crates/miner" }
 cofd-meta = { path = "crates/meta" }
-cofd-schema = { git = "https://github.com/m00nwtchr/cofd.git", rev = "b06c28bd560eae54e77919c0ab6625fa9dcbf902" }
+cofd-schema = { git = "https://github.com/m00nwtchr/cofd.git" }
 
 strum = "0.26"
 regex = "1.10"
