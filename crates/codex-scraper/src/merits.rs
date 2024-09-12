@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use crate::MultiMap;
 use cofd_schema::{
 	book::BookReference,
 	item::{
@@ -10,6 +9,8 @@ use cofd_schema::{
 	prelude::DotRange,
 	prerequisites::Prerequisites,
 };
+
+use crate::MultiMap;
 
 pub fn parse_merits(map: MultiMap) -> anyhow::Result<Vec<Item<Merit>>> {
 	let mut merits = Vec::new();

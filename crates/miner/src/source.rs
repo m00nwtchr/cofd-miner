@@ -1,13 +1,12 @@
 use std::{collections::HashMap, ops::Range, path::Path};
 
 use anyhow::Result;
+use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
 use rayon::prelude::*;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 pub use crate::backend::extract_pages;
 use crate::{backend::PdfText, parse::PdfExtract};
-use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {

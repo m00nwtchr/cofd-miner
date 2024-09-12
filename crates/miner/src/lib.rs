@@ -7,15 +7,13 @@
 
 use std::path::Path;
 
+use cofd_meta::SourceMeta;
+use cofd_schema::{book::Book, DOT_CHAR};
 use error::CofDMinerError;
+use hash::hash;
 use lazy_static::lazy_static;
 use parse::PdfExtract;
 use regex::Regex;
-
-use cofd_meta::SourceMeta;
-use cofd_schema::book::Book;
-use cofd_schema::DOT_CHAR;
-use hash::hash;
 
 mod backend;
 

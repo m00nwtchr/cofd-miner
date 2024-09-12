@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
+use std::{collections::HashMap, fs, path::Path};
 
-use cofd_schema::book::{Book, BookId};
-use cofd_schema::prelude::BookInfo;
+use cofd_schema::{
+	book::{Book, BookId},
+	prelude::BookInfo,
+};
 use itertools::Itertools;
 use reqwest::Url;
 use scraper::{ElementRef, Html, Selector};

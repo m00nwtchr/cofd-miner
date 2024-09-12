@@ -1,10 +1,10 @@
 use std::ops::{Range, RangeInclusive};
 
+use cofd_schema::book::BookInfo;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 pub use crate::page_kind::PageKind;
-use cofd_schema::book::BookInfo;
 
 mod page_kind;
 

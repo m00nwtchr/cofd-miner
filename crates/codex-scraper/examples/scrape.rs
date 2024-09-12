@@ -1,9 +1,8 @@
+use std::{fs::File, io::Write, path::Path};
+
 use codex_scraper::{self, download, parse, url_to_name, PageType};
-use cofd_schema::book::Book;
 use reqwest::Url;
 use ron::ser::PrettyConfig;
-use std::io::Write;
-use std::{fs::File, path::Path};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {

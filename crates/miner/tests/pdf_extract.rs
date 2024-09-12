@@ -1,8 +1,10 @@
-use std::collections::HashMap;
-use std::fs::{DirEntry, File};
-use std::ops::Deref;
-use std::path::{Path, PathBuf};
-use std::sync::RwLock;
+use std::{
+	collections::HashMap,
+	fs::{DirEntry, File},
+	ops::Deref,
+	path::{Path, PathBuf},
+	sync::RwLock,
+};
 
 use anyhow::{anyhow, Result};
 use cofd_miner::hash;

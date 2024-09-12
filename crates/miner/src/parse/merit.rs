@@ -15,12 +15,10 @@ use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
-use crate::parse::paragraph::to_paragraphs;
-use crate::source::Section;
-
 use super::{
 	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action, PROP_REGEX,
 };
+use crate::{parse::paragraph::to_paragraphs, source::Section};
 
 lazy_static! {
 	static ref MERIT_HEADER_REGEX: Regex = Regex::new(

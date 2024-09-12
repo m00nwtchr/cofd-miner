@@ -5,18 +5,19 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use eframe::egui::text::{LayoutSection, TextWrapping};
+use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
+use cofd_miner::{hash, process_section, source::Section};
+use cofd_schema::prelude::BookInfo;
 use eframe::{
-	egui::{self, FontSelection, TextEdit, TextFormat},
+	egui::{
+		self,
+		text::{LayoutSection, TextWrapping},
+		FontSelection, TextEdit, TextFormat,
+	},
 	epaint::{self, Color32, FontId},
 };
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
-
-use cofd_meta::{Op, PageKind, SectionMeta, SectionRange, SourceMeta};
-use cofd_miner::source::Section;
-use cofd_miner::{hash, process_section};
-use cofd_schema::prelude::BookInfo;
 
 fn main() -> eframe::Result<()> {
 	let native_options = eframe::NativeOptions::default();

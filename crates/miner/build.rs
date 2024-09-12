@@ -5,7 +5,6 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-
 #[cfg(feature = "embed_meta")]
 use cofd_meta::SourceMeta;
 

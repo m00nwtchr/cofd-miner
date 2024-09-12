@@ -1,12 +1,11 @@
 use std::str::FromStr;
 
-use serde::{Deserialize, Serialize};
-use strum::EnumString;
-
 use cofd_schema::{
 	dice_pool::DicePool,
 	prerequisites::{Prerequisite, Prerequisites},
 };
+use serde::{Deserialize, Serialize};
+use strum::EnumString;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq)]
 #[strum(ascii_case_insensitive)]

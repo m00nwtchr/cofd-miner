@@ -1,10 +1,10 @@
 use std::{collections::BTreeMap, path::Path, result::Result};
 
-use crate::DOT_REGEX;
 use anyhow::anyhow;
 use mupdf::{Document, TextPageOptions};
 
 use super::PdfText;
+use crate::DOT_REGEX;
 
 const THRESHOLD: f32 = 240.0;
 

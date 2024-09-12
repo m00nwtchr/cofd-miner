@@ -1,31 +1,29 @@
-use std::str::FromStr;
-use std::{collections::HashMap, ops::Range};
+use std::{collections::HashMap, ops::Range, str::FromStr};
 
 use anyhow::Result;
+use cofd_meta::PageKind;
+use cofd_schema::{
+	book::{Book, BookInfo, BookReference},
+	item::{gift::GiftKind, ActionFields},
+	modifiers::SuggestedModifiers,
+};
 use convert_case::{Case, Casing};
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
 use crate::parse::paragraph::to_paragraphs;
-use cofd_meta::PageKind;
-use cofd_schema::modifiers::SuggestedModifiers;
-use cofd_schema::{
-	book::{Book, BookInfo, BookReference},
-	item::{gift::GiftKind, ActionFields},
-};
 
 mod gift;
 mod item;
 mod merit;
-
-use crate::source::Section;
 
 use self::{
 	gift::parse_gifts,
 	item::{convert_dice_pool, ItemProp},
 	merit::parse_merits,
 };
+use crate::source::Section;
 
 lazy_static! {
 	static ref PROP_REGEX: Regex = Regex::new(
@@ -133,8 +131,9 @@ pub fn starts_with_one(str: &str, char_p: char) -> bool {
 }
 
 mod paragraph {
-	use crate::DOT_REGEX;
 	use cofd_schema::DOT_CHAR;
+
+	use crate::DOT_REGEX;
 
 	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 

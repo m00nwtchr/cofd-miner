@@ -6,12 +6,11 @@ use std::{
 };
 
 use anyhow::Result;
+use cofd_miner::hash;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::ser::PrettyFormatter;
 use walkdir::{DirEntry, WalkDir};
-
-use cofd_miner::hash;
 
 fn to_path_pretty<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Result<()> {
 	let mut ser = serde_json::Serializer::with_formatter(
