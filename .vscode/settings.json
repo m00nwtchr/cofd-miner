@@ -1,6 +1,4 @@
 {
 	"rust-analyzer.showUnlinkedFileNotification": false,
-	"rust-analyzer.cargo.features": [
-		"meta_editor"
-	]
+	"rust-analyzer.cargo.features": []
 }
