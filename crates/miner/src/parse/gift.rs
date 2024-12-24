@@ -9,17 +9,17 @@ use cofd_schema::{
 		Item,
 	},
 	prelude::BookInfo,
-	splat::werewolf::Renown,
+	template::werewolf::Renown,
 };
 use convert_case::{Case, Casing};
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::Regex;
 
 use super::{get_book_reference, item::ItemProp, process_action, PROP_REGEX};
 use crate::{parse::to_paragraphs, source::Section};
 
-lazy_static! {
-	static ref GIFT_HEADER_REGEX: Regex = Regex::new(
+static GIFT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
+	Regex::new(
 		r"(?xmi)
 			^
 			(?P<name>[^\s.][^\n.]+)               # Name
@@ -31,10 +31,10 @@ lazy_static! {
 			\)
 			\s?
 			$
-		"
+		",
 	)
-	.unwrap();
-}
+	.unwrap()
+});
 
 pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>> {
 	let mut out = Vec::new();

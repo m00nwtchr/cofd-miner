@@ -8,7 +8,7 @@ use cofd_schema::{
 	modifiers::SuggestedModifiers,
 };
 use convert_case::{Case, Casing};
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
@@ -25,12 +25,12 @@ use self::{
 };
 use crate::source::Section;
 
-lazy_static! {
-	static ref PROP_REGEX: Regex = Regex::new(
+static PROP_REGEX: Lazy<Regex> = Lazy::new(|| {
+	Regex::new(
 		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note|Exceptional Success|Success|Failure|Dramatic Failure|Suggested Modifiers)s?:\s?(.*)$"
 	)
-	.unwrap();
-}
+	.unwrap()
+});
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PdfExtract {
@@ -125,7 +125,7 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 
 #[must_use]
 pub fn starts_with_one(str: &str, char_p: char) -> bool {
-	str.chars().next().map_or(false, |first_char| {
+	str.chars().next().is_some_and(|first_char| {
 		first_char == char_p && !str[first_char.len_utf8()..].starts_with(char_p)
 	})
 }

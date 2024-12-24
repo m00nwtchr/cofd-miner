@@ -12,7 +12,7 @@ use cofd_schema::{
 	prerequisites::{Prerequisite, Prerequisites},
 };
 use convert_case::{Case, Casing};
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 
 use super::{
@@ -20,8 +20,8 @@ use super::{
 };
 use crate::{parse::paragraph::to_paragraphs, source::Section};
 
-lazy_static! {
-	static ref MERIT_HEADER_REGEX: Regex = Regex::new(
+static MERIT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
+	Regex::new(
 		r"(?xmi)
 		^\t*
 		(?<name> (?:\w{2,3}\.\s)? (?:\t?[\w\-\']\s*)+)  # Name
@@ -42,10 +42,10 @@ lazy_static! {
 		(?: : \s (?<sub> .* ) )?
 		\s?
 		$
-	"
+	",
 	)
-	.unwrap();
-}
+	.unwrap()
+});
 
 pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>> {
 	let mut out = Vec::new();

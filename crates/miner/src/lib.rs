@@ -11,7 +11,7 @@ use cofd_meta::SourceMeta;
 use cofd_schema::{book::Book, DOT_CHAR};
 use error::CofDMinerError;
 use hash::hash;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use parse::PdfExtract;
 use regex::Regex;
 
@@ -28,13 +28,10 @@ pub use source::{extract_pages, extract_text, process_section};
 const META_BYTES: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/meta.bin"));
 
 #[cfg(feature = "embed_meta")]
-lazy_static! {
-	static ref META: Vec<SourceMeta> = rmp_serde::decode::from_slice(META_BYTES).unwrap();
-}
+static META: Lazy<Vec<SourceMeta>> =
+	Lazy::new(|| rmp_serde::decode::from_slice(META_BYTES).unwrap());
 
-lazy_static! {
-	static ref DOT_REGEX: Regex = Regex::new(&format!("^{DOT_CHAR}+ ")).unwrap();
-}
+static DOT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(&format!("^{DOT_CHAR}+ ")).unwrap());
 
 pub fn parse_book_with_meta(path: impl AsRef<Path>, source: &SourceMeta) -> anyhow::Result<Book> {
 	extract_text(path, source).and_then(PdfExtract::parse)

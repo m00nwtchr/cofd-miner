@@ -17,12 +17,12 @@ cofd-schema.workspace = true
 cofd-meta.workspace = true
 
 mupdf = { version = "0.4", default-features = false, optional = true, features = [
-    "sys-lib",
+	"sys-lib",
 ] }
 # lopdf = { version = "0.31", optional = true }
 
 strum.workspace = true
-lazy_static = "1"
+once_cell = "1"
 rayon = "1.8"
 
 convert_case = "0.6"
