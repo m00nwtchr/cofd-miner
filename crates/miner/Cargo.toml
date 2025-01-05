@@ -8,6 +8,7 @@ license.workspace = true
 [features]
 default = ["mupdf", "embed_meta"]
 embed_meta = ["dep:serde_json", "dep:rmp-serde", "dep:cofd-meta"]
+llm-parser = ["dep:mistralrs", "cofd-schema/json_schema"]
 
 mupdf = ["dep:mupdf"]
 # lopdf = ["dep:lopdf"]
@@ -36,6 +37,11 @@ thiserror.workspace = true
 
 serde = { workspace = true, features = ["derive"] }
 rmp-serde = { workspace = true, optional = true }
+
+tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "macros"] }
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", optional = true }
+schemars = "1.0.0-alpha.17"
+reqwest = "0.12"
 
 [build-dependencies]
 anyhow.workspace = true

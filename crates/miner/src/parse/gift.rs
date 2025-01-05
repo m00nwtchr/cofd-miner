@@ -36,6 +36,14 @@ static GIFT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
 	.unwrap()
 });
 
+#[cfg(feature = "llm-parser")]
+pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>> {
+	println!("{}", section.extract);
+	panic!("");
+	Ok(vec![])
+}
+
+#[cfg(not(feature = "llm-parser"))]
 pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>> {
 	let mut out = Vec::new();
 	let mut facets = Vec::new();
