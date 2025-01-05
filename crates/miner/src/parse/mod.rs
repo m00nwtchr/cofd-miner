@@ -8,8 +8,7 @@ use cofd_schema::{
 	modifiers::SuggestedModifiers,
 };
 use convert_case::{Case, Casing};
-use once_cell::sync::Lazy;
-use regex::{Captures, Regex};
+use regex::Captures;
 use serde::{Deserialize, Serialize};
 
 use crate::parse::paragraph::to_paragraphs;
@@ -24,13 +23,6 @@ use self::{
 	merit::parse_merits,
 };
 use crate::source::Section;
-
-static PROP_REGEX: Lazy<Regex> = Lazy::new(|| {
-	Regex::new(
-		r"^(Prerequisite|Style Tag|Cost|Dice Pool|Action|Duration|Effect|Drawback|Note|Exceptional Success|Success|Failure|Dramatic Failure|Suggested Modifiers)s?:\s?(.*)$"
-	)
-	.unwrap()
-});
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PdfExtract {
@@ -93,31 +85,31 @@ fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: 
 			action
 				.get_or_insert_with(ActionFields::default)
 				.roll_results
-				.dramatic_failure = to_paragraphs(lines);
+				.dramatic_failure = to_paragraphs(&lines);
 		}
 		ItemProp::Failure => {
 			action
 				.get_or_insert_with(ActionFields::default)
 				.roll_results
-				.failure = to_paragraphs(lines);
+				.failure = to_paragraphs(&lines);
 		}
 		ItemProp::Success => {
 			action
 				.get_or_insert_with(ActionFields::default)
 				.roll_results
-				.success = to_paragraphs(lines);
+				.success = to_paragraphs(&lines);
 		}
 		ItemProp::ExceptionalSuccess => {
 			action
 				.get_or_insert_with(ActionFields::default)
 				.roll_results
-				.exceptional_success = to_paragraphs(lines);
+				.exceptional_success = to_paragraphs(&lines);
 		}
 		ItemProp::SuggestedModifiers => {
 			action
 				.get_or_insert_with(ActionFields::default)
 				.suggested_modifiers =
-				SuggestedModifiers::from_str(&to_paragraphs(lines).concat()).unwrap_or_default();
+				SuggestedModifiers::from_str(&to_paragraphs(&lines).concat()).unwrap_or_default();
 		}
 		_ => {}
 	}
@@ -131,13 +123,9 @@ pub fn starts_with_one(str: &str, char_p: char) -> bool {
 }
 
 mod paragraph {
-	use cofd_schema::DOT_CHAR;
-
-	use crate::DOT_REGEX;
-
 	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 
-	fn to_paragraphs_old(lines: Vec<String>) -> Vec<String> {
+	fn to_paragraphs_old(lines: &Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
@@ -157,7 +145,7 @@ mod paragraph {
 		paragraphs
 	}
 
-	fn to_paragraphs_tab(lines: Vec<String>) -> Vec<String> {
+	fn to_paragraphs_tab(lines: &Vec<String>) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
@@ -189,10 +177,9 @@ mod paragraph {
 		line
 	}
 
-	pub fn to_paragraphs(mut lines: Vec<String>) -> Vec<String> {
+	pub fn to_paragraphs(mut lines: &Vec<String>) -> Vec<String> {
 		if lines.len() == 1 {
-			let line = lines.pop().unwrap();
-			let line = line.trim();
+			let line = lines.first().unwrap().trim();
 
 			vec![line.to_owned()]
 		} else {

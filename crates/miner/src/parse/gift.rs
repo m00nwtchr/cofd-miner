@@ -15,8 +15,11 @@ use convert_case::{Case, Casing};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-use super::{get_book_reference, item::ItemProp, process_action, PROP_REGEX};
-use crate::{parse::to_paragraphs, source::Section};
+use super::{get_book_reference, item::ItemProp, process_action};
+use crate::{
+	parse::{item::PROP_REGEX, to_paragraphs},
+	source::Section,
+};
 
 static GIFT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
 	Regex::new(
@@ -92,7 +95,7 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 
 						lines.push(line.to_owned());
 						lines.reverse();
-						process_action(&mut action, prop_key, to_paragraphs(lines));
+						process_action(&mut action, prop_key, to_paragraphs(&lines));
 
 						lines = Vec::new();
 					}
@@ -118,8 +121,8 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			facets.push(Item {
 				name: name.clone(),
 				reference,
-				description: to_paragraphs(description),
-				effects: to_paragraphs(effects),
+				description: to_paragraphs(&description),
+				effects: to_paragraphs(&effects),
 				inner: Facet {
 					action,
 					inner: Other { renown },

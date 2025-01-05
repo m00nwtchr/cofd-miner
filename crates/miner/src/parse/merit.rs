@@ -15,10 +15,11 @@ use convert_case::{Case, Casing};
 use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 
-use super::{
-	get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action, PROP_REGEX,
+use super::{get_body, get_book_reference, item::ItemProp, normalize, parse_name, process_action};
+use crate::{
+	parse::{item::PROP_REGEX, paragraph::to_paragraphs},
+	source::Section,
 };
-use crate::{parse::paragraph::to_paragraphs, source::Section};
 
 static MERIT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
 	Regex::new(
@@ -92,7 +93,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 			});
 			children.push(MeritSubItem {
 				name: name.clone(),
-				description: to_paragraphs(body.description),
+				description: to_paragraphs(&body.description),
 				prerequisites,
 				dot_rating,
 				drawbacks: body.drawbacks,
@@ -102,7 +103,7 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 			out.push(MeritItem {
 				name,
 				reference,
-				description: to_paragraphs(body.description),
+				description: to_paragraphs(&body.description),
 				effects: body.effects,
 				inner: Merit {
 					dot_rating,
@@ -163,15 +164,15 @@ fn parse_body(body: &[String]) -> MeritBody {
 				match prop_key {
 					ItemProp::Prerequisites => {
 						prerequisites.extend(
-							to_paragraphs(lines)[0]
+							to_paragraphs(&lines)[0]
 								.split(", ")
 								.filter_map(|str| Prerequisite::from_str(str).ok()),
 						);
 					}
 					ItemProp::Effects => effects.extend(lines), // Effects are rolled into paragraphs later
-					ItemProp::Notes => notes.extend(to_paragraphs(lines)),
-					ItemProp::Drawbacks => drawbacks.extend(to_paragraphs(lines)),
-					_ => process_action(&mut action, prop_key, to_paragraphs(lines)),
+					ItemProp::Notes => notes.extend(to_paragraphs(&lines)),
+					ItemProp::Drawbacks => drawbacks.extend(to_paragraphs(&lines)),
+					_ => process_action(&mut action, prop_key, to_paragraphs(&lines)),
 				}
 				lines = Vec::new();
 			}
@@ -195,7 +196,7 @@ fn parse_body(body: &[String]) -> MeritBody {
 	description.reverse();
 	effects.reverse();
 	// description = to_paragraphs(description); // Allow descriptions to be rolled into paragraphs later
-	effects = to_paragraphs(effects);
+	effects = to_paragraphs(&effects);
 
 	MeritBody {
 		description,
