@@ -9,91 +9,141 @@ use crate::DOT_REGEX;
 const THRESHOLD: f32 = 240.0;
 
 pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
-	let path_str = path
-		.as_ref()
-		.to_str()
-		.ok_or_else(|| anyhow!("Path is not a valid UTF-8 string"))?;
-	let document = Document::open(path_str)?;
-
+	let document = Document::open(
+		path.as_ref()
+			.to_str()
+			.ok_or(anyhow!("Path is not valid utf-8 string"))?,
+	)?;
 	let mut pages = BTreeMap::new();
 
-	for (page_index, text_page) in document
+	for (i, text_page) in document
 		.pages()?
 		.filter_map(Result::ok)
 		.filter_map(|p| p.to_text_page(TextPageOptions::empty()).ok())
 		.enumerate()
 	{
-		let page_lines = process_page(&text_page);
-		pages.insert(page_index, page_lines);
+		let mut l_indent = (f32::MAX, f32::MIN);
+		let mut r_indent = (f32::MAX, f32::MIN);
+
+		let mut last_y = 0.0;
+		let mut blank = false;
+
+		let mut lines = Vec::new();
+
+		for block in text_page.blocks() {
+			for line in block.lines() {
+				let x = line.bounds().x0;
+				let y = line.bounds().y0;
+				let line = line.chars().filter_map(|c| c.char()).collect::<String>();
+
+				let y_shift = f32::floor(y - last_y);
+
+				if y_shift > 100.0 {
+					blank = true; // End of Page Content
+				} else if y_shift < -100.0 {
+					blank = false; // New Page
+				}
+				last_y = y;
+
+				if blank || line.trim().chars().all(char::is_numeric) {
+					// Some(format!(
+					// 	"{min_x}{indent}:BLANK:{}",
+					// 	l.chars().filter_map(|c| c.char()).collect::<String>()
+					// ));
+					continue;
+				}
+
+				if x > THRESHOLD {
+					if x < r_indent.0 {
+						r_indent.0 = x;
+					}
+				} else if x < l_indent.0 {
+					l_indent.0 = x;
+				}
+
+				lines.push((x, line));
+			}
+		}
+
+		let mut last_x = 0.0;
+		let mut last_indent = 0.0;
+
+		let mut last_has_dot = false;
+		// let mut dot_line_indent = f32::MAX;
+		// let mut dot_paragraph_indent = f32::MAX;
+		// let mut pre_dot_indent = f32::MAX;
+
+		let mut last_tab = false;
+
+		let lines = lines
+			.into_iter()
+			.map(|(x, line)| {
+				let min_x = if x < THRESHOLD {
+					l_indent.0
+				} else {
+					r_indent.0
+				};
+				let indent = f32::floor(x - min_x);
+
+				let dot = DOT_REGEX.is_match(&line);
+
+				//
+				// let x = f32::floor(l.bounds().x0);
+				// let y = f32::floor(l.bounds().y0);
+				//
+
+				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
+				let tab = if indent > last_indent {
+					// if indent == 0.0 {
+					// 	// Jump to other column
+					// 	false
+					// } else {
+					// 	true
+					// }
+
+					if last_has_dot && !dot {
+						false
+					} else {
+						true
+					}
+				} else if indent < last_indent {
+					// line.insert_str(0, "LESS:");
+					if dot {
+						true
+					} else {
+						false
+					}
+				} else {
+					// line.insert_str(0, "LAST:");
+					last_tab
+				};
+
+				// if last_has_dot && !dot && dot_paragraph_indent == f32::MAX {
+				// 	dot_paragraph_indent = indent;
+				// }
+
+				last_x = x;
+
+				last_indent = indent;
+				last_tab = tab;
+				last_has_dot = dot;
+
+				let tab = if tab { "\t" } else { "" };
+				// let dot = if dot { "\t" } else { "" };
+
+				#[cfg(debug_assertions)]
+				if std::env::var("INDENT_DEBUG").is_ok() {
+					format!("{indent}{tab}{line}")
+				} else {
+					format!("{tab}{line}")
+				}
+				#[cfg(not(debug_assertions))]
+				format!("{tab}{line}")
+			})
+			.collect();
+
+		pages.insert(i, lines);
 	}
 
 	Ok(pages)
-}
-
-fn process_page(text_page: &mupdf::TextPage) -> Vec<String> {
-	let mut left_indent = (f32::MAX, f32::MIN);
-	let mut right_indent = (f32::MAX, f32::MIN);
-
-	let mut last_y = 0.0;
-	let mut blank = false;
-
-	let mut lines = Vec::new();
-
-	for block in text_page.blocks() {
-		for line in block.lines() {
-			let x = line.bounds().x0;
-			let y = line.bounds().y0;
-			let line_text = line.chars().filter_map(|c| c.char()).collect::<String>();
-
-			let y_shift = (y - last_y).floor();
-			last_y = y;
-
-			if y_shift.abs() > 100.0 {
-				blank = y_shift > 0.0;
-			}
-
-			if blank || line_text.trim().chars().all(char::is_numeric) {
-				continue;
-			}
-
-			if x > THRESHOLD {
-				left_indent.0 = left_indent.0.min(x);
-			} else {
-				right_indent.0 = right_indent.0.min(x);
-			}
-
-			lines.push((x, line_text));
-		}
-	}
-
-	format_lines(lines, left_indent.0, right_indent.0)
-}
-
-fn format_lines(lines: Vec<(f32, String)>, left_bound: f32, right_bound: f32) -> Vec<String> {
-	let mut last_indent = 0.0;
-	let mut last_has_dot = false;
-
-	lines
-		.into_iter()
-		.map(|(x, line)| {
-			let is_right = x > THRESHOLD;
-			let min_indent = if is_right { right_bound } else { left_bound };
-			let indent = (x - min_indent).floor();
-			let has_dot = DOT_REGEX.is_match(&line);
-
-			let should_tab = if indent > last_indent {
-				!last_has_dot || has_dot
-			} else if indent < last_indent {
-				has_dot
-			} else {
-				false
-			};
-
-			last_indent = indent;
-			last_has_dot = has_dot;
-
-			let prefix = if should_tab { "\t" } else { "" };
-			format!("{prefix}{line}")
-		})
-		.collect()
 }
