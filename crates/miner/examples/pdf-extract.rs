@@ -51,9 +51,9 @@ fn main() -> Result<()> {
 	// env_logger::init();
 
 	let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-	let pdf_path = std::fs::canonicalize(manifest_dir.join("../pdf/")).unwrap();
+	let pdf_path = std::fs::canonicalize(manifest_dir.join("../../pdf/")).unwrap();
 
-	let cache_path = manifest_dir.join("../cache.json");
+	let cache_path = manifest_dir.join("../../cache.json");
 	let cache = RwLock::new(if cache_path.exists() {
 		serde_json::de::from_reader(File::open(&cache_path)?)?
 	} else {
