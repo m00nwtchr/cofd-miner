@@ -25,10 +25,10 @@ async fn main() -> Result<()> {
 	// let schema = schemars::schema_for!(cofd_schema::item::gift::Gift<Other>);
 	// let mut json = schema.as_value().clone();
 
-	let schema = include_str!("./schema.json");
+	let schema = include_str!("../../../llm/schema.json");
 	let json: Value = serde_json::from_str(schema)?;
 
-	let text = include_str!("./gifts.txt");
+	let text = include_str!("../../../llm/gifts.txt");
 
 	let prompt =
 		format!(
