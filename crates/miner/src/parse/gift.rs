@@ -15,9 +15,9 @@ use convert_case::{Case, Casing};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-use super::{get_book_reference, item::ItemProp, process_action};
+use super::{get_book_reference, item::ItemProp};
 use crate::{
-	parse::{item::PROP_REGEX, to_paragraphs},
+	parse::{item::RawItem, to_paragraphs},
 	source::Section,
 };
 
@@ -75,56 +75,16 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			let renown = Renown::from_str(captures.name("renown").unwrap().as_str().trim())?;
 			let reference = get_book_reference(&captures, section, info);
 
-			let mut lines = Vec::new();
-
-			let mut action = None;
-			let mut description = Vec::new();
-			let mut effects = Vec::new();
-
-			let mut first_prop = true;
-
-			for line in body {
-				if let Some(prop) = PROP_REGEX.captures(line.trim_start()) {
-					if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
-						let prop_key = ItemProp::from_str(prop_key.as_str()).unwrap();
-						let line = prop_val.as_str();
-
-						if !effects.is_empty() {
-							first_prop = false;
-						}
-
-						lines.push(line.to_owned());
-						lines.reverse();
-						process_action(&mut action, prop_key, to_paragraphs(&lines));
-
-						lines = Vec::new();
-					}
-				} else if line.starts_with('\t') {
-					lines.push(line.to_owned());
-					if first_prop {
-						effects.extend(lines);
-					} else {
-						description.extend(lines);
-					}
-					lines = Vec::new();
-				} else {
-					lines.push(line.to_owned());
-				}
-			}
-
-			if !lines.is_empty() {
-				description.extend(lines);
-			}
-			description.reverse();
-			effects.reverse();
+			body.reverse();
+			let mut raw_item = RawItem::try_from(body)?;
 
 			facets.push(Item {
 				name: name.clone(),
 				reference,
-				description: to_paragraphs(&description),
-				effects: to_paragraphs(&effects),
+				description: to_paragraphs(raw_item.get(None)),
+				effects: raw_item.take(Some(ItemProp::Effects)),
 				inner: Facet {
-					action,
+					action: raw_item.action(),
 					inner: Other { renown },
 				},
 			});

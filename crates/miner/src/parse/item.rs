@@ -1,16 +1,16 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anyhow::anyhow;
 use cofd_schema::{
 	dice_pool::DicePool,
-	prerequisites::{Prerequisite, Prerequisites},
+	item::{ActionFields, RollResults},
+	modifiers::SuggestedModifiers,
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
-use crate::parse::{paragraph::to_paragraphs, process_action};
+use crate::parse::paragraph::to_paragraphs;
 
 pub static PROP_REGEX: Lazy<Regex> = Lazy::new(|| {
 	Regex::new(
@@ -71,25 +71,68 @@ impl RawItem {
 		self.0.get_mut(&prop)
 	}
 
-	pub fn has_properties(&self) -> bool {
-		self.0.keys().any(|p| p.is_some())
+	// pub fn has_properties(&self) -> bool {
+	// 	self.0
+	// 		.keys()
+	// 		.any(|p| !(p.is_none() || p.eq(&Some(ItemProp::Effects))))
+	// }
+
+	pub fn action(&mut self) -> Option<ActionFields> {
+		if self.0.keys().any(|k| {
+			matches!(
+				k,
+				Some(
+					ItemProp::Action
+						| ItemProp::Cost | ItemProp::DicePool
+						| ItemProp::Duration
+						| ItemProp::Success
+						| ItemProp::Failure
+						| ItemProp::DramaticFailure
+						| ItemProp::ExceptionalSuccess
+						| ItemProp::SuggestedModifiers
+				)
+			)
+		}) {
+			Some(ActionFields {
+				action: self.take(Some(ItemProp::Action)),
+				cost: self.take(Some(ItemProp::Cost)),
+				dice_pool: convert_dice_pool(&self.take(Some(ItemProp::DicePool))),
+				duration: self.take(Some(ItemProp::Duration)),
+				roll_results: RollResults {
+					exceptional_success: self.take(Some(ItemProp::ExceptionalSuccess)),
+					success: self.take(Some(ItemProp::Success)),
+					failure: self.take(Some(ItemProp::Failure)),
+					dramatic_failure: self.take(Some(ItemProp::DramaticFailure)),
+				},
+				suggested_modifiers: SuggestedModifiers::from_str(
+					&self.take(Some(ItemProp::SuggestedModifiers)).concat(),
+				)
+				.unwrap_or_default(),
+			})
+		} else {
+			None
+		}
 	}
 }
 
-impl TryFrom<Vec<String>> for RawItem {
+impl TryFrom<Vec<&str>> for RawItem {
 	type Error = anyhow::Error;
 
-	fn try_from(body: Vec<String>) -> Result<Self, Self::Error> {
+	fn try_from(body: Vec<&str>) -> Result<Self, Self::Error> {
 		let mut lines: Vec<String> = Vec::new();
-		// let mut first_prop = true;
+		let mut first_prop = true;
 
 		let mut raw_item = RawItem::default();
 
-		for line in body.iter().rev() {
+		for line in body.into_iter().rev() {
 			if let Some(prop) = PROP_REGEX.captures(line.trim_start()) {
 				if let (Some(prop_key), Some(prop_val)) = (prop.get(1), prop.get(2)) {
 					let prop_key = ItemProp::from_str(prop_key.as_str())?;
 					let line = prop_val.as_str();
+
+					if !raw_item.get(Some(ItemProp::Effects)).is_empty() {
+						first_prop = false;
+					}
 
 					lines.push(line.to_owned());
 					// Effects get reversed later
@@ -101,7 +144,7 @@ impl TryFrom<Vec<String>> for RawItem {
 							Some(ItemProp::Prerequisites),
 							to_paragraphs(&lines)[0]
 								.split(", ")
-								.map(|s| s.to_string())
+								.map(ToString::to_string)
 								.collect(),
 						),
 						ItemProp::Effects => raw_item.push(Some(ItemProp::Effects), lines), // Effects are rolled into paragraphs later
@@ -110,18 +153,18 @@ impl TryFrom<Vec<String>> for RawItem {
 					lines = Vec::new();
 				}
 			} else if line.starts_with('\t') {
-				lines.push(line.to_owned());
+				lines.push(line.to_string());
 				raw_item.push(
-					if raw_item.has_properties() {
-						None
-					} else {
+					if first_prop {
 						Some(ItemProp::Effects)
+					} else {
+						None
 					},
 					lines,
 				);
 				lines = Vec::new();
 			} else {
-				lines.push(line.to_owned());
+				lines.push(line.to_string());
 			}
 		}
 
@@ -130,29 +173,16 @@ impl TryFrom<Vec<String>> for RawItem {
 		}
 
 		// Allow descriptions to be rolled into paragraphs later
-		raw_item.get_mut(None).iter_mut().for_each(|d| d.reverse());
-		raw_item
-			.get_mut(Some(ItemProp::Effects))
-			.iter_mut()
-			.for_each(|d| {
-				d.reverse();
-				**d = to_paragraphs(d);
-			});
+		if let Some(descriptions) = raw_item.get_mut(None) {
+			descriptions.reverse();
+		}
+		if let Some(effects) = raw_item.get_mut(Some(ItemProp::Effects)) {
+			effects.reverse();
+			*effects = to_paragraphs(effects);
+		}
 
 		Ok(raw_item)
 	}
-}
-
-fn convert_prerequisites(vec: Vec<String>) -> Prerequisites {
-	let mut prereqs = Vec::new();
-
-	for str in vec {
-		if let Ok(prereq) = Prerequisite::from_str(&str) {
-			prereqs.push(prereq);
-		}
-	}
-
-	prereqs.into()
 }
 
 pub fn convert_dice_pool(vec: &[String]) -> Option<DicePool> {

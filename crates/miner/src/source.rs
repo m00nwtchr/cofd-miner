@@ -79,31 +79,12 @@ pub fn process_section(
 
 	if !flag {
 		for op in &section.ops {
+			#[allow(clippy::single_match)]
 			match op {
-				Op::Replace { range, replace } => {
-					// extract.replace_range(range.clone(), replace);
-				}
-				Op::Insert { pos, char } => {
-					// extract.insert(*pos, *char);
-				}
-				Op::Delete { range } => {
-					// extract.replace_range(range.clone(), "");
-				}
-				Op::Move { range, pos } => {
-					// let str = extract[range.clone()].to_owned();
-					//
-					// extract.insert_str(*pos, &str);
-					//
-					// if range.start() > pos {
-					// 	extract.replace_range(
-					// 		(range.start() + str.len())..(range.end() + str.len()),
-					// 		"",
-					// 	);
-					// }
-				}
 				Op::RegexReplace { regex, replace } => {
 					extract = regex.replace_all(&extract, replace).into_owned();
 				}
+				_ => {}
 			}
 		}
 	}

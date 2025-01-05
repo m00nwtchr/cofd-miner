@@ -1,11 +1,10 @@
-use std::{collections::HashMap, ops::Range, str::FromStr};
+use std::{collections::HashMap, ops::Range};
 
 use anyhow::Result;
 use cofd_meta::PageKind;
 use cofd_schema::{
 	book::{Book, BookInfo, BookReference},
-	item::{gift::GiftKind, ActionFields},
-	modifiers::SuggestedModifiers,
+	item::gift::GiftKind,
 };
 use convert_case::{Case, Casing};
 use regex::Captures;
@@ -17,11 +16,7 @@ mod gift;
 mod item;
 mod merit;
 
-use self::{
-	gift::parse_gifts,
-	item::{convert_dice_pool, ItemProp},
-	merit::parse_merits,
-};
+use self::{gift::parse_gifts, merit::parse_merits};
 use crate::source::Section;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,11 +38,12 @@ impl PdfExtract {
 				// 	_ => unreachable!(),
 				// })),
 				PageKind::Gift(kind) => match kind {
-					// GiftKind::Moon => parse.moon_gifts.extend(todo!()),
+					GiftKind::Moon => {
+						// parse.moon_gifts.extend(todo!())
+					}
 					GiftKind::Shadow | GiftKind::Wolf => {
 						parse.gifts.extend(parse_gifts(&parse.info, &section)?);
 					}
-					_ => {}
 				},
 				_ => {}
 			}
@@ -73,48 +69,6 @@ fn get_book_reference(
 	BookReference(info.id, *page)
 }
 
-fn process_action(action: &mut Option<ActionFields>, prop_key: ItemProp, lines: Vec<String>) {
-	match prop_key {
-		ItemProp::Action => action.get_or_insert_with(ActionFields::default).action = lines,
-		ItemProp::Cost => action.get_or_insert_with(ActionFields::default).cost = lines,
-		ItemProp::DicePool => {
-			action.get_or_insert_with(ActionFields::default).dice_pool = convert_dice_pool(&lines);
-		}
-		ItemProp::Duration => action.get_or_insert_with(ActionFields::default).duration = lines,
-		ItemProp::DramaticFailure => {
-			action
-				.get_or_insert_with(ActionFields::default)
-				.roll_results
-				.dramatic_failure = to_paragraphs(&lines);
-		}
-		ItemProp::Failure => {
-			action
-				.get_or_insert_with(ActionFields::default)
-				.roll_results
-				.failure = to_paragraphs(&lines);
-		}
-		ItemProp::Success => {
-			action
-				.get_or_insert_with(ActionFields::default)
-				.roll_results
-				.success = to_paragraphs(&lines);
-		}
-		ItemProp::ExceptionalSuccess => {
-			action
-				.get_or_insert_with(ActionFields::default)
-				.roll_results
-				.exceptional_success = to_paragraphs(&lines);
-		}
-		ItemProp::SuggestedModifiers => {
-			action
-				.get_or_insert_with(ActionFields::default)
-				.suggested_modifiers =
-				SuggestedModifiers::from_str(&to_paragraphs(&lines).concat()).unwrap_or_default();
-		}
-		_ => {}
-	}
-}
-
 #[must_use]
 pub fn starts_with_one(str: &str, char_p: char) -> bool {
 	str.chars().next().is_some_and(|first_char| {
@@ -125,7 +79,7 @@ pub fn starts_with_one(str: &str, char_p: char) -> bool {
 mod paragraph {
 	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 
-	fn to_paragraphs_old(lines: &Vec<String>) -> Vec<String> {
+	fn to_paragraphs_old(lines: &[String]) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
@@ -145,7 +99,7 @@ mod paragraph {
 		paragraphs
 	}
 
-	fn to_paragraphs_tab(lines: &Vec<String>) -> Vec<String> {
+	fn to_paragraphs_tab(lines: &[String]) -> Vec<String> {
 		let mut paragraphs = Vec::new();
 		let mut paragraph = String::new();
 
@@ -177,7 +131,7 @@ mod paragraph {
 		line
 	}
 
-	pub fn to_paragraphs(mut lines: &Vec<String>) -> Vec<String> {
+	pub fn to_paragraphs(lines: &[String]) -> Vec<String> {
 		if lines.len() == 1 {
 			let line = lines.first().unwrap().trim();
 
