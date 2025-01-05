@@ -1,7 +1,7 @@
 [alias]
 meta-edit = [
-    "run",
-    "-p",
-    "meta-editor",
-    "--",
+	"run",
+	"-p",
+	"meta-editor",
+	"--",
 ]
