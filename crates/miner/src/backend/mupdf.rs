@@ -36,12 +36,10 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				let y = line.bounds().y0;
 				let line = line.chars().filter_map(|c| c.char()).collect::<String>();
 
-				let y_shift = f32::floor(y - last_y);
+				let y_shift = (y - last_y).floor();
 
-				if y_shift > 100.0 {
-					blank = true; // End of Page Content
-				} else if y_shift < -100.0 {
-					blank = false; // New Page
+				if y_shift.abs() > 100.0 {
+					blank = y_shift > 0.0; // End of Page Content
 				}
 				last_y = y;
 
@@ -84,31 +82,18 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				} else {
 					r_indent.0
 				};
-				let indent = f32::floor(x - min_x);
+				let indent = (x - min_x).floor();
 
 				let dot = DOT_REGEX.is_match(&line);
 
-				//
-				// let x = f32::floor(l.bounds().x0);
-				// let y = f32::floor(l.bounds().y0);
-				//
-
 				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
 				let should_tab = if indent > last_indent {
-					// if indent == 0.0 {
-					// 	// Jump to other column
-					// 	false
-					// } else {
-					// 	true
-					// }
-
 					if last_has_dot && !dot {
 						false
 					} else {
 						true
 					}
 				} else if indent < last_indent {
-					// line.insert_str(0, "LESS:");
 					if dot {
 						true
 					} else {
@@ -120,16 +105,18 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					last_should_tab
 				};
 
-				// if last_has_dot && !dot && dot_paragraph_indent == f32::MAX {
-				// 	dot_paragraph_indent = indent;
-				// }
+				let indent = if indent == 0.0 && should_tab {
+					9.0
+				} else {
+					indent
+				};
 
 				last_x = x;
 
 				last_indent = indent;
 				last_should_tab = should_tab;
 				last_has_dot = dot;
-				last_line = line.clone();
+				last_line.clone_from(&line);
 
 				let prefix = if should_tab { "\t" } else { "" };
 
