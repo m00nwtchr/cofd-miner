@@ -31,7 +31,9 @@ impl PdfExtract {
 
 		for section in self.sections {
 			match &section.kind {
-				PageKind::Merit(_) => parse.merits.extend(parse_merits(&parse.info, &section)?),
+				PageKind::Merit(_) => parse
+					.merits
+					.extend(parse_merits(&parse.info, &section).unwrap()),
 				// PageKind::MageSpell => parse.mage_spells.extend(vec.into_iter().map(|i| match i {
 				// 	_ => unreachable!(),
 				// })),
@@ -79,46 +81,6 @@ mod paragraph {
 
 	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 
-	fn to_paragraphs_old(lines: &[String]) -> Vec<String> {
-		let mut paragraphs = Vec::new();
-		let mut paragraph = String::new();
-
-		for line in lines {
-			paragraph.push_str(trim_line(line.as_str()));
-
-			if line.trim().ends_with(|c| PUNCTUATION.contains(&c)) {
-				paragraphs.push(paragraph.trim().to_owned());
-				paragraph = String::new();
-			}
-		}
-
-		if !paragraph.is_empty() && !paragraph.eq_ignore_ascii_case("roll results") {
-			paragraphs.push(paragraph.trim().to_owned());
-		}
-
-		paragraphs
-	}
-
-	fn to_paragraphs_tab(lines: &[String]) -> Vec<String> {
-		let mut paragraphs = Vec::new();
-		let mut paragraph = String::new();
-
-		for line in lines {
-			if line.starts_with('\t') && !paragraph.is_empty() {
-				paragraphs.push(paragraph.trim().to_owned());
-				paragraph = String::new();
-			}
-
-			paragraph.push_str(trim_line(line.as_str()));
-		}
-
-		if !paragraph.is_empty() && !paragraph.eq_ignore_ascii_case("roll results") {
-			paragraphs.push(paragraph.trim().to_owned());
-		}
-
-		paragraphs
-	}
-
 	fn trim_line(line: &str) -> &str {
 		let line = line.trim_start();
 		let line = if line.ends_with("God-") {
@@ -137,18 +99,36 @@ mod paragraph {
 
 			vec![line.to_owned()]
 		} else {
+			let mut paragraphs = Vec::new();
+			let mut paragraph = String::new();
+
 			let count = lines
 				.iter()
 				.filter(|l| l.starts_with('\t') && !l.starts_with(&format!("\t{DOT_CHAR}")))
 				.count();
+			let too_many_tabs = count > (lines.len() / 2);
 
-			if count > (lines.len() / 2)
-			// || lines.iter().any(|l| l.trim_start().starts_with(DOT_CHAR))
-			{
-				to_paragraphs_old(lines)
-			} else {
-				to_paragraphs_tab(lines)
+			for line in lines {
+				let tab = line.starts_with('\t');
+
+				if (!too_many_tabs && tab) && !paragraph.is_empty() {
+					paragraphs.push(paragraph.trim().to_owned());
+					paragraph = String::new();
+				}
+
+				paragraph.push_str(trim_line(line.as_str()));
+
+				if (too_many_tabs && !tab) && line.trim().ends_with(|c| PUNCTUATION.contains(&c)) {
+					paragraphs.push(paragraph.trim().to_owned());
+					paragraph = String::new();
+				}
 			}
+
+			if !paragraph.is_empty() && !paragraph.eq_ignore_ascii_case("roll results") {
+				paragraphs.push(paragraph.trim().to_owned());
+			}
+
+			paragraphs
 		}
 	}
 }
