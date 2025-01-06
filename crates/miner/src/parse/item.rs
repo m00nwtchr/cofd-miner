@@ -54,7 +54,9 @@ pub enum ItemProp {
 pub struct RawItem(HashMap<Option<ItemProp>, Vec<String>>);
 impl RawItem {
 	pub fn push(&mut self, prop: Option<ItemProp>, value: Vec<String>) {
-		self.0.entry(prop).or_default().extend(value);
+		if !value.is_empty() {
+			self.0.entry(prop).or_default().extend(value);
+		}
 	}
 
 	pub fn get(&self, prop: Option<ItemProp>) -> &Vec<String> {
@@ -71,11 +73,9 @@ impl RawItem {
 		self.0.get_mut(&prop)
 	}
 
-	// pub fn has_properties(&self) -> bool {
-	// 	self.0
-	// 		.keys()
-	// 		.any(|p| !(p.is_none() || p.eq(&Some(ItemProp::Effects))))
-	// }
+	pub fn has_property(&self, prop: Option<ItemProp>) -> bool {
+		self.0.contains_key(&prop)
+	}
 
 	pub fn action(&mut self) -> Option<ActionFields> {
 		if self.0.keys().any(|k| {
@@ -172,9 +172,9 @@ impl TryFrom<Vec<&str>> for RawItem {
 			raw_item.push(None, lines);
 		}
 
-		// Allow descriptions to be rolled into paragraphs later
-		if let Some(descriptions) = raw_item.get_mut(None) {
-			descriptions.reverse();
+		if let Some(description) = raw_item.get_mut(None) {
+			description.reverse();
+			*description = to_paragraphs(description);
 		}
 		if let Some(effects) = raw_item.get_mut(Some(ItemProp::Effects)) {
 			effects.reverse();

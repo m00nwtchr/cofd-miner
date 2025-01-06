@@ -16,10 +16,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 use super::{get_book_reference, item::ItemProp};
-use crate::{
-	parse::{item::RawItem, to_paragraphs},
-	source::Section,
-};
+use crate::{parse::item::RawItem, source::Section};
 
 static GIFT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
 	Regex::new(
@@ -81,7 +78,7 @@ pub fn parse_gifts(info: &BookInfo, section: &Section) -> Result<Vec<OtherGift>>
 			facets.push(Item {
 				name: name.clone(),
 				reference,
-				description: to_paragraphs(raw_item.get(None)),
+				description: raw_item.take(None),
 				effects: raw_item.take(Some(ItemProp::Effects)),
 				inner: Facet {
 					action: raw_item.action(),

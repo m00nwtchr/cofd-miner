@@ -10,8 +10,6 @@ use convert_case::{Case, Casing};
 use regex::Captures;
 use serde::{Deserialize, Serialize};
 
-use crate::parse::paragraph::to_paragraphs;
-
 mod gift;
 mod item;
 mod merit;
@@ -77,6 +75,8 @@ pub fn starts_with_one(str: &str, char_p: char) -> bool {
 }
 
 mod paragraph {
+	use cofd_schema::DOT_CHAR;
+
 	const PUNCTUATION: [char; 4] = ['.', ':', '!', '?'];
 
 	fn to_paragraphs_old(lines: &[String]) -> Vec<String> {
@@ -137,7 +137,10 @@ mod paragraph {
 
 			vec![line.to_owned()]
 		} else {
-			let count = lines.iter().filter(|l| l.starts_with('\t')).count();
+			let count = lines
+				.iter()
+				.filter(|l| l.starts_with('\t') && !l.starts_with(&format!("\t{DOT_CHAR}")))
+				.count();
 
 			if count > (lines.len() / 2)
 			// || lines.iter().any(|l| l.trim_start().starts_with(DOT_CHAR))

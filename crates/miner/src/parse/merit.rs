@@ -22,14 +22,14 @@ static MERIT_HEADER_REGEX: Lazy<Regex> = Lazy::new(|| {
 	Regex::new(
 		r"(?xmi)
 		^\t*
-		(?<name> (?:\w{2,3}\.\s)? (?:\t?[\w\-\']\s*)+)  # Name
+		(?<name> (?:\w{2,3}\.\s)? (?:\t?[\w\-'/]\s*)+)  # Name
 		\s?
 		\(
 			(?: (?<ltags> [^•\n]+ ) [,;] \s)?           # Tags
 			(?<cost>                                    # Cost
 				(?:          
 					•{1,5}
-					[,\s\+]*
+					[,\s+]*
 
 					(?:to|or)?
 					\s*
@@ -71,7 +71,13 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		let reference = get_book_reference(&captures, section, info);
 		let tags = process_tags(&captures)?;
 
-		let body = get_body(&mut str_pos, &section.extract, &captures);
+		let mut body = get_body(&mut str_pos, &section.extract, &captures);
+		if let Some(sub) = &sub {
+			let mut desc = normalize(sub.as_str());
+			desc.insert(0, '\t');
+			body.insert(0, desc);
+		}
+
 		let mut raw_item = {
 			let v: Vec<&str> = body.iter().map(String::as_str).collect();
 			RawItem::try_from(v)?
@@ -91,17 +97,14 @@ pub fn parse_merits(info: &BookInfo, section: &Section) -> Result<Vec<MeritItem>
 		let prerequisites = Prerequisites::from(prerequisites);
 		let dot_rating = DotRange::from_str(cost.as_str())?;
 
-		if let Some(sub) = sub {
-			let mut description = raw_item.take(None);
-
-			description.insert(0, {
-				let mut desc = normalize(sub.as_str());
-				desc.insert(0, '\t');
-				desc
-			});
+		if sub.is_some() {
 			children.push(MeritSubItem {
 				name: name.clone(),
-				description: to_paragraphs(&description),
+				description: raw_item.take(if raw_item.has_property(None) {
+					None
+				} else {
+					Some(ItemProp::Effects)
+				}),
 				prerequisites,
 				dot_rating,
 				drawbacks: raw_item.take(Some(ItemProp::Drawbacks)),

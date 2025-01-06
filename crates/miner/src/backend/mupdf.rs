@@ -73,7 +73,8 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 		// let mut dot_paragraph_indent = f32::MAX;
 		// let mut pre_dot_indent = f32::MAX;
 
-		let mut last_tab = false;
+		let mut last_should_tab = false;
+		let mut last_line = String::new();
 
 		let lines = lines
 			.into_iter()
@@ -93,7 +94,7 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				//
 
 				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
-				let tab = if indent > last_indent {
+				let should_tab = if indent > last_indent {
 					// if indent == 0.0 {
 					// 	// Jump to other column
 					// 	false
@@ -113,9 +114,10 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 					} else {
 						false
 					}
+				} else if last_line.trim().ends_with(':') && dot {
+					true
 				} else {
-					// line.insert_str(0, "LAST:");
-					last_tab
+					last_should_tab
 				};
 
 				// if last_has_dot && !dot && dot_paragraph_indent == f32::MAX {
@@ -125,20 +127,20 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				last_x = x;
 
 				last_indent = indent;
-				last_tab = tab;
+				last_should_tab = should_tab;
 				last_has_dot = dot;
+				last_line = line.clone();
 
-				let tab = if tab { "\t" } else { "" };
-				// let dot = if dot { "\t" } else { "" };
+				let prefix = if should_tab { "\t" } else { "" };
 
 				#[cfg(debug_assertions)]
 				if std::env::var("INDENT_DEBUG").is_ok() {
-					format!("{indent}{tab}{line}")
+					format!("{indent}{prefix}{line}")
 				} else {
-					format!("{tab}{line}")
+					format!("{prefix}{line}")
 				}
 				#[cfg(not(debug_assertions))]
-				format!("{tab}{line}")
+				format!("{prefix}{line}")
 			})
 			.collect();
 
