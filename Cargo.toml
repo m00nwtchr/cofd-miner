@@ -8,6 +8,9 @@ authors = ["m00n"]
 edition = "2021"
 license = "MPL"
 
+[workspace.metadata.crane]
+name = "cofd-miner"
+
 [workspace.dependencies]
 cofd-miner = { path = "crates/miner" }
 cofd-meta = { path = "crates/meta" }

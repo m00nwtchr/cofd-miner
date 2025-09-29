@@ -1,10 +1,14 @@
 use std::{collections::BTreeMap, path::Path, result::Result};
 
 use anyhow::anyhow;
+use cofd_schema::DOT_CHAR;
 use mupdf::{Document, TextPageOptions};
+use once_cell::sync::Lazy;
+use regex::Regex;
 
 use super::PdfText;
-use crate::DOT_REGEX;
+
+static DOT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(&format!("^{DOT_CHAR} ")).unwrap());
 
 const THRESHOLD: f32 = 240.0;
 
@@ -82,9 +86,10 @@ pub fn extract_pages(path: impl AsRef<Path>) -> anyhow::Result<PdfText> {
 				} else {
 					r_indent.0
 				};
-				let indent = (x - min_x).floor();
 
 				let dot = DOT_REGEX.is_match(&line);
+				let indent = (x - min_x).floor();
+				let indent = if dot { indent.max(9.0) } else { indent };
 
 				#[allow(clippy::if_same_then_else, clippy::nonminimal_bool)]
 				let should_tab = if indent > last_indent {

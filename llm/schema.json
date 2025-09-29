@@ -1,0 +1,96 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Facet",
+	"type": "object",
+	"properties": {
+		"name": {
+			"type": "string"
+		},
+		"renown": {
+			"type": "string",
+			"enum": [
+				"Purity",
+				"Glory",
+				"Honor",
+				"Wisdom",
+				"Cunning"
+			]
+		},
+		"description": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"effects": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"cost": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"dicePool": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"action": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"duration": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"rollResults": {
+			"type": "object",
+			"properties": {
+				"exceptionalSuccess": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"success": {
+					"type": "string"
+				},
+				"failure": {
+					"type": "string"
+				},
+				"dramaticFailure": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"exceptionalSuccess",
+				"success",
+				"failure",
+				"dramaticFailure"
+			]
+		}
+	},
+	"required": [
+		"name",
+		"renown",
+		"description",
+		"effects",
+		"cost",
+		"dicePool",
+		"action",
+		"duration",
+		"rollResults"
+	]
+}
