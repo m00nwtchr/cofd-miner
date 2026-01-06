@@ -1,3 +1,4 @@
 [submodule "crates/miner/res/tests/data"]
 	path = crates/miner/res/tests/data
 	url = git@github.com:m00nwtchr/cofd-miner-test-data.git
+	update = none

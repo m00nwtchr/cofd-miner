@@ -4,17 +4,18 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "A scraper for the codexofdarkness.com wiki."
 
 [dependencies]
 cofd-schema.workspace = true
 
-reqwest = "0.11"
-scraper = "0.19"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-webpki-roots"] }
+scraper = "0.25"
 
 log.workspace = true
 anyhow.workspace = true
 itertools.workspace = true
-convert_case = "0.6"
 
-ron = "0.9.0-alpha.0"
+ron = "0.12.0"
 tokio = { version = "1.33.0", features = ["rt", "macros"] }
