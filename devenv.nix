@@ -40,8 +40,6 @@
   languages.rust = {
     enable = true;
     mold.enable = true;
-    # toolchainFile = ./rust-toolchain.toml;
-    channel = "nightly";
   };
 
   processes = {
@@ -61,12 +59,13 @@
     clippy.enable = true;
   };
 
-  # tasks = {
-  #   "cofdminer:tests" = {
-  #     after = ["devenv:enterTest"];
-  #     exec = "cargo nextest run";
-  #   };
-  # };
+  tasks = {
+    "cofd:tests" = lib.mkForce { };
+    #   "cofdminer:tests" = {
+    #     after = ["devenv:enterTest"];
+    #     exec = "cargo nextest run";
+    #   };
+  };
 
   outputs = {
     # package Rust app using Nix

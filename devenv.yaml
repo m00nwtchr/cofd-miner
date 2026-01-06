@@ -11,3 +11,8 @@ inputs:
     inputs:
       nixpkgs:
         follows: nixpkgs
+  cofd:
+    url: github:m00nwtchr/cofd
+    flake: false
+imports:
+  - cofd

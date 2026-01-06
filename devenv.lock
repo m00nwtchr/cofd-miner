@@ -1,5 +1,20 @@
 {
   "nodes": {
+    "cofd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767731719,
+        "owner": "m00nwtchr",
+        "repo": "cofd",
+        "rev": "11fbe68db5e74068429cf82ecd74b6399574c79c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m00nwtchr",
+        "repo": "cofd",
+        "type": "github"
+      }
+    },
     "devenv": {
       "locked": {
         "dir": "src/modules",
@@ -89,6 +104,7 @@
     },
     "root": {
       "inputs": {
+        "cofd": "cofd",
         "devenv": "devenv",
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs",
