@@ -25,6 +25,8 @@
       gumbo
       jbig2dec
       openjpeg
+      libjpeg
+      harfbuzz
       # build tools
       llvmPackages.clangUseLLVM # bindgen
     ]
@@ -38,7 +40,8 @@
   languages.rust = {
     enable = true;
     mold.enable = true;
-    toolchainFile = ./rust-toolchain.toml;
+    # toolchainFile = ./rust-toolchain.toml;
+    channel = "nightly";
   };
 
   processes = {
