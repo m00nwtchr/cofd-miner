@@ -462,7 +462,7 @@ dependencies = [
 [[package]]
 name = "cofd-derive"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
+source = "git+https://github.com/m00nwtchr/cofd.git#89b07a2cfb7d11b9a829f831c97baf63246aac8e"
 dependencies = [
  "convert_case 0.6.0",
  "proc-macro2",
@@ -507,7 +507,7 @@ dependencies = [
 [[package]]
 name = "cofd-schema"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
+source = "git+https://github.com/m00nwtchr/cofd.git#89b07a2cfb7d11b9a829f831c97baf63246aac8e"
 dependencies = [
  "chrono",
  "cofd-util",
@@ -522,7 +522,7 @@ dependencies = [
 [[package]]
 name = "cofd-util"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
+source = "git+https://github.com/m00nwtchr/cofd.git#89b07a2cfb7d11b9a829f831c97baf63246aac8e"
 dependencies = [
  "cofd-derive",
 ]
