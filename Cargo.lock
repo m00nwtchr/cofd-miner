@@ -462,9 +462,9 @@ dependencies = [
 [[package]]
 name = "cofd-derive"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#e24adffebcafc985fec96256d6e2effbbdb975f3"
+source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
 dependencies = [
- "convert_case",
+ "convert_case 0.6.0",
  "proc-macro2",
  "quote",
  "syn",
@@ -487,7 +487,7 @@ dependencies = [
  "anyhow",
  "cofd-meta",
  "cofd-schema",
- "convert_case",
+ "convert_case 0.6.0",
  "highway",
  "itertools 0.14.0",
  "log",
@@ -499,7 +499,7 @@ dependencies = [
  "serde",
  "serde_json",
  "similar-asserts",
- "strum 0.27.2",
+ "strum",
  "thiserror 2.0.17",
  "walkdir",
 ]
@@ -507,22 +507,22 @@ dependencies = [
 [[package]]
 name = "cofd-schema"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#e24adffebcafc985fec96256d6e2effbbdb975f3"
+source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
 dependencies = [
  "chrono",
  "cofd-util",
- "derive_more 1.0.0",
+ "derive_more",
  "itertools 0.14.0",
  "schemars",
  "serde",
- "strum 0.26.3",
- "thiserror 1.0.69",
+ "strum",
+ "thiserror 2.0.17",
 ]
 
 [[package]]
 name = "cofd-util"
 version = "0.1.0"
-source = "git+https://github.com/m00nwtchr/cofd.git#e24adffebcafc985fec96256d6e2effbbdb975f3"
+source = "git+https://github.com/m00nwtchr/cofd.git#11fbe68db5e74068429cf82ecd74b6399574c79c"
 dependencies = [
  "cofd-derive",
 ]
@@ -569,6 +569,15 @@ name = "convert_case"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "convert_case"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "633458d4ef8c78b72454de2d54fd6ab2e60f9e02be22f3c6104cdc8a4e0fceb9"
 dependencies = [
  "unicode-segmentation",
 ]
@@ -678,32 +687,11 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
 name = "derive_more"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
-dependencies = [
- "derive_more-impl 1.0.0",
-]
-
-[[package]]
-name = "derive_more"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d751e9e49156b02b44f9c1815bcb94b984cdcc4396ecc32521c739452808b134"
 dependencies = [
- "derive_more-impl 2.1.1",
-]
-
-[[package]]
-name = "derive_more-impl"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
- "unicode-xid",
+ "derive_more-impl",
 ]
 
 [[package]]
@@ -712,10 +700,12 @@ version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "799a97264921d8623a957f6c3b9011f3b5492f557bbb7a5a19b7fa6d06ba8dcb"
 dependencies = [
+ "convert_case 0.10.0",
  "proc-macro2",
  "quote",
  "rustc_version",
  "syn",
+ "unicode-xid",
 ]
 
 [[package]]
@@ -2784,7 +2774,7 @@ checksum = "feef350c36147532e1b79ea5c1f3791373e61cbd9a6a2615413b3807bb164fb7"
 dependencies = [
  "bitflags 2.10.0",
  "cssparser",
- "derive_more 2.1.1",
+ "derive_more",
  "log",
  "new_debug_unreachable",
  "phf 0.13.1",
@@ -3067,33 +3057,11 @@ dependencies = [
 
 [[package]]
 name = "strum"
-version = "0.26.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
-dependencies = [
- "strum_macros 0.26.4",
-]
-
-[[package]]
-name = "strum"
 version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af23d6f6c1a224baef9d3f61e287d2761385a5b88fdab4eb4c6f11aeb54c4bcf"
 dependencies = [
- "strum_macros 0.27.2",
-]
-
-[[package]]
-name = "strum_macros"
-version = "0.26.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn",
+ "strum_macros",
 ]
 
 [[package]]
